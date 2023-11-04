@@ -933,11 +933,9 @@ func SshJump(ctx context.Context, conf *util.SshConfig, flags *pflag.FlagSet, pr
 	SshJumpBreakPoint()
 	rawConfig.Clusters[rawConfig.Contexts[rawConfig.CurrentContext].Cluster].Server = fmt.Sprintf("%s://%s", u.Scheme, local.String())
 	rawConfig.Clusters[rawConfig.Contexts[rawConfig.CurrentContext].Cluster].TLSServerName = serverHost
-	log.Infof("using temp kubeconfig serverHost = %s", serverHost)
-	log.Infof("using temp kubeconfig remoteTlsServerIp = %s", remoteTlsServerIp)
+	// To Do: add cli option to skip tls verify
 	// rawConfig.Clusters[rawConfig.Contexts[rawConfig.CurrentContext].Cluster].CertificateAuthorityData = nil
 	// rawConfig.Clusters[rawConfig.Contexts[rawConfig.CurrentContext].Cluster].InsecureSkipTLSVerify = true
-	//ProxyURL
 	rawConfig.SetGroupVersionKind(schema.GroupVersionKind{Version: clientcmdlatest.Version, Kind: "Config"})
 
 	var convertedObj runtime.Object
@@ -979,9 +977,6 @@ func SshJump(ctx context.Context, conf *util.SshConfig, flags *pflag.FlagSet, pr
 func printLine(msg string) {
 	line := "+" + strings.Repeat("-", len(msg)-2) + "+"
 	log.Infof(line)
-}
-func SshJumpBreakPoint() {
-	log.Infof("so to continue debug")
 }
 
 func SshJumpAndSetEnv(ctx context.Context, conf *util.SshConfig, flags *pflag.FlagSet, print bool) error {

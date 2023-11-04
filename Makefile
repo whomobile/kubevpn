@@ -33,12 +33,14 @@ GO111MODULE=on
 GOPROXY=https://goproxy.cn,direct
 
 .PHONY: all
-all: kubevpn-all container
+all: kubevpn-all 
+# container
 
 .PHONY: kubevpn-all
-kubevpn-all: kubevpn-darwin-amd64 kubevpn-darwin-arm64 \
-kubevpn-windows-amd64 kubevpn-windows-386 kubevpn-windows-arm64 \
-kubevpn-linux-amd64 kubevpn-linux-386 kubevpn-linux-arm64
+kubevpn-all: kubevpn-darwin-amd64 
+# kubevpn-darwin-arm64 \
+# kubevpn-windows-amd64 kubevpn-windows-386 kubevpn-windows-arm64 \
+# kubevpn-linux-amd64 kubevpn-linux-386 kubevpn-linux-arm64
 
 .PHONY: kubevpn
 kubevpn:

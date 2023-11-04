@@ -8,6 +8,7 @@ import (
 
 	"github.com/cilium/ipam/service/allocator"
 	"github.com/cilium/ipam/service/ipallocator"
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	v1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -202,6 +203,7 @@ func (d *DHCPManager) updateDHCPConfigMap(ctx context.Context, f func(ipv4 *ipal
 	if err == nil {
 		err = dhcp.Restore(d.cidr, str)
 		if err != nil {
+			err = errors.New("dhcp.Restore(d.cidr, str): " + err.Error())
 			return err
 		}
 	}
@@ -217,6 +219,7 @@ func (d *DHCPManager) updateDHCPConfigMap(ctx context.Context, f func(ipv4 *ipal
 	if err == nil {
 		err = dhcp6.Restore(d.cidr6, str)
 		if err != nil {
+			err = errors.New("dhcp6.Restore(d.cidr6, str): " + err.Error())
 			return err
 		}
 	}
@@ -292,10 +295,12 @@ func (d *DHCPManager) ForEach(fn func(net.IP)) error {
 	}
 	str, err := base64.StdEncoding.DecodeString(cm.Data[config.KeyDHCP])
 	if err != nil {
+		err = errors.New("base64.StdEncoding.DecodeString(cm.Data[config.KeyDHCP]): " + err.Error())
 		return err
 	}
 	err = dhcp.Restore(d.cidr, str)
 	if err != nil {
+		err = errors.New("dhcp.Restore(d.cidr, str): " + err.Error())
 		return err
 	}
 	dhcp.ForEach(fn)

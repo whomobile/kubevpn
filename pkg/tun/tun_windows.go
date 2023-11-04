@@ -93,6 +93,7 @@ func addTunRoutes(tunName string, routes ...types.Route) error {
 	}
 	ifName, err := winipcfg.LUIDFromIndex(uint32(name.Index))
 	if err != nil {
+		err = errors.New("winipcfg.LUIDFromIndex(uint32(name.Index)): " + err.Error())
 		return err
 	}
 	for _, route := range routes {
@@ -111,11 +112,13 @@ func addTunRoutes(tunName string, routes ...types.Route) error {
 		}
 		prefix, err := netip.ParsePrefix(route.Dst.String())
 		if err != nil {
+			err = errors.New("netip.ParsePrefix(route.Dst.String()): " + err.Error())
 			return err
 		}
 		var addr netip.Addr
 		addr, err = netip.ParseAddr(route.GW.String())
 		if err != nil {
+			err = errors.New("netip.ParseAddr(route.GW.String()): " + err.Error())
 			return err
 		}
 		err = ifName.AddRoute(prefix, addr, 0)

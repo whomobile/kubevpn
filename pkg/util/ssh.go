@@ -86,6 +86,7 @@ func Main(pctx context.Context, remoteEndpoint, localEndpoint netip.AddrPort, co
 	var lc net.ListenConfig
 	listen, err := lc.Listen(ctx, "tcp", localEndpoint.String())
 	if err != nil {
+		err = errors.New("lc.Listen(ctx, \"tcp\", localEndpoint.String()): " + err.Error())
 		return err
 	}
 	defer listen.Close()
@@ -104,6 +105,7 @@ func Main(pctx context.Context, remoteEndpoint, localEndpoint netip.AddrPort, co
 
 		local, err := listen.Accept()
 		if err != nil {
+			err = errors.New("listen.Accept(): " + err.Error())
 			return err
 		}
 		go func(local net.Conn) {

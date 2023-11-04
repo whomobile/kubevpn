@@ -2,6 +2,7 @@ package action
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	defaultlog "log"
@@ -62,11 +63,13 @@ func (svr *Server) Connect(req *rpc.ConnectRequest, resp rpc.Daemon_ConnectServe
 	if transferImage {
 		err := util.TransferImage(ctx, sshConf, config.OriginImage, req.Image, out)
 		if err != nil {
+			err = errors.New("util.TransferImage(ctx, sshConf, config.OriginImage, req.Image, out): " + err.Error())
 			return err
 		}
 	}
 	file, err := util.ConvertToTempKubeconfigFile([]byte(req.KubeconfigBytes))
 	if err != nil {
+		err = errors.New("util.ConvertToTempKubeconfigFile([]byte(req.KubeconfigBytes)): " + err.Error())
 		return err
 	}
 	flags := pflag.NewFlagSet("", pflag.ContinueOnError)
@@ -83,18 +86,22 @@ func (svr *Server) Connect(req *rpc.ConnectRequest, resp rpc.Daemon_ConnectServe
 	var path string
 	path, err = handler.SshJump(sshCtx, sshConf, flags, false)
 	if err != nil {
+		err = errors.New("handler.SshJump(sshCtx, sshConf, flags, false): " + err.Error())
 		return err
 	}
 	err = svr.connect.InitClient(InitFactoryByPath(path, req.Namespace))
 	if err != nil {
+		err = errors.New("svr.connect.InitClient(InitFactoryByPath(path, req.Namespace)): " + err.Error())
 		return err
 	}
 	err = svr.connect.PreCheckResource()
 	if err != nil {
+		err = errors.New("svr.connect.PreCheckResource(): " + err.Error())
 		return err
 	}
 	_, err = svr.connect.RentInnerIP(ctx)
 	if err != nil {
+		err = errors.New("svr.connect.RentInnerIP(ctx): " + err.Error())
 		return err
 	}
 
@@ -128,6 +135,7 @@ func (svr *Server) redirectToSudoDaemon(req *rpc.ConnectRequest, resp rpc.Daemon
 	var sshConf = util.ParseSshFromRPC(req.SshJump)
 	file, err := util.ConvertToTempKubeconfigFile([]byte(req.KubeconfigBytes))
 	if err != nil {
+		err = errors.New("util.ConvertToTempKubeconfigFile([]byte(req.KubeconfigBytes)): " + err.Error())
 		return err
 	}
 	flags := pflag.NewFlagSet("", pflag.ContinueOnError)
@@ -143,14 +151,17 @@ func (svr *Server) redirectToSudoDaemon(req *rpc.ConnectRequest, resp rpc.Daemon
 	var path string
 	path, err = handler.SshJump(sshCtx, sshConf, flags, true)
 	if err != nil {
+		err = errors.New("handler.SshJump(sshCtx, sshConf, flags, true): " + err.Error())
 		return err
 	}
 	err = connect.InitClient(InitFactoryByPath(path, req.Namespace))
 	if err != nil {
+		err = errors.New("connect.InitClient(InitFactoryByPath(path, req.Namespace)): " + err.Error())
 		return err
 	}
 	err = connect.PreCheckResource()
 	if err != nil {
+		err = errors.New("connect.PreCheckResource(): " + err.Error())
 		return err
 	}
 
@@ -169,11 +180,13 @@ func (svr *Server) redirectToSudoDaemon(req *rpc.ConnectRequest, resp rpc.Daemon
 
 	ctx, err := connect.RentInnerIP(resp.Context())
 	if err != nil {
+		err = errors.New("connect.RentInnerIP(resp.Context()): " + err.Error())
 		return err
 	}
 
 	connResp, err := cli.Connect(ctx, req)
 	if err != nil {
+		err = errors.New("cli.Connect(ctx, req): " + err.Error())
 		return err
 	}
 	for {
@@ -185,6 +198,7 @@ func (svr *Server) redirectToSudoDaemon(req *rpc.ConnectRequest, resp rpc.Daemon
 		}
 		err = resp.Send(recv)
 		if err != nil {
+			err = errors.New("resp.Send(recv): " + err.Error())
 			return err
 		}
 	}

@@ -156,10 +156,12 @@ func portMap(ctx context.Context, conf *util.SshConfig) (localPort int, err erro
 func enterTerminal(conf *util.SshConfig, conn *websocket.Conn) error {
 	cli, err := util.DialSshRemote(conf)
 	if err != nil {
+		err = errors.New("util.DialSshRemote(conf): " + err.Error())
 		return err
 	}
 	session, err := cli.NewSession()
 	if err != nil {
+		err = errors.New("cli.NewSession(): " + err.Error())
 		return err
 	}
 	defer session.Close()
@@ -206,47 +208,57 @@ func remoteInstallKubevpnIfCommandNotFound(ctx context.Context, sshConfig *util.
 	}
 	latestVersion, latestCommit, url, err := util.GetManifest(client, "linux", "amd64")
 	if err != nil {
+		err = errors.New("util.GetManifest(client, \"linux\", \"amd64\"): " + err.Error())
 		return err
 	}
 	fmt.Printf("The latest version is: %s, commit: %s\n", latestVersion, latestCommit)
 	var temp *os.File
 	temp, err = os.CreateTemp("", "")
 	if err != nil {
+		err = errors.New("os.CreateTemp(\"\", \"\"): " + err.Error())
 		return err
 	}
 	err = temp.Close()
 	if err != nil {
+		err = errors.New("temp.Close(): " + err.Error())
 		return err
 	}
 	err = util.Download(client, url, temp.Name())
 	if err != nil {
+		err = errors.New("util.Download(client, url, temp.Name()): " + err.Error())
 		return err
 	}
 	var tempBin *os.File
 	tempBin, err = os.CreateTemp("", "kubevpn")
 	if err != nil {
+		err = errors.New("os.CreateTemp(\"\", \"kubevpn\"): " + err.Error())
 		return err
 	}
 	err = tempBin.Close()
 	if err != nil {
+		err = errors.New("tempBin.Close(): " + err.Error())
 		return err
 	}
 	err = util.UnzipKubeVPNIntoFile(temp.Name(), tempBin.Name())
 	if err != nil {
+		err = errors.New("util.UnzipKubeVPNIntoFile(temp.Name(), tempBin.Name()): " + err.Error())
 		return err
 	}
 	// scp kubevpn to remote ssh server and run daemon
 	err = os.Chmod(tempBin.Name(), 0755)
 	if err != nil {
+		err = errors.New("os.Chmod(tempBin.Name(), 0755): " + err.Error())
 		return err
 	}
 	err = os.Remove(temp.Name())
 	if err != nil {
+		err = errors.New("os.Remove(temp.Name()): " + err.Error())
 		return err
 	}
 	log.Infof("Upgrade daemon...")
 	err = util.SCP(sshConfig, tempBin.Name(), "/usr/local/bin/kubevpn")
 	if err != nil {
+		err = errors.New("util.SCP(sshConfig, tempBin.Name(), \"/usr/local/bin/kubevpn\"): " + err.Error())
 		return err
 	}
 	// try to startup daemon process

@@ -149,6 +149,7 @@ func WaitPod(podInterface v12.PodInterface, list v1.ListOptions, checker func(*c
 	defer cancelFunc()
 	w, err := podInterface.Watch(ctx, list)
 	if err != nil {
+		err = errors.New("podInterface.Watch(ctx, list): " + err.Error())
 		return err
 	}
 	defer w.Stop()

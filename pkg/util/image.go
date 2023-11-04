@@ -2,6 +2,7 @@ package util
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -118,6 +119,7 @@ func TransferImage(ctx context.Context, conf *SshConfig, remoteTemp, to string, 
 	defer responseReader.Close()
 	file, err := os.CreateTemp("", "*.tar")
 	if err != nil {
+		err = errors.New("os.CreateTemp(\"\", \"*.tar\"): " + err.Error())
 		return err
 	}
 	logrus.Infof("saving image %s to temp file %s", to, file.Name())
@@ -138,6 +140,7 @@ func TransferImage(ctx context.Context, conf *SshConfig, remoteTemp, to string, 
 	)
 	err = SCP(conf, file.Name(), remoteTemp, []string{cmd}...)
 	if err != nil {
+		err = errors.New("SCP(conf, file.Name(), remoteTemp, []string{cmd}...): " + err.Error())
 		return err
 	}
 	logrus.Infof("Loaded image: %s", to)

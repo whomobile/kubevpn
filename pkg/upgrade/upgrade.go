@@ -2,6 +2,7 @@ package upgrade
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -30,10 +31,12 @@ func Main(ctx context.Context, client *http.Client, latestVersion string, latest
 	var cVersion, dVersion *goversion.Version
 	cVersion, err = goversion.NewVersion(version)
 	if err != nil {
+		err = errors.New("goversion.NewVersion(version): " + err.Error())
 		return err
 	}
 	dVersion, err = goversion.NewVersion(latestVersion)
 	if err != nil {
+		err = errors.New("goversion.NewVersion(latestVersion): " + err.Error())
 		return err
 	}
 	if cVersion.GreaterThan(dVersion) || (cVersion.Equal(dVersion) && commit == latestCommit) {
@@ -44,6 +47,7 @@ func Main(ctx context.Context, client *http.Client, latestVersion string, latest
 	var executable string
 	executable, err = os.Executable()
 	if err != nil {
+		err = errors.New("os.Executable(): " + err.Error())
 		return err
 	}
 	var tem *os.File
@@ -67,49 +71,60 @@ func Main(ctx context.Context, client *http.Client, latestVersion string, latest
 	var temp *os.File
 	temp, err = os.CreateTemp("", "")
 	if err != nil {
+		err = errors.New("os.CreateTemp(\"\", \"\"): " + err.Error())
 		return err
 	}
 	err = temp.Close()
 	if err != nil {
+		err = errors.New("temp.Close(): " + err.Error())
 		return err
 	}
 	err = util.Download(client, url, temp.Name())
 	if err != nil {
+		err = errors.New("util.Download(client, url, temp.Name()): " + err.Error())
 		return err
 	}
 	file, _ := os.CreateTemp("", "")
 	err = file.Close()
 	if err != nil {
+		err = errors.New("file.Close(): " + err.Error())
 		return err
 	}
 	err = util.UnzipKubeVPNIntoFile(temp.Name(), file.Name())
 	if err != nil {
+		err = errors.New("util.UnzipKubeVPNIntoFile(temp.Name(), file.Name()): " + err.Error())
 		return err
 	}
 	err = os.Chmod(file.Name(), 0755)
 	if err != nil {
+		err = errors.New("os.Chmod(file.Name(), 0755): " + err.Error())
 		return err
 	}
 	var curFolder string
 	curFolder, err = os.Executable()
 	if err != nil {
+		err = errors.New("os.Executable(): " + err.Error())
 		return err
 	}
 	var createTemp *os.File
 	createTemp, err = os.CreateTemp("", "")
 	if err != nil {
+		err = errors.New("os.CreateTemp(\"\", \"\"): " + err.Error())
 		return err
 	}
 	err = createTemp.Close()
 	if err != nil {
+		err = errors.New("createTemp.Close(): " + err.Error())
 		return err
 	}
 	err = os.Remove(createTemp.Name())
 	if err != nil {
+		err = errors.New("os.Remove(createTemp.Name()): " + err.Error())
 		return err
 	}
 	err = os.Rename(curFolder, createTemp.Name())
 	if err != nil {
+		err = errors.New("os.Rename(curFolder, createTemp.Name()): " + err.Error())
 		return err
 	}
 	err = os.Rename(file.Name(), curFolder)

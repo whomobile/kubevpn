@@ -2,6 +2,7 @@ package cmds
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -46,6 +47,7 @@ func quit(ctx context.Context, isSudo bool) error {
 	}
 	client, err := cli.Quit(ctx, &rpc.QuitRequest{})
 	if err != nil {
+		err = errors.New("cli.Quit(ctx, &rpc.QuitRequest{}): " + err.Error())
 		return err
 	}
 	var resp *rpc.QuitResponse

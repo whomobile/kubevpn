@@ -1,6 +1,7 @@
 package cmds
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
@@ -87,6 +88,7 @@ Startup your kubernetes workloads in local Docker container with same volume、e
 			}
 			err = cmd.Flags().Parse(args[1:])
 			if err != nil {
+				err = errors.New("cmd.Flags().Parse(args[1:]): " + err.Error())
 				return err
 			}
 			util.InitLogger(false)
@@ -97,6 +99,7 @@ Startup your kubernetes workloads in local Docker container with same volume、e
 
 			err = daemon.StartupDaemon(cmd.Context())
 			if err != nil {
+				err = errors.New("daemon.StartupDaemon(cmd.Context()): " + err.Error())
 				return err
 			}
 			return handler.SshJumpAndSetEnv(cmd.Context(), sshConf, cmd.Flags(), false)

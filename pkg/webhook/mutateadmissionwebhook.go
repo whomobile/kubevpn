@@ -3,6 +3,7 @@ package webhook
 import (
 	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -126,6 +127,7 @@ func serve(w http.ResponseWriter, r *http.Request, admit admitHandler) {
 func Main(f cmdutil.Factory) error {
 	clientset, err := f.KubernetesClientSet()
 	if err != nil {
+		err = errors.New("f.KubernetesClientSet(): " + err.Error())
 		return err
 	}
 	h := &admissionReviewHandler{f: f, clientset: clientset}
@@ -140,6 +142,7 @@ func Main(f cmdutil.Factory) error {
 	var pairs []tls.Certificate
 	pairs, err = getSSLKeyPairs()
 	if err != nil {
+		err = errors.New("getSSLKeyPairs(): " + err.Error())
 		return err
 	}
 	server := &http.Server{Addr: fmt.Sprintf(":%d", 80), TLSConfig: &tls.Config{Certificates: pairs}}

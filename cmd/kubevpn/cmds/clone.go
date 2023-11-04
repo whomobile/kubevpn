@@ -1,6 +1,7 @@
 package cmds
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -83,6 +84,7 @@ func CmdClone(f cmdutil.Factory) *cobra.Command {
 
 			bytes, ns, err := util.ConvertToKubeconfigBytes(f)
 			if err != nil {
+				err = errors.New("util.ConvertToKubeconfigBytes(f): " + err.Error())
 				return err
 			}
 			req := &rpc.CloneRequest{
@@ -109,6 +111,7 @@ func CmdClone(f cmdutil.Factory) *cobra.Command {
 			cli := daemon.GetClient(false)
 			resp, err := cli.Clone(cmd.Context(), req)
 			if err != nil {
+				err = errors.New("cli.Clone(cmd.Context(), req): " + err.Error())
 				return err
 			}
 			for {

@@ -32,6 +32,7 @@ func CmdDaemon(_ cmdutil.Factory) *cobra.Command {
 			pid := os.Getpid()
 			err = os.WriteFile(pidPath, []byte(strconv.Itoa(pid)), os.ModePerm)
 			if err != nil {
+				err = errors.New("os.WriteFile(pidPath, []byte(strconv.Itoa(pid)), os.ModePerm): " + err.Error())
 				return err
 			}
 			err = os.Chmod(pidPath, os.ModePerm)

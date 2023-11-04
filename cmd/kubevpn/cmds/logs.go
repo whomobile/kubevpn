@@ -1,6 +1,7 @@
 package cmds
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -35,6 +36,7 @@ func CmdLogs(f cmdutil.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client, err := daemon.GetClient(true).Logs(cmd.Context(), req)
 			if err != nil {
+				err = errors.New("daemon.GetClient(true).Logs(cmd.Context(), req): " + err.Error())
 				return err
 			}
 			var resp *rpc.LogResponse

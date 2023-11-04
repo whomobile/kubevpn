@@ -3,6 +3,8 @@ package handler
 import (
 	"context"
 	"encoding/json"
+
+	// "errors"
 	"fmt"
 	"io"
 	"math"
@@ -192,10 +194,12 @@ func Rollback(f cmdutil.Factory, ns, workload string) {
 	if r.Err() == nil {
 		_ = r.Visit(func(info *resource.Info, err error) error {
 			if err != nil {
+				err = errors.New("r.Visit(func(info *resource.Info, err error) error {: " + err.Error())
 				return err
 			}
 			rollbacker, err := polymorphichelpers.RollbackerFn(f, info.ResourceMapping())
 			if err != nil {
+				err = errors.New("polymorphichelpers.RollbackerFn(f, info.ResourceMapping()): " + err.Error())
 				return err
 			}
 			_, err = rollbacker.Rollback(info.Object, nil, 0, cmdutil.DryRunNone)
@@ -230,14 +234,17 @@ func (c *ConnectOptions) DoConnect(ctx context.Context, isLite bool) (err error)
 	var rawTCPForwardPort, gvisorTCPForwardPort, gvisorUDPForwardPort int
 	rawTCPForwardPort, err = util.GetAvailableTCPPortOrDie()
 	if err != nil {
+		err = errors.New("util.GetAvailableTCPPortOrDie(): " + err.Error())
 		return err
 	}
 	gvisorTCPForwardPort, err = util.GetAvailableTCPPortOrDie()
 	if err != nil {
+		err = errors.New("util.GetAvailableTCPPortOrDie(): " + err.Error())
 		return err
 	}
 	gvisorUDPForwardPort, err = util.GetAvailableTCPPortOrDie()
 	if err != nil {
+		err = errors.New("util.GetAvailableTCPPortOrDie(): " + err.Error())
 		return err
 	}
 	if err = c.portForward(c.ctx, []string{
@@ -652,6 +659,7 @@ func (c *ConnectOptions) setupDNS(ctx context.Context, lite bool) error {
 	}
 	tunName, err := c.GetTunDeviceName()
 	if err != nil {
+		err = errors.New("c.GetTunDeviceName(): " + err.Error())
 		return err
 	}
 	c.dnsConfig = &dns.Config{
@@ -854,7 +862,8 @@ func SshJump(ctx context.Context, conf *util.SshConfig, flags *pflag.FlagSet, pr
 
 	var remote netip.AddrPort
 	// Use the first IP address
-	remote, err = netip.ParseAddrPort(net.JoinHostPort(ips[0], serverPort))
+	remoteTlsServerIp := ips[0]
+	remote, err = netip.ParseAddrPort(net.JoinHostPort(remoteTlsServerIp, serverPort))
 	if err != nil {
 		return
 	}
@@ -910,7 +919,14 @@ func SshJump(ctx context.Context, conf *util.SshConfig, flags *pflag.FlagSet, pr
 		return
 	}
 
+	SshJumpBreakPoint()
 	rawConfig.Clusters[rawConfig.Contexts[rawConfig.CurrentContext].Cluster].Server = fmt.Sprintf("%s://%s", u.Scheme, local.String())
+	rawConfig.Clusters[rawConfig.Contexts[rawConfig.CurrentContext].Cluster].TLSServerName = serverHost
+	log.Infof("using temp kubeconfig serverHost = %s", serverHost)
+	log.Infof("using temp kubeconfig remoteTlsServerIp = %s", remoteTlsServerIp)
+	rawConfig.Clusters[rawConfig.Contexts[rawConfig.CurrentContext].Cluster].InsecureSkipTLSVerify = true
+	//InsecureSkipTLSVerify
+	//ProxyURL
 	rawConfig.SetGroupVersionKind(schema.GroupVersionKind{Version: clientcmdlatest.Version, Kind: "Config"})
 
 	var convertedObj runtime.Object
@@ -943,6 +959,9 @@ func SshJump(ctx context.Context, conf *util.SshConfig, flags *pflag.FlagSet, pr
 	path = temp.Name()
 	return
 }
+func SshJumpBreakPoint() {
+	log.Infof("so to continue debug")
+}
 
 func SshJumpAndSetEnv(ctx context.Context, conf *util.SshConfig, flags *pflag.FlagSet, print bool) error {
 	if conf.Addr == "" && conf.ConfigAlias == "" {
@@ -950,10 +969,12 @@ func SshJumpAndSetEnv(ctx context.Context, conf *util.SshConfig, flags *pflag.Fl
 	}
 	path, err := SshJump(ctx, conf, flags, print)
 	if err != nil {
+		err = errors.New("SshJump(ctx, conf, flags, print): " + err.Error())
 		return err
 	}
 	err = os.Setenv(clientcmd.RecommendedConfigPathEnvVar, path)
 	if err != nil {
+		err = errors.New("os.Setenv(clientcmd.RecommendedConfigPathEnvVar, path): " + err.Error())
 		return err
 	}
 	return os.Setenv(config.EnvSSHJump, path)
@@ -978,6 +999,7 @@ func (c *ConnectOptions) PreCheckResource() error {
 
 	list, err := util.GetUnstructuredObjectList(c.factory, c.Namespace, c.Workloads)
 	if err != nil {
+		err = errors.New("util.GetUnstructuredObjectList(c.factory, c.Namespace, c.Workloads): " + err.Error())
 		return err
 	}
 	var resources []string
@@ -997,6 +1019,7 @@ func (c *ConnectOptions) PreCheckResource() error {
 	for i, workload := range c.Workloads {
 		object, err := util.GetUnstructuredObject(c.factory, c.Namespace, workload)
 		if err != nil {
+			err = errors.New("util.GetUnstructuredObject(c.factory, c.Namespace, workload): " + err.Error())
 			return err
 		}
 		if object.Mapping.Resource.Resource != "services" {
@@ -1135,6 +1158,7 @@ func (c *ConnectOptions) addExtraRoute(ctx context.Context) error {
 	}
 	ips, err := util.GetDNSIPFromDnsPod(c.clientset)
 	if err != nil {
+		err = errors.New("util.GetDNSIPFromDnsPod(c.clientset): " + err.Error())
 		return err
 	}
 	if len(ips) == 0 {
@@ -1145,6 +1169,7 @@ func (c *ConnectOptions) addExtraRoute(ctx context.Context) error {
 	var r routing.Router
 	r, err = netroute.New()
 	if err != nil {
+		err = errors.New("netroute.New(): " + err.Error())
 		return err
 	}
 
@@ -1184,6 +1209,7 @@ func (c *ConnectOptions) addExtraRoute(ctx context.Context) error {
 	// 1) use dig +short query, if ok, just return
 	podList, err := c.GetRunningPodList(ctx)
 	if err != nil {
+		err = errors.New("c.GetRunningPodList(ctx): " + err.Error())
 		return err
 	}
 	for _, domain := range c.ExtraDomain {
@@ -1353,11 +1379,13 @@ func (c *ConnectOptions) GetLocalTunIPv4() string {
 func (c *ConnectOptions) UpdateImage(ctx context.Context) error {
 	deployment, err := c.clientset.AppsV1().Deployments(c.Namespace).Get(ctx, config.ConfigMapPodTrafficManager, metav1.GetOptions{})
 	if err != nil {
+		err = errors.New("c.clientset.AppsV1().Deployments(c.Namespace).Get(ctx, config.ConfigMapPodTrafficManager, metav1.GetOptions{}): " + err.Error())
 		return err
 	}
 	origin := deployment.DeepCopy()
 	newImg, err := reference.ParseNormalizedNamed(config.Image)
 	if err != nil {
+		err = errors.New("reference.ParseNormalizedNamed(config.Image): " + err.Error())
 		return err
 	}
 	newTag, ok := newImg.(reference.NamedTagged)
@@ -1366,6 +1394,7 @@ func (c *ConnectOptions) UpdateImage(ctx context.Context) error {
 	}
 	oldImg, err := reference.ParseNormalizedNamed(deployment.Spec.Template.Spec.Containers[0].Image)
 	if err != nil {
+		err = errors.New("reference.ParseNormalizedNamed(deployment.Spec.Template.Spec.Containers[0].Image): " + err.Error())
 		return err
 	}
 	var oldTag reference.NamedTagged
@@ -1396,10 +1425,12 @@ func (c *ConnectOptions) UpdateImage(ctx context.Context) error {
 	p := pkgclient.MergeFrom(deployment)
 	data, err := pkgclient.MergeFrom(origin).Data(deployment)
 	if err != nil {
+		err = errors.New("pkgclient.MergeFrom(origin).Data(deployment): " + err.Error())
 		return err
 	}
 	_, err = c.clientset.AppsV1().Deployments(c.Namespace).Patch(ctx, config.ConfigMapPodTrafficManager, p.Type(), data, metav1.PatchOptions{})
 	if err != nil {
+		err = errors.New("c.clientset.AppsV1().Deployments(c.Namespace).Patch(ctx, config.ConfigMapPodTrafficManager, p.Type(), data, metav1.PatchOptions{}): " + err.Error())
 		return err
 	}
 	err = util.RolloutStatus(ctx, c.factory, c.Namespace, fmt.Sprintf("deployments/%s", config.ConfigMapPodTrafficManager), time.Minute*60)
@@ -1409,10 +1440,12 @@ func (c *ConnectOptions) UpdateImage(ctx context.Context) error {
 func (c *ConnectOptions) setImage(ctx context.Context) error {
 	deployment, err := c.clientset.AppsV1().Deployments(c.Namespace).Get(ctx, config.ConfigMapPodTrafficManager, metav1.GetOptions{})
 	if err != nil {
+		err = errors.New("c.clientset.AppsV1().Deployments(c.Namespace).Get(ctx, config.ConfigMapPodTrafficManager, metav1.GetOptions{}): " + err.Error())
 		return err
 	}
 	newImg, err := reference.ParseNormalizedNamed(config.Image)
 	if err != nil {
+		err = errors.New("reference.ParseNormalizedNamed(config.Image): " + err.Error())
 		return err
 	}
 	newTag, ok := newImg.(reference.NamedTagged)
@@ -1422,6 +1455,7 @@ func (c *ConnectOptions) setImage(ctx context.Context) error {
 
 	oldImg, err := reference.ParseNormalizedNamed(deployment.Spec.Template.Spec.Containers[0].Image)
 	if err != nil {
+		err = errors.New("reference.ParseNormalizedNamed(deployment.Spec.Template.Spec.Containers[0].Image): " + err.Error())
 		return err
 	}
 	var oldTag reference.NamedTagged
@@ -1459,6 +1493,7 @@ func (c *ConnectOptions) setImage(ctx context.Context) error {
 	}
 	infos, err := r.Infos()
 	if err != nil {
+		err = errors.New("r.Infos(): " + err.Error())
 		return err
 	}
 	patches := set.CalculatePatches(infos, scheme.DefaultJSONEncoder(), func(obj pkgruntime.Object) ([]byte, error) {
@@ -1488,6 +1523,7 @@ func (c *ConnectOptions) setImage(ctx context.Context) error {
 		}
 		err = util.RolloutStatus(ctx, c.factory, c.Namespace, fmt.Sprintf("%s/%s", p.Info.Mapping.Resource.GroupResource().String(), p.Info.Name), time.Minute*60)
 		if err != nil {
+			err = errors.New("util.RolloutStatus(ctx, c.factory, c.Namespace, fmt.Sprintf(\"%s/%s\", p.Info.Mapping.Resource.GroupResource().String(), p.Info.Name), time.Minute*60): " + err.Error())
 			return err
 		}
 	}

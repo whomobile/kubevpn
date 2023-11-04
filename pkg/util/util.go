@@ -97,11 +97,13 @@ func RolloutStatus(ctx1 context.Context, factory cmdutil.Factory, namespace, wor
 		Do()
 	err = r.Err()
 	if err != nil {
+		err = errors.New("r.Err(): " + err.Error())
 		return err
 	}
 
 	infos, err := r.Infos()
 	if err != nil {
+		err = errors.New("r.Infos(): " + err.Error())
 		return err
 	}
 	if len(infos) != 1 {
@@ -112,6 +114,7 @@ func RolloutStatus(ctx1 context.Context, factory cmdutil.Factory, namespace, wor
 
 	statusViewer, err := polymorphichelpers.StatusViewerFn(mapping)
 	if err != nil {
+		err = errors.New("polymorphichelpers.StatusViewerFn(mapping): " + err.Error())
 		return err
 	}
 

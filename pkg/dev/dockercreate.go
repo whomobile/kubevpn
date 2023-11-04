@@ -39,18 +39,21 @@ type createOptions struct {
 func pullImage(ctx context.Context, dockerCli command.Cli, image string, platform string, out io.Writer) error {
 	ref, err := reference.ParseNormalizedNamed(image)
 	if err != nil {
+		err = errors.New("reference.ParseNormalizedNamed(image): " + err.Error())
 		return err
 	}
 
 	// Resolve the Repository name from fqn to RepositoryInfo
 	repoInfo, err := registry.ParseRepositoryInfo(ref)
 	if err != nil {
+		err = errors.New("registry.ParseRepositoryInfo(ref): " + err.Error())
 		return err
 	}
 
 	authConfig := command.ResolveAuthConfig(ctx, dockerCli, repoInfo.Index)
 	encodedAuth, err := command.EncodeAuthToBase64(authConfig)
 	if err != nil {
+		err = errors.New("command.EncodeAuthToBase64(authConfig): " + err.Error())
 		return err
 	}
 
@@ -61,6 +64,7 @@ func pullImage(ctx context.Context, dockerCli command.Cli, image string, platfor
 
 	responseBody, err := dockerCli.Client().ImageCreate(ctx, image, options)
 	if err != nil {
+		err = errors.New("dockerCli.Client().ImageCreate(ctx, image, options): " + err.Error())
 		return err
 	}
 	defer responseBody.Close()

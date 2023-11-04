@@ -3,6 +3,7 @@
 package dns
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	"net/netip"
@@ -19,10 +20,12 @@ func (c *Config) SetupDNS() error {
 
 	tun, err := net.InterfaceByName(tunName)
 	if err != nil {
+		err = errors.New("net.InterfaceByName(tunName): " + err.Error())
 		return err
 	}
 	luid, err := winipcfg.LUIDFromIndex(uint32(tun.Index))
 	if err != nil {
+		err = errors.New("winipcfg.LUIDFromIndex(uint32(tun.Index)): " + err.Error())
 		return err
 	}
 	var servers []netip.Addr

@@ -90,16 +90,19 @@ func (o *CopyOptions) Complete(f cmdutil.Factory, cmd *cobra.Command, args []str
 	var err error
 	o.Namespace, _, err = f.ToRawKubeConfigLoader().Namespace()
 	if err != nil {
+		err = errors.New("f.ToRawKubeConfigLoader().Namespace(): " + err.Error())
 		return err
 	}
 
 	o.Clientset, err = f.KubernetesClientSet()
 	if err != nil {
+		err = errors.New("f.KubernetesClientSet(): " + err.Error())
 		return err
 	}
 
 	o.ClientConfig, err = f.ToRESTConfig()
 	if err != nil {
+		err = errors.New("f.ToRESTConfig(): " + err.Error())
 		return err
 	}
 
@@ -119,10 +122,12 @@ func (o *CopyOptions) Validate() error {
 func (o *CopyOptions) Run() error {
 	srcSpec, err := extractFileSpec(o.args[0])
 	if err != nil {
+		err = errors.New("extractFileSpec(o.args[0]): " + err.Error())
 		return err
 	}
 	destSpec, err := extractFileSpec(o.args[1])
 	if err != nil {
+		err = errors.New("extractFileSpec(o.args[1]): " + err.Error())
 		return err
 	}
 
@@ -301,16 +306,19 @@ func makeTar(src localPath, dest remotePath, writer io.Writer) error {
 func recursiveTar(srcDir, srcFile localPath, destDir, destFile remotePath, tw *tar.Writer) error {
 	matchedPaths, err := srcDir.Join(srcFile).Glob()
 	if err != nil {
+		err = errors.New("srcDir.Join(srcFile).Glob(): " + err.Error())
 		return err
 	}
 	for _, fpath := range matchedPaths {
 		stat, err := os.Lstat(fpath)
 		if err != nil {
+			err = errors.New("os.Lstat(fpath): " + err.Error())
 			return err
 		}
 		if stat.IsDir() {
 			files, err := os.ReadDir(fpath)
 			if err != nil {
+				err = errors.New("os.ReadDir(fpath): " + err.Error())
 				return err
 			}
 			if len(files) == 0 {
@@ -333,6 +341,7 @@ func recursiveTar(srcDir, srcFile localPath, destDir, destFile remotePath, tw *t
 			hdr, _ := tar.FileInfoHeader(stat, fpath)
 			target, err := os.Readlink(fpath)
 			if err != nil {
+				err = errors.New("os.Readlink(fpath): " + err.Error())
 				return err
 			}
 
@@ -345,6 +354,7 @@ func recursiveTar(srcDir, srcFile localPath, destDir, destFile remotePath, tw *t
 			//case regular file or other file type like pipe
 			hdr, err := tar.FileInfoHeader(stat, fpath)
 			if err != nil {
+				err = errors.New("tar.FileInfoHeader(stat, fpath): " + err.Error())
 				return err
 			}
 			hdr.Name = destFile.String()
@@ -355,6 +365,7 @@ func recursiveTar(srcDir, srcFile localPath, destDir, destFile remotePath, tw *t
 
 			f, err := os.Open(fpath)
 			if err != nil {
+				err = errors.New("os.Open(fpath): " + err.Error())
 				return err
 			}
 			defer f.Close()
@@ -415,6 +426,7 @@ func (o *CopyOptions) untarAll(prefix string, dest localPath, reader io.Reader) 
 
 		outFile, err := os.Create(destFileName.String())
 		if err != nil {
+			err = errors.New("os.Create(destFileName.String()): " + err.Error())
 			return err
 		}
 		defer outFile.Close()
@@ -435,6 +447,7 @@ func (o *CopyOptions) untarAll(prefix string, dest localPath, reader io.Reader) 
 	for _, f := range linkList {
 		err := copyFromLink(linkList, f, genDstFilename)
 		if err != nil {
+			err = errors.New("copyFromLink(linkList, f, genDstFilename): " + err.Error())
 			return err
 		}
 	}

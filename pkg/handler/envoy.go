@@ -35,6 +35,7 @@ func InjectVPNAndEnvoySidecar(ctx1 context.Context, factory cmdutil.Factory, cli
 	var object *runtimeresource.Info
 	object, err = util.GetUnstructuredObject(factory, namespace, workload)
 	if err != nil {
+		err = errors.New("util.GetUnstructuredObject(factory, namespace, workload): " + err.Error())
 		return err
 	}
 
@@ -43,6 +44,7 @@ func InjectVPNAndEnvoySidecar(ctx1 context.Context, factory cmdutil.Factory, cli
 	var path []string
 	templateSpec, path, err = util.GetPodTemplateSpecPath(u)
 	if err != nil {
+		err = errors.New("util.GetPodTemplateSpecPath(u): " + err.Error())
 		return err
 	}
 
@@ -102,6 +104,7 @@ func InjectVPNAndEnvoySidecar(ctx1 context.Context, factory cmdutil.Factory, cli
 	var bytes []byte
 	bytes, err = k8sjson.Marshal(append(ps, removePatch...))
 	if err != nil {
+		err = errors.New("k8sjson.Marshal(append(ps, removePatch...)): " + err.Error())
 		return err
 	}
 	_, err = helper.Patch(object.Namespace, object.Name, types.JSONPatchType, bytes, &metav1.PatchOptions{})
@@ -191,6 +194,7 @@ func UnPatchContainer(factory cmdutil.Factory, mapInterface v12.ConfigMapInterfa
 func addEnvoyConfig(mapInterface v12.ConfigMapInterface, nodeID string, tunIP util.PodRouteConfig, headers map[string]string, port []v1.ContainerPort) error {
 	configMap, err := mapInterface.Get(context.Background(), config.ConfigMapPodTrafficManager, metav1.GetOptions{})
 	if err != nil {
+		err = errors.New("mapInterface.Get(context.Background(), config.ConfigMapPodTrafficManager, metav1.GetOptions{}): " + err.Error())
 		return err
 	}
 	var v = make([]*controlplane.Virtual, 0)
@@ -239,6 +243,7 @@ func addEnvoyConfig(mapInterface v12.ConfigMapInterface, nodeID string, tunIP ut
 
 	marshal, err := yaml.Marshal(v)
 	if err != nil {
+		err = errors.New("yaml.Marshal(v): " + err.Error())
 		return err
 	}
 	configMap.Data[config.KeyEnvoy] = string(marshal)

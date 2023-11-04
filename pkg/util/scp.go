@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/pkg/errors"
 	"github.com/schollz/progressbar/v3"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/ssh"
@@ -21,6 +22,7 @@ func SCP(conf *SshConfig, filename, to string, commands ...string) error {
 
 	sess, err := remote.NewSession()
 	if err != nil {
+		err = errors.New("remote.NewSession(): " + err.Error())
 		return err
 	}
 	err = main(sess, filename, to)
@@ -30,6 +32,7 @@ func SCP(conf *SshConfig, filename, to string, commands ...string) error {
 	}
 	sess, err = remote.NewSession()
 	if err != nil {
+		err = errors.New("remote.NewSession(): " + err.Error())
 		return err
 	}
 	for _, command := range commands {
@@ -48,10 +51,12 @@ func SCP(conf *SshConfig, filename, to string, commands ...string) error {
 func main(sess *ssh.Session, filename string, to string) error {
 	open, err := os.Open(filename)
 	if err != nil {
+		err = errors.New("os.Open(filename): " + err.Error())
 		return err
 	}
 	stat, err := open.Stat()
 	if err != nil {
+		err = errors.New("open.Stat(): " + err.Error())
 		return err
 	}
 	defer open.Close()

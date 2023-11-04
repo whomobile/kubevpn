@@ -3,6 +3,7 @@ package dns
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"net"
 	"os"
@@ -106,6 +107,7 @@ func (c *Config) updateHosts(str string) error {
 	path := GetHostFile()
 	file, err := os.ReadFile(path)
 	if err != nil {
+		err = errors.New("os.ReadFile(path): " + err.Error())
 		return err
 	}
 	lines := strings.Split(string(file), "\n")
@@ -242,6 +244,7 @@ func CleanupHosts() error {
 	path := GetHostFile()
 	file, err := os.ReadFile(path)
 	if err != nil {
+		err = errors.New("os.ReadFile(path): " + err.Error())
 		return err
 	}
 	lines := strings.Split(string(file), "\n")

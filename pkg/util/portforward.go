@@ -253,6 +253,7 @@ func (pf *PortForwarder) listenOnPort(port *ForwardedPort) error {
 func (pf *PortForwarder) listenOnPortAndAddress(port *ForwardedPort, protocol string, address string) error {
 	listener, err := pf.getListener(protocol, address, port)
 	if err != nil {
+		err = errors.New("pf.getListener(protocol, address, port): " + err.Error())
 		return err
 	}
 	pf.listeners = append(pf.listeners, listener)

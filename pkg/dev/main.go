@@ -97,11 +97,13 @@ func (d *Options) Main(ctx context.Context, tempContainerConfig *containerConfig
 	//var path []string
 	templateSpec, _, err = util.GetPodTemplateSpecPath(u)
 	if err != nil {
+		err = errors.New("util.GetPodTemplateSpecPath(u): " + err.Error())
 		return err
 	}
 
 	set, err := d.Factory.KubernetesClientSet()
 	if err != nil {
+		err = errors.New("d.Factory.KubernetesClientSet(): " + err.Error())
 		return err
 	}
 
@@ -222,6 +224,7 @@ func (d *Options) Main(ctx context.Context, tempContainerConfig *containerConfig
 	})
 	err = runConfigList.Run(ctx, volume, d.Cli, d.DockerCli)
 	if err != nil {
+		err = errors.New("runConfigList.Run(ctx, volume, d.Cli, d.DockerCli): " + err.Error())
 		return err
 	}
 	return terminal(runConfigList[0].containerName, d.DockerCli)
@@ -252,6 +255,7 @@ func (l ConfigList) Remove(ctx context.Context, cli *client.Client) error {
 	}
 	i, err := cli.NetworkInspect(ctx, config.ConfigMapPodTrafficManager, types.NetworkInspectOptions{})
 	if err != nil {
+		err = errors.New("cli.NetworkInspect(ctx, config.ConfigMapPodTrafficManager, types.NetworkInspectOptions{}): " + err.Error())
 		return err
 	}
 	if len(i.Containers) == 0 {
@@ -266,6 +270,7 @@ func (l ConfigList) Run(ctx context.Context, volume map[string][]mount.Mount, cl
 		if index == 0 {
 			_, err := runFirst(ctx, runConfig, cli, dockerCli)
 			if err != nil {
+				err = errors.New("runFirst(ctx, runConfig, cli, dockerCli): " + err.Error())
 				return err
 			}
 		} else {
@@ -276,10 +281,12 @@ func (l ConfigList) Run(ctx context.Context, volume map[string][]mount.Mount, cl
 				runConfig.hostConfig.Mounts = nil
 				id, err = run(ctx, runConfig, cli, dockerCli)
 				if err != nil {
+					err = errors.New("run(ctx, runConfig, cli, dockerCli): " + err.Error())
 					return err
 				}
 				err = l.copyToContainer(ctx, volume[runConfig.k8sContainerName], cli, id)
 				if err != nil {
+					err = errors.New("l.copyToContainer(ctx, volume[runConfig.k8sContainerName], cli, id): " + err.Error())
 					return err
 				}
 			}
@@ -386,6 +393,7 @@ func checkOutOfMemory(spec *v1.PodTemplateSpec, cli *client.Client) (outOfMemory
 func DoDev(ctx context.Context, devOption *Options, conf *util.SshConfig, flags *pflag.FlagSet, f cmdutil.Factory, transferImage bool) error {
 	cli, dockerCli, err := util.GetClient()
 	if err != nil {
+		err = errors.New("util.GetClient(): " + err.Error())
 		return err
 	}
 	mode := container.NetworkMode(devOption.Copts.netMode.NetworkMode())
@@ -412,6 +420,7 @@ func DoDev(ctx context.Context, devOption *Options, conf *util.SshConfig, flags 
 		log.Infof("hostname is %s", hostname)
 		err = devOption.Copts.netMode.Set(fmt.Sprintf("container:%s", hostname))
 		if err != nil {
+			err = errors.New("devOption.Copts.netMode.Set(fmt.Sprintf(\"container:%s\", hostname)): " + err.Error())
 			return err
 		}
 	}
@@ -431,6 +440,7 @@ func DoDev(ctx context.Context, devOption *Options, conf *util.SshConfig, flags 
 	var tempContainerConfig *containerConfig
 	err = validatePullOpt(devOption.Options.Pull)
 	if err != nil {
+		err = errors.New("validatePullOpt(devOption.Options.Pull): " + err.Error())
 		return err
 	}
 	proxyConfig := dockerCli.ConfigFile().ParseProxyConfig(dockerCli.Client().DaemonHost(), opts.ConvertKVStringsToMapWithNil(devOption.Copts.env.GetAll()))
@@ -450,6 +460,7 @@ func DoDev(ctx context.Context, devOption *Options, conf *util.SshConfig, flags 
 	}
 	err = validateAPIVersion(tempContainerConfig, dockerCli.Client().ClientVersion())
 	if err != nil {
+		err = errors.New("validateAPIVersion(tempContainerConfig, dockerCli.Client().ClientVersion()): " + err.Error())
 		return err
 	}
 
@@ -727,6 +738,7 @@ func createConnectContainer(noProxy bool, connect handler.ConnectOptions, path s
 func runLogsWaitRunning(ctx context.Context, dockerCli command.Cli, container string) error {
 	c, err := dockerCli.Client().ContainerInspect(ctx, container)
 	if err != nil {
+		err = errors.New("dockerCli.Client().ContainerInspect(ctx, container): " + err.Error())
 		return err
 	}
 
@@ -737,6 +749,7 @@ func runLogsWaitRunning(ctx context.Context, dockerCli command.Cli, container st
 	}
 	logStream, err := dockerCli.Client().ContainerLogs(ctx, c.ID, options)
 	if err != nil {
+		err = errors.New("dockerCli.Client().ContainerLogs(ctx, c.ID, options): " + err.Error())
 		return err
 	}
 	defer logStream.Close()
@@ -785,6 +798,7 @@ func runLogsSinceNow(dockerCli command.Cli, container string, follow bool) error
 
 	c, err := dockerCli.Client().ContainerInspect(ctx, container)
 	if err != nil {
+		err = errors.New("dockerCli.Client().ContainerInspect(ctx, container): " + err.Error())
 		return err
 	}
 
@@ -796,6 +810,7 @@ func runLogsSinceNow(dockerCli command.Cli, container string, follow bool) error
 	}
 	responseBody, err := dockerCli.Client().ContainerLogs(ctx, c.ID, options)
 	if err != nil {
+		err = errors.New("dockerCli.Client().ContainerLogs(ctx, c.ID, options): " + err.Error())
 		return err
 	}
 	defer responseBody.Close()

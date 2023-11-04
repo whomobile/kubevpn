@@ -2,6 +2,7 @@ package daemon
 
 import (
 	"context"
+	"errors"
 	"net"
 	"net/http"
 	"os"
@@ -47,12 +48,14 @@ func (o *SvrOption) Start(ctx context.Context) error {
 	var lc net.ListenConfig
 	lis, err := lc.Listen(o.ctx, "unix", GetSockPath(o.IsSudo))
 	if err != nil {
+		err = errors.New("lc.Listen(o.ctx, \"unix\", GetSockPath(o.IsSudo)): " + err.Error())
 		return err
 	}
 	defer lis.Close()
 
 	err = os.Chmod(GetSockPath(o.IsSudo), 0666)
 	if err != nil {
+		err = errors.New("os.Chmod(GetSockPath(o.IsSudo), 0666): " + err.Error())
 		return err
 	}
 

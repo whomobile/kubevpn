@@ -1,6 +1,7 @@
 package cmds
 
 import (
+	"errors"
 	"io"
 	"os"
 
@@ -39,6 +40,7 @@ func CmdSSH(_ cmdutil.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			config, err := websocket.NewConfig("ws://test/ws", "http://test")
 			if err != nil {
+				err = errors.New("websocket.NewConfig(\"ws://test/ws\", \"http://test\"): " + err.Error())
 				return err
 			}
 			config.Header.Set("ssh-addr", sshConf.Addr)
@@ -49,6 +51,7 @@ func CmdSSH(_ cmdutil.Factory) *cobra.Command {
 			client := daemon.GetTCPClient(true)
 			conn, err := websocket.NewClient(config, client)
 			if err != nil {
+				err = errors.New("websocket.NewClient(config, client): " + err.Error())
 				return err
 			}
 			go io.Copy(conn, os.Stdin)

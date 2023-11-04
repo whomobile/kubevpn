@@ -1,6 +1,7 @@
 package cmds
 
 import (
+	"errors"
 	"math/rand"
 	"runtime"
 	"time"
@@ -39,6 +40,7 @@ func CmdServe(_ cmdutil.Factory) *cobra.Command {
 			_, _ = maxprocs.Set(maxprocs.Logger(nil))
 			err := handler.RentIPIfNeeded(route)
 			if err != nil {
+				err = errors.New("handler.RentIPIfNeeded(route): " + err.Error())
 				return err
 			}
 			defer func() {

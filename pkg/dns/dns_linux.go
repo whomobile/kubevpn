@@ -4,6 +4,7 @@ package dns
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -102,6 +103,7 @@ func SetupLocalDNS(clientConfig *miekgdns.ClientConfig, existNameservers []strin
 	// Start your engines
 	instance, err := caddy.Start(corefile)
 	if err != nil {
+		err = errors.New("caddy.Start(corefile): " + err.Error())
 		return err
 	}
 

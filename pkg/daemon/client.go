@@ -128,6 +128,7 @@ func runDaemon(ctx context.Context, exe string, isSudo bool) error {
 		}
 		err = os.Remove(pidPath)
 		if err != nil {
+			err = errors.New("os.Remove(pidPath): " + err.Error())
 			return err
 		}
 	}

@@ -39,6 +39,7 @@ func mergeDockerOptions(r ConfigList, copts *Options, tempContainerConfig *conta
 	if copts.Options.Platform != "" {
 		p, err := platforms.Parse(copts.Options.Platform)
 		if err != nil {
+			err = errors.New("platforms.Parse(copts.Options.Platform): " + err.Error())
 			return errors.Wrap(err, "error parsing specified platform")
 		}
 		config.platform = &p

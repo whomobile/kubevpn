@@ -1,6 +1,7 @@
 package cmds
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
@@ -47,6 +48,7 @@ func cmdConfigAdd(f cmdutil.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			bytes, ns, err := util.ConvertToKubeconfigBytes(f)
 			if err != nil {
+				err = errors.New("util.ConvertToKubeconfigBytes(f): " + err.Error())
 				return err
 			}
 			req := &rpc.ConfigAddRequest{
@@ -57,6 +59,7 @@ func cmdConfigAdd(f cmdutil.Factory) *cobra.Command {
 			cli := daemon.GetClient(false)
 			resp, err := cli.ConfigAdd(cmd.Context(), req)
 			if err != nil {
+				err = errors.New("cli.ConfigAdd(cmd.Context(), req): " + err.Error())
 				return err
 			}
 			fmt.Fprint(os.Stdout, resp.ClusterID)
@@ -88,6 +91,7 @@ func cmdConfigRemove(f cmdutil.Factory) *cobra.Command {
 			cli := daemon.GetClient(false)
 			_, err := cli.ConfigRemove(cmd.Context(), req)
 			if err != nil {
+				err = errors.New("cli.ConfigRemove(cmd.Context(), req): " + err.Error())
 				return err
 			}
 			return nil

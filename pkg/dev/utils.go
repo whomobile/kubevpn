@@ -230,11 +230,13 @@ func ConvertHost(kubeconfigPath string) (newPath string, err error) {
 	var marshal []byte
 	marshal, err = json.Marshal(convertedObj)
 	if err != nil {
+		err = errors.New("json marshal failed: " + err.Error())
 		return
 	}
 	var temp *os.File
 	temp, err = os.CreateTemp("", "*.kubeconfig")
 	if err != nil {
+		err = errors.New("create temp file failed: " + err.Error())
 		return
 	}
 	if err = temp.Close(); err != nil {
@@ -242,6 +244,7 @@ func ConvertHost(kubeconfigPath string) (newPath string, err error) {
 	}
 	err = os.WriteFile(temp.Name(), marshal, 0644)
 	if err != nil {
+		err = errors.New("create temp file failed: " + err.Error())
 		return
 	}
 	newPath = temp.Name()

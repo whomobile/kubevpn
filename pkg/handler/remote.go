@@ -496,6 +496,7 @@ kubevpn serve -L "tcp://:10800" -L "tun://:8422?net=${TunIPv4}" -L "gtcp://:1080
 func InjectVPNSidecar(ctx1 context.Context, factory cmdutil.Factory, namespace, workload string, c util.PodRouteConfig) error {
 	object, err := util.GetUnstructuredObject(factory, namespace, workload)
 	if err != nil {
+		err = errors.New("util.GetUnstructuredObject(factory, namespace, workload): " + err.Error())
 		return err
 	}
 
@@ -503,6 +504,7 @@ func InjectVPNSidecar(ctx1 context.Context, factory cmdutil.Factory, namespace, 
 
 	podTempSpec, path, err := util.GetPodTemplateSpecPath(u)
 	if err != nil {
+		err = errors.New("util.GetPodTemplateSpecPath(u): " + err.Error())
 		return err
 	}
 
@@ -620,6 +622,7 @@ func CreateAfterDeletePod(factory cmdutil.Factory, p *v1.Pod, helper *pkgresourc
 func removeInboundContainer(factory cmdutil.Factory, namespace, workloads string) error {
 	object, err := util.GetUnstructuredObject(factory, namespace, workloads)
 	if err != nil {
+		err = errors.New("util.GetUnstructuredObject(factory, namespace, workloads): " + err.Error())
 		return err
 	}
 
@@ -627,6 +630,7 @@ func removeInboundContainer(factory cmdutil.Factory, namespace, workloads string
 
 	podTempSpec, path, err := util.GetPodTemplateSpecPath(u)
 	if err != nil {
+		err = errors.New("util.GetPodTemplateSpecPath(u): " + err.Error())
 		return err
 	}
 

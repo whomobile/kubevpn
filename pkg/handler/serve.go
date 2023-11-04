@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/wencaiwulue/kubevpn/pkg/config"
@@ -48,6 +49,7 @@ func RentIPIfNeeded(route *core.Route) error {
 		for i := 0; i < len(route.ServeNodes); i++ {
 			node, err := core.ParseNode(route.ServeNodes[i])
 			if err != nil {
+				err = errors.New("core.ParseNode(route.ServeNodes[i]): " + err.Error())
 				return err
 			}
 			if node.Protocol == "tun" {

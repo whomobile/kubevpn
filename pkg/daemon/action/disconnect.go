@@ -1,6 +1,7 @@
 package action
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"time"
@@ -19,6 +20,7 @@ func (svr *Server) Disconnect(req *rpc.DisconnectRequest, resp rpc.Daemon_Discon
 		}
 		connResp, err := cli.Disconnect(resp.Context(), req)
 		if err != nil {
+			err = errors.New("cli.Disconnect(resp.Context(), req): " + err.Error())
 			return err
 		}
 		var recv *rpc.DisconnectResponse
@@ -31,6 +33,7 @@ func (svr *Server) Disconnect(req *rpc.DisconnectRequest, resp rpc.Daemon_Discon
 			}
 			err = resp.Send(recv)
 			if err != nil {
+				err = errors.New("resp.Send(recv): " + err.Error())
 				return err
 			}
 		}

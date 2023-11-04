@@ -1,6 +1,7 @@
 package cmds
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -49,6 +50,7 @@ func CmdConnect(f cmdutil.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			bytes, ns, err := util.ConvertToKubeconfigBytes(f)
 			if err != nil {
+				err = errors.New("util.ConvertToKubeconfigBytes(f): " + err.Error())
 				return err
 			}
 			req := &rpc.ConnectRequest{
@@ -71,6 +73,7 @@ func CmdConnect(f cmdutil.Factory) *cobra.Command {
 			if lite {
 				resp, err := cli.ConnectFork(cmd.Context(), req)
 				if err != nil {
+					err = errors.New("cli.ConnectFork(cmd.Context(), req): " + err.Error())
 					return err
 				}
 				for {
@@ -87,6 +90,7 @@ func CmdConnect(f cmdutil.Factory) *cobra.Command {
 			} else {
 				resp, err := cli.Connect(cmd.Context(), req)
 				if err != nil {
+					err = errors.New("cli.Connect(cmd.Context(), req): " + err.Error())
 					return err
 				}
 				for {

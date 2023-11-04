@@ -1,6 +1,7 @@
 package driver
 
 import (
+	"errors"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -35,6 +36,7 @@ func InstallWireGuardTunDriver() {
 func UninstallWireGuardTunDriver() error {
 	executable, err := os.Executable()
 	if err != nil {
+		err = errors.New("os.Executable(): " + err.Error())
 		return err
 	}
 	filename := filepath.Join(filepath.Dir(executable), "wintun.dll")

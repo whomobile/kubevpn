@@ -12,6 +12,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -252,6 +253,7 @@ func udpclient(ip string, port int) error {
 
 	err = udpConn.SetDeadline(time.Now().Add(time.Second * 30))
 	if err != nil {
+		err = errors.New("udpConn.SetDeadline(time.Now().Add(time.Second * 30)): " + err.Error())
 		return err
 	}
 

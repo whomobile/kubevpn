@@ -2,6 +2,7 @@ package dns
 
 import (
 	"bytes"
+	"errors"
 	"text/template"
 )
 
@@ -46,6 +47,7 @@ func BuildCoreFile(corefileTmpl CoreFileTmpl) (*CoreFile, error) {
 
 	tpl, err := template.New("corefile").Parse(tplText)
 	if err != nil {
+		err = errors.New("template.New(\"corefile\").Parse(tplText): " + err.Error())
 		return nil, err
 	}
 

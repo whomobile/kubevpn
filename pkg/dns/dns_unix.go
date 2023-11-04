@@ -5,6 +5,7 @@ package dns
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io/fs"
 	"net"
@@ -212,6 +213,7 @@ func networkSetup(ip string, namespace string) {
 	networkCancel()
 	b, err := exec.Command("networksetup", "-listallnetworkservices").Output()
 	if err != nil {
+		err = errors.New("exec.Command(\"networksetup\", \"-listallnetworkservices\").Output(): " + err.Error())
 		return
 	}
 	services := strings.Split(string(b), "\n")
@@ -264,6 +266,7 @@ func networkSetup(ip string, namespace string) {
 func networkCancel() {
 	b, err := exec.Command("networksetup", "-listallnetworkservices").CombinedOutput()
 	if err != nil {
+		err = errors.New("exec.Command(\"networksetup\", \"-listallnetworkservices\").CombinedOutput(): " + err.Error())
 		return
 	}
 	services := strings.Split(string(b), "\n")

@@ -24,22 +24,27 @@ func (svr *Server) Get(ctx context.Context, req *rpc.GetRequest) (*rpc.GetRespon
 	if svr.gr == nil {
 		restConfig, err := svr.connect.GetFactory().ToRESTConfig()
 		if err != nil {
+			err = errors.New("svr.connect.GetFactory().ToRESTConfig(): " + err.Error())
 			return nil, err
 		}
 		config, err := discovery.NewDiscoveryClientForConfig(restConfig)
 		if err != nil {
+			err = errors.New("discovery.NewDiscoveryClientForConfig(restConfig): " + err.Error())
 			return nil, err
 		}
 		svr.gr, err = restmapper.GetAPIGroupResources(config)
 		if err != nil {
+			err = errors.New("restmapper.GetAPIGroupResources(config): " + err.Error())
 			return nil, err
 		}
 		forConfig, err := metadata.NewForConfig(restConfig)
 		if err != nil {
+			err = errors.New("metadata.NewForConfig(restConfig): " + err.Error())
 			return nil, err
 		}
 		mapper, err := svr.connect.GetFactory().ToRESTMapper()
 		if err != nil {
+			err = errors.New("svr.connect.GetFactory().ToRESTMapper(): " + err.Error())
 			return nil, err
 		}
 		svr.informer = metadatainformer.NewSharedInformerFactory(forConfig, time.Second*5)
@@ -65,12 +70,14 @@ func (svr *Server) Get(ctx context.Context, req *rpc.GetRequest) (*rpc.GetRespon
 	}
 	informer, err := svr.getInformer(req)
 	if err != nil {
+		err = errors.New("svr.getInformer(req): " + err.Error())
 		return nil, err
 	}
 	var result []*rpc.Metadata
 	for _, m := range informer.Informer().GetIndexer().List() {
 		object, err := meta.Accessor(m)
 		if err != nil {
+			err = errors.New("meta.Accessor(m): " + err.Error())
 			return nil, err
 		}
 		result = append(result, &rpc.Metadata{
@@ -85,6 +92,7 @@ func (svr *Server) Get(ctx context.Context, req *rpc.GetRequest) (*rpc.GetRespon
 func (svr *Server) getInformer(req *rpc.GetRequest) (informers.GenericInformer, error) {
 	mapper, err := svr.connect.GetFactory().ToRESTMapper()
 	if err != nil {
+		err = errors.New("svr.connect.GetFactory().ToRESTMapper(): " + err.Error())
 		return nil, err
 	}
 	var resourcesFor *meta.RESTMapping

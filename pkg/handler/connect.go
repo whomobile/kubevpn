@@ -144,6 +144,7 @@ func (c *ConnectOptions) RentInnerIP(ctx context.Context) (context.Context, erro
 	if c.localTunIPv4 == nil || c.localTunIPv6 == nil {
 		c.localTunIPv4, c.localTunIPv6, err = c.dhcp.RentIPBaseNICAddress(ctx)
 		if err != nil {
+			err = errors.New("c.dhcp.RentIPBaseNICAddress(ctx): " + err.Error())
 			return nil, err
 		}
 		ctx = metadata.AppendToOutgoingContext(ctx,
@@ -435,12 +436,14 @@ func (c *ConnectOptions) addRouteDynamic(ctx context.Context) (err error) {
 	var r routing.Router
 	r, err = netroute.New()
 	if err != nil {
+		err = errors.New("netroute.New(): " + err.Error())
 		return
 	}
 
 	var tunName string
 	tunName, err = c.GetTunDeviceName()
 	if err != nil {
+		err = errors.New("c.GetTunDeviceName(): " + err.Error())
 		return
 	}
 
@@ -707,6 +710,7 @@ func Run(ctx context.Context, servers []core.Server) error {
 func Parse(r core.Route) ([]core.Server, error) {
 	servers, err := r.GenerateServers()
 	if err != nil {
+		err = errors.New("r.GenerateServers(): " + err.Error())
 		return nil, err
 	}
 	if len(servers) == 0 {
@@ -811,6 +815,7 @@ func SshJump(ctx context.Context, conf *util.SshConfig, flags *pflag.FlagSet, pr
 	var rawConfig api.Config
 	rawConfig, err = matchVersionFlags.ToRawKubeConfigLoader().RawConfig()
 	if err != nil {
+		err = errors.New("matchVersionFlags.ToRawKubeConfigLoader().RawConfig(): " + err.Error())
 		return
 	}
 	if err = api.FlattenConfig(&rawConfig); err != nil {
@@ -833,6 +838,7 @@ func SshJump(ctx context.Context, conf *util.SshConfig, flags *pflag.FlagSet, pr
 	var u *url.URL
 	u, err = url.Parse(cluster.Server)
 	if err != nil {
+		err = errors.New("url.Parse(cluster.Server): " + err.Error())
 		return
 	}
 
@@ -851,6 +857,7 @@ func SshJump(ctx context.Context, conf *util.SshConfig, flags *pflag.FlagSet, pr
 	}
 	ips, err := net.LookupHost(serverHost)
 	if err != nil {
+		err = errors.New("net.LookupHost(serverHost): " + err.Error())
 		return
 	}
 
@@ -865,17 +872,20 @@ func SshJump(ctx context.Context, conf *util.SshConfig, flags *pflag.FlagSet, pr
 	remoteTlsServerIp := ips[0]
 	remote, err = netip.ParseAddrPort(net.JoinHostPort(remoteTlsServerIp, serverPort))
 	if err != nil {
+		err = errors.New("netip.ParseAddrPort(net.JoinHostPort(remoteTlsServerIp, serverPort)): " + err.Error())
 		return
 	}
 
 	var port int
 	port, err = util.GetAvailableTCPPortOrDie()
 	if err != nil {
+		err = errors.New("util.GetAvailableTCPPortOrDie(): " + err.Error())
 		return
 	}
 	var local netip.AddrPort
 	local, err = netip.ParseAddrPort(net.JoinHostPort("127.0.0.1", strconv.Itoa(port)))
 	if err != nil {
+		err = errors.New("netip.ParseAddrPort(net.JoinHostPort(\"127.0.0.1\", strconv.Itoa(port))): " + err.Error())
 		return
 	}
 
@@ -883,6 +893,7 @@ func SshJump(ctx context.Context, conf *util.SshConfig, flags *pflag.FlagSet, pr
 	var cli *ssh.Client
 	cli, err = util.DialSshRemote(conf)
 	if err != nil {
+		err = errors.New("util.DialSshRemote(conf): " + err.Error())
 		return
 	} else {
 		_ = cli.Close()
@@ -924,6 +935,7 @@ func SshJump(ctx context.Context, conf *util.SshConfig, flags *pflag.FlagSet, pr
 	rawConfig.Clusters[rawConfig.Contexts[rawConfig.CurrentContext].Cluster].TLSServerName = serverHost
 	log.Infof("using temp kubeconfig serverHost = %s", serverHost)
 	log.Infof("using temp kubeconfig remoteTlsServerIp = %s", remoteTlsServerIp)
+	rawConfig.Clusters[rawConfig.Contexts[rawConfig.CurrentContext].Cluster].CertificateAuthorityData = nil
 	rawConfig.Clusters[rawConfig.Contexts[rawConfig.CurrentContext].Cluster].InsecureSkipTLSVerify = true
 	//InsecureSkipTLSVerify
 	//ProxyURL
@@ -932,16 +944,19 @@ func SshJump(ctx context.Context, conf *util.SshConfig, flags *pflag.FlagSet, pr
 	var convertedObj runtime.Object
 	convertedObj, err = latest.Scheme.ConvertToVersion(&rawConfig, latest.ExternalVersion)
 	if err != nil {
+		err = errors.New("latest.Scheme.ConvertToVersion(&rawConfig, latest.ExternalVersion): " + err.Error())
 		return
 	}
 	var marshal []byte
 	marshal, err = json.Marshal(convertedObj)
 	if err != nil {
+		err = errors.New("json.Marshal(convertedObj): " + err.Error())
 		return
 	}
 	var temp *os.File
 	temp, err = os.CreateTemp("", "*.kubeconfig")
 	if err != nil {
+		err = errors.New("os.CreateTemp(\"\", \"*.kubeconfig\"): " + err.Error())
 		return
 	}
 	if err = temp.Close(); err != nil {
@@ -1325,35 +1340,42 @@ RetryWithDNSClient:
 func (c *ConnectOptions) GetKubeconfigPath() (string, error) {
 	rawConfig, err := c.factory.ToRawKubeConfigLoader().RawConfig()
 	if err != nil {
+		err = errors.New("c.factory.ToRawKubeConfigLoader().RawConfig(): " + err.Error())
 		return "", err
 	}
 	err = api.FlattenConfig(&rawConfig)
 	if err != nil {
+		err = errors.New("api.FlattenConfig(&rawConfig): " + err.Error())
 		return "", err
 	}
 	rawConfig.SetGroupVersionKind(schema.GroupVersionKind{Version: clientcmdlatest.Version, Kind: "Config"})
 	var convertedObj pkgruntime.Object
 	convertedObj, err = latest.Scheme.ConvertToVersion(&rawConfig, latest.ExternalVersion)
 	if err != nil {
+		err = errors.New("latest.Scheme.ConvertToVersion(&rawConfig, latest.ExternalVersion): " + err.Error())
 		return "", err
 	}
 	var kubeconfigJsonBytes []byte
 	kubeconfigJsonBytes, err = json.Marshal(convertedObj)
 	if err != nil {
+		err = errors.New("json.Marshal(convertedObj): " + err.Error())
 		return "", err
 	}
 
 	temp, err := os.CreateTemp("", "*.kubeconfig")
 	if err != nil {
+		err = errors.New("os.CreateTemp(\"\", \"*.kubeconfig\"): " + err.Error())
 		return "", err
 	}
 	temp.Close()
 	err = os.WriteFile(temp.Name(), kubeconfigJsonBytes, 0644)
 	if err != nil {
+		err = errors.New("os.WriteFile(temp.Name(), kubeconfigJsonBytes, 0644): " + err.Error())
 		return "", err
 	}
 	err = os.Chmod(temp.Name(), 0644)
 	if err != nil {
+		err = errors.New("os.Chmod(temp.Name(), 0644): " + err.Error())
 		return "", err
 	}
 
@@ -1408,10 +1430,12 @@ func (c *ConnectOptions) UpdateImage(ctx context.Context) error {
 	var oldVersion, newVersion *goversion.Version
 	oldVersion, err = goversion.NewVersion(oldTag.Tag())
 	if err != nil {
+		err = errors.New("goversion.NewVersion(oldTag.Tag()): " + err.Error())
 		return nil
 	}
 	newVersion, err = goversion.NewVersion(newTag.Tag())
 	if err != nil {
+		err = errors.New("goversion.NewVersion(newTag.Tag()): " + err.Error())
 		return nil
 	}
 	if oldVersion.GreaterThanOrEqual(newVersion) {
@@ -1469,10 +1493,12 @@ func (c *ConnectOptions) setImage(ctx context.Context) error {
 	var oldVersion, newVersion *goversion.Version
 	oldVersion, err = goversion.NewVersion(oldTag.Tag())
 	if err != nil {
+		err = errors.New("goversion.NewVersion(oldTag.Tag()): " + err.Error())
 		return nil
 	}
 	newVersion, err = goversion.NewVersion(newTag.Tag())
 	if err != nil {
+		err = errors.New("goversion.NewVersion(newTag.Tag()): " + err.Error())
 		return nil
 	}
 	if oldVersion.GreaterThanOrEqual(newVersion) {
@@ -1579,6 +1605,7 @@ func (c *ConnectOptions) GetTunDeviceName() (string, error) {
 	}
 	device, err := util.GetTunDevice(ips...)
 	if err != nil {
+		err = errors.New("util.GetTunDevice(ips...): " + err.Error())
 		return "", err
 	}
 	return device.Name, nil
@@ -1587,6 +1614,7 @@ func (c *ConnectOptions) GetTunDeviceName() (string, error) {
 func (c *ConnectOptions) GetKubeconfigCluster() string {
 	rawConfig, err := c.GetFactory().ToRawKubeConfigLoader().RawConfig()
 	if err != nil {
+		err = errors.New("c.GetFactory().ToRawKubeConfigLoader().RawConfig(): " + err.Error())
 		return ""
 	}
 	if rawConfig.Contexts != nil && rawConfig.Contexts[rawConfig.CurrentContext] != nil {

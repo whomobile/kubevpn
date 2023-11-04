@@ -2,6 +2,7 @@ package action
 
 import (
 	"context"
+	"errors"
 	"net"
 	"sync"
 	"time"
@@ -75,10 +76,12 @@ func (svr *Server) SshStart(ctx context.Context, req *rpc.SshStartRequest) (*rpc
 
 	serverip, _, err := net.ParseCIDR(serverIP)
 	if err != nil {
+		err = errors.New("net.ParseCIDR(serverIP): " + err.Error())
 		return nil, err
 	}
 	tunDevice, err := util.GetTunDevice(serverip)
 	if err != nil {
+		err = errors.New("util.GetTunDevice(serverip): " + err.Error())
 		return nil, err
 	}
 	err = tun.AddRoutes(tunDevice.Name, types.Route{

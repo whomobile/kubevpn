@@ -289,6 +289,7 @@ func removeEnvoyConfig(mapInterface v12.ConfigMapInterface, nodeID string, local
 	var bytes []byte
 	bytes, err = yaml.Marshal(v)
 	if err != nil {
+		err = errors.New("yaml.Marshal(v): " + err.Error())
 		return false, err
 	}
 	configMap.Data[config.KeyEnvoy] = string(bytes)

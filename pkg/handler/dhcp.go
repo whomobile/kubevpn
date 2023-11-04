@@ -35,6 +35,10 @@ func NewDHCPManager(client corev1.ConfigMapInterface, namespace string) *DHCPMan
 	}
 }
 
+func initDHCPBreakPoint() {
+	log.Infof("init dhcp breakpoint")
+}
+
 // initDHCP
 // TODO optimize dhcp, using mac address, ip and deadline as unit
 func (d *DHCPManager) initDHCP(ctx context.Context) error {
@@ -77,6 +81,7 @@ func (d *DHCPManager) initDHCP(ctx context.Context) error {
 func (d *DHCPManager) RentIPBaseNICAddress(ctx context.Context) (*net.IPNet, *net.IPNet, error) {
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {
+		err = errors.New("net.InterfaceAddrs(): " + err.Error())
 		return nil, nil, err
 	}
 	var isAlreadyExistedFunc = func(ips ...net.IP) bool {
@@ -121,6 +126,7 @@ func (d *DHCPManager) RentIPBaseNICAddress(ctx context.Context) (*net.IPNet, *ne
 func (d *DHCPManager) RentIPRandom(ctx context.Context) (*net.IPNet, *net.IPNet, error) {
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {
+		err = errors.New("net.InterfaceAddrs(): " + err.Error())
 		return nil, nil, err
 	}
 	var isAlreadyExistedFunc = func(ips ...net.IP) bool {
@@ -268,6 +274,7 @@ func (d *DHCPManager) Set(key, value string) error {
 func (d *DHCPManager) Get(ctx2 context.Context, key string) (string, error) {
 	cm, err := d.client.Get(ctx2, config.ConfigMapPodTrafficManager, metav1.GetOptions{})
 	if err != nil {
+		err = errors.New("d.client.Get(ctx2, config.ConfigMapPodTrafficManager, metav1.GetOptions{}): " + err.Error())
 		return "", err
 	}
 	if cm != nil && cm.Data != nil {

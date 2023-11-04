@@ -144,6 +144,7 @@ func NewOnAddresses(dialer httpstream.Dialer, addresses []string, ports []string
 	}
 	parsedAddresses, err := parseAddresses(addresses)
 	if err != nil {
+		err = errors.New("parseAddresses(addresses): " + err.Error())
 		return nil, err
 	}
 	if len(ports) == 0 {
@@ -151,6 +152,7 @@ func NewOnAddresses(dialer httpstream.Dialer, addresses []string, ports []string
 	}
 	parsedPorts, err := parsePorts(ports)
 	if err != nil {
+		err = errors.New("parsePorts(ports): " + err.Error())
 		return nil, err
 	}
 	return &PortForwarder{

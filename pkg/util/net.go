@@ -1,6 +1,7 @@
 package util
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	"strings"
@@ -16,11 +17,13 @@ import (
 func GetTunDevice(ips ...net.IP) (*net.Interface, error) {
 	interfaces, err := net.Interfaces()
 	if err != nil {
+		err = errors.New("net.Interfaces(): " + err.Error())
 		return nil, err
 	}
 	for _, i := range interfaces {
 		addrs, err := i.Addrs()
 		if err != nil {
+			err = errors.New("i.Addrs(): " + err.Error())
 			return nil, err
 		}
 		for _, addr := range addrs {
@@ -37,6 +40,7 @@ func GetTunDevice(ips ...net.IP) (*net.Interface, error) {
 func GetTunDeviceByConn(tun net.Conn) (*net.Interface, error) {
 	interfaces, err := net.Interfaces()
 	if err != nil {
+		err = errors.New("net.Interfaces(): " + err.Error())
 		return nil, err
 	}
 	var ip string
@@ -48,6 +52,7 @@ func GetTunDeviceByConn(tun net.Conn) (*net.Interface, error) {
 	for _, i := range interfaces {
 		addrs, err := i.Addrs()
 		if err != nil {
+			err = errors.New("i.Addrs(): " + err.Error())
 			return nil, err
 		}
 		for _, addr := range addrs {
@@ -62,6 +67,7 @@ func GetTunDeviceByConn(tun net.Conn) (*net.Interface, error) {
 func Ping(targetIP string) (bool, error) {
 	pinger, err := probing.NewPinger(targetIP)
 	if err != nil {
+		err = errors.New("probing.NewPinger(targetIP): " + err.Error())
 		return false, err
 	}
 	pinger.SetLogger(nil)
@@ -70,6 +76,7 @@ func Ping(targetIP string) (bool, error) {
 	pinger.Timeout = time.Millisecond * 1500
 	err = pinger.Run() // Blocks until finished.
 	if err != nil {
+		err = errors.New("pinger.Run() // Blocks until finished.: " + err.Error())
 		return false, err
 	}
 	stat := pinger.Statistics()

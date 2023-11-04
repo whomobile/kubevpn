@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -19,6 +20,7 @@ const retries = 4
 func DownloadFileWithName(uri, name string) (string, error) {
 	resp, err := getWithRetry(uri)
 	if err != nil {
+		err = errors.New("getWithRetry(uri): " + err.Error())
 		return "", err
 	}
 	defer resp.Body.Close()
@@ -29,12 +31,14 @@ func DownloadFileWithName(uri, name string) (string, error) {
 
 	dir, err := os.MkdirTemp("", "")
 	if err != nil {
+		err = errors.New("os.MkdirTemp(\"\", \"\"): " + err.Error())
 		return "", err
 	}
 
 	file := filepath.Join(dir, name)
 	out, err := os.Create(file)
 	if err != nil {
+		err = errors.New("os.Create(file): " + err.Error())
 		return "", err
 	}
 	defer out.Close()
@@ -55,12 +59,14 @@ func downloadFile(uri string) (string, error) {
 func GetSha256ForAsset(uri string) (string, error) {
 	file, err := downloadFile(uri)
 	if err != nil {
+		err = errors.New("downloadFile(uri): " + err.Error())
 		return "", err
 	}
 
 	defer os.Remove(file)
 	sha256, err := getSha256(file)
 	if err != nil {
+		err = errors.New("getSha256(file): " + err.Error())
 		return "", err
 	}
 
@@ -70,6 +76,7 @@ func GetSha256ForAsset(uri string) (string, error) {
 func getSha256(filename string) (string, error) {
 	f, err := os.Open(filename)
 	if err != nil {
+		err = errors.New("os.Open(filename): " + err.Error())
 		return "", err
 	}
 	defer f.Close()

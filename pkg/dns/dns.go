@@ -82,6 +82,7 @@ func (c *Config) AddServiceNameToHosts(ctx context.Context, serviceInterface v13
 							}
 							list, err := serviceInterface.List(ctx, v1.ListOptions{})
 							if err != nil {
+								err = errors.New("serviceInterface.List(ctx, v1.ListOptions{}): " + err.Error())
 								return
 							}
 							entry := c.generateHostsEntry(list.Items, hosts)
@@ -216,6 +217,7 @@ func (c *Config) generateHostsEntry(list []v12.Service, hosts []Entry) string {
 	// if hosts file already contains item, not needs to add it to hosts file
 	file, err := os.ReadFile(GetHostFile())
 	if err != nil {
+		err = errors.New("os.ReadFile(GetHostFile()): " + err.Error())
 		return ""
 	}
 	lines := strings.Split(string(file), "\n")

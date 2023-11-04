@@ -37,6 +37,7 @@ func createTun(cfg Config) (conn net.Conn, itf *net.Interface, err error) {
 	var name string
 	name, err = device.Name()
 	if err != nil {
+		err = errors.New("device.Name(): " + err.Error())
 		return
 	}
 	var ifc *net.Interface

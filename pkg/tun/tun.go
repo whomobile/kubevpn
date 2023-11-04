@@ -89,6 +89,7 @@ func (c *tunConn) Read(b []byte) (n int, err error) {
 	var size int
 	size, err = c.ifce.Read(bytes[:], offset)
 	if err != nil {
+		err = errors.New("c.ifce.Read(bytes[:], offset): " + err.Error())
 		return 0, err
 	}
 	if size == 0 || size > device.MaxSegmentSize-device.MessageTransportHeaderSize {

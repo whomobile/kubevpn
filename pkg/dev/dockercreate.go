@@ -120,6 +120,7 @@ func newCIDFile(path string) (*cidFile, error) {
 
 	f, err := os.Create(path)
 	if err != nil {
+		err = errors.New("os.Create(path): " + err.Error())
 		return nil, errors.Wrap(err, "failed to create the container ID file")
 	}
 
@@ -143,12 +144,14 @@ func createContainer(ctx context.Context, dockerCli command.Cli, containerConfig
 
 	containerIDFile, err := newCIDFile(hostConfig.ContainerIDFile)
 	if err != nil {
+		err = errors.New("newCIDFile(hostConfig.ContainerIDFile): " + err.Error())
 		return nil, err
 	}
 	defer containerIDFile.Close()
 
 	ref, err := reference.ParseAnyReference(config.Image)
 	if err != nil {
+		err = errors.New("reference.ParseAnyReference(config.Image): " + err.Error())
 		return nil, err
 	}
 	if named, ok := ref.(reference.Named); ok {
@@ -158,6 +161,7 @@ func createContainer(ctx context.Context, dockerCli command.Cli, containerConfig
 			var err error
 			trustedRef, err = image.TrustedReference(ctx, dockerCli, taggedRef, nil)
 			if err != nil {
+				err = errors.New("image.TrustedReference(ctx, dockerCli, taggedRef, nil): " + err.Error())
 				return nil, err
 			}
 			config.Image = reference.FamiliarString(trustedRef)
@@ -186,6 +190,7 @@ func createContainer(ctx context.Context, dockerCli command.Cli, containerConfig
 	if opts.Platform != "" && versions.GreaterThanOrEqualTo(dockerCli.Client().ClientVersion(), "1.41") {
 		p, err := platforms.Parse(opts.Platform)
 		if err != nil {
+			err = errors.New("platforms.Parse(opts.Platform): " + err.Error())
 			return nil, errors.Wrap(err, "error parsing specified platform")
 		}
 		platform = &p

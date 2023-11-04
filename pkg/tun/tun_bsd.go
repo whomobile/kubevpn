@@ -31,18 +31,21 @@ func createTun(cfg Config) (conn net.Conn, itf *net.Interface, err error) {
 	var ifce tun.Device
 	ifce, err = tun.CreateTUN("utun", mtu)
 	if err != nil {
+		err = errors.New("tun.CreateTUN("utun", mtu): " + err.Error())
 		return
 	}
 
 	var name string
 	name, err = ifce.Name()
 	if err != nil {
+		err = errors.New("ifce.Name(): " + err.Error())
 		return
 	}
 
 	if cfg.Addr != "" {
 		ipv4, _, err = net.ParseCIDR(cfg.Addr6)
 		if err != nil {
+			err = errors.New("net.ParseCIDR(cfg.Addr6): " + err.Error())
 			return
 		}
 		cmd := fmt.Sprintf("ifconfig %s inet %s mtu %d up", ifce.Name(), cfg.Addr, mtu)
@@ -56,6 +59,7 @@ func createTun(cfg Config) (conn net.Conn, itf *net.Interface, err error) {
 	if cfg.Addr6 != "" {
 		ipv6, _, err = net.ParseCIDR(cfg.Addr6)
 		if err != nil {
+			err = errors.New("net.ParseCIDR(cfg.Addr6): " + err.Error())
 			return
 		}
 		cmd := fmt.Sprintf("ifconfig %s add %s", ifce.Name(), cfg.Addr6)
@@ -73,6 +77,7 @@ func createTun(cfg Config) (conn net.Conn, itf *net.Interface, err error) {
 
 	itf, err = net.InterfaceByName(ifce.Name())
 	if err != nil {
+		err = errors.New("net.InterfaceByName(ifce.Name()): " + err.Error())
 		return
 	}
 

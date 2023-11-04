@@ -2,6 +2,7 @@ package util
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net"
 
@@ -132,10 +133,12 @@ func GetCIDRFromResourceUgly(clientset *kubernetes.Clientset, namespace string) 
 func GetLocalTunIP(tunName string) (net.IP, net.IP, error) {
 	tunIface, err := net.InterfaceByName(tunName)
 	if err != nil {
+		err = errors.New("net.InterfaceByName(tunName): " + err.Error())
 		return nil, nil, err
 	}
 	addrs, err := tunIface.Addrs()
 	if err != nil {
+		err = errors.New("tunIface.Addrs(): " + err.Error())
 		return nil, nil, err
 	}
 	var srcIPv4, srcIPv6 net.IP

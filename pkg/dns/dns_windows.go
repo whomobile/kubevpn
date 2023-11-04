@@ -52,10 +52,12 @@ func (c *Config) CancelDNS() {
 	c.updateHosts("")
 	tun, err := net.InterfaceByName(c.TunName)
 	if err != nil {
+		err = errors.New("net.InterfaceByName(c.TunName): " + err.Error())
 		return
 	}
 	luid, err := winipcfg.LUIDFromIndex(uint32(tun.Index))
 	if err != nil {
+		err = errors.New("winipcfg.LUIDFromIndex(uint32(tun.Index)): " + err.Error())
 		return
 	}
 	_ = luid.FlushDNS(windows.AF_INET)

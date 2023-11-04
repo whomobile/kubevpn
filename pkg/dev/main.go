@@ -333,6 +333,7 @@ func (l ConfigList) copyToContainer(ctx context.Context, volume []mount.Mount, c
 func createFolder(ctx context.Context, cli *client.Client, id string, src string, target string) (string, error) {
 	lstat, err := os.Lstat(src)
 	if err != nil {
+		err = errors.New("os.Lstat(src): " + err.Error())
 		return "", err
 	}
 	if !lstat.IsDir() {
@@ -373,6 +374,7 @@ func checkOutOfMemory(spec *v1.PodTemplateSpec, cli *client.Client) (outOfMemory
 	var info types.Info
 	info, err = cli.Info(context.Background())
 	if err != nil {
+		err = errors.New("cli.Info(context.Background()): " + err.Error())
 		return
 	}
 	total := info.MemTotal
@@ -511,6 +513,7 @@ func (d *Options) doConnect(ctx context.Context, f cmdutil.Factory, conf *util.S
 		var ns string
 		kubeconfig, ns, err = util.ConvertToKubeconfigBytes(f)
 		if err != nil {
+			err = errors.New("util.ConvertToKubeconfigBytes(f): " + err.Error())
 			return
 		}
 		// not needs to ssh jump in daemon, because dev mode will hang up until user exit,
@@ -568,6 +571,7 @@ func (d *Options) doConnect(ctx context.Context, f cmdutil.Factory, conf *util.S
 		var connectContainer *RunConfig
 		connectContainer, err = createConnectContainer(d.NoProxy, *connect, path, d.Cli, &platform)
 		if err != nil {
+			err = errors.New("createConnectContainer(d.NoProxy, *connect, path, d.Cli, &platform): " + err.Error())
 			return
 		}
 		cancelCtx, cancelFunc := context.WithCancel(ctx)
@@ -576,6 +580,7 @@ func (d *Options) doConnect(ctx context.Context, f cmdutil.Factory, conf *util.S
 		log.Infof("starting container connect to cluster")
 		id, err = run(cancelCtx, connectContainer, d.Cli, d.DockerCli)
 		if err != nil {
+			err = errors.New("run(cancelCtx, connectContainer, d.Cli, d.DockerCli): " + err.Error())
 			return
 		}
 		h := interrupt.New(
@@ -717,6 +722,7 @@ func createConnectContainer(noProxy bool, connect handler.ConnectOptions, path s
 	}
 	kubevpnNetwork, err := createKubevpnNetwork(context.Background(), cli)
 	if err != nil {
+		err = errors.New("createKubevpnNetwork(context.Background(), cli): " + err.Error())
 		return nil, err
 	}
 	name := fmt.Sprintf("%s_%s_%s", "kubevpn", "local", suffix)

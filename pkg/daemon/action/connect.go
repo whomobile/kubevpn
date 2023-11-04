@@ -267,14 +267,17 @@ func InitFactory(kubeconfigBytes string, ns string) cmdutil.Factory {
 	// todo optimize here
 	temp, err := os.CreateTemp("", "*.json")
 	if err != nil {
+		err = errors.New("os.CreateTemp(\"\", \"*.json\"): " + err.Error())
 		return nil
 	}
 	err = temp.Close()
 	if err != nil {
+		err = errors.New("temp.Close(): " + err.Error())
 		return nil
 	}
 	err = os.WriteFile(temp.Name(), []byte(kubeconfigBytes), os.ModePerm)
 	if err != nil {
+		err = errors.New("os.WriteFile(temp.Name(), []byte(kubeconfigBytes), os.ModePerm): " + err.Error())
 		return nil
 	}
 	configFlags.KubeConfig = pointer.String(temp.Name())

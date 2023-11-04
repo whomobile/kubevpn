@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math/rand"
 	"net"
@@ -245,6 +246,7 @@ func heartbeats(tun net.Conn, in chan<- *DataElem) {
 	}
 	srcIPv4, srcIPv6, err := util.GetLocalTunIP(conn.Name)
 	if err != nil {
+		err = errors.New("util.GetLocalTunIP(conn.Name): " + err.Error())
 		return
 	}
 	if config.RouterIP.To4().Equal(srcIPv4) {

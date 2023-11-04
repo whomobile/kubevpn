@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"errors"
 	"net"
 	"sync"
 	"time"
@@ -25,14 +26,17 @@ func (c *fakeUDPTunnelConnector) ConnectContext(ctx context.Context, conn net.Co
 	case *net.TCPConn:
 		err := con.SetNoDelay(true)
 		if err != nil {
+			err = errors.New("con.SetNoDelay(true): " + err.Error())
 			return nil, err
 		}
 		err = con.SetKeepAlive(true)
 		if err != nil {
+			err = errors.New("con.SetKeepAlive(true): " + err.Error())
 			return nil, err
 		}
 		err = con.SetKeepAlivePeriod(15 * time.Second)
 		if err != nil {
+			err = errors.New("con.SetKeepAlivePeriod(15 * time.Second): " + err.Error())
 			return nil, err
 		}
 	}

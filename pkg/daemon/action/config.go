@@ -2,6 +2,7 @@ package action
 
 import (
 	"context"
+	"errors"
 
 	"github.com/spf13/pflag"
 	"github.com/wencaiwulue/kubevpn/pkg/handler"
@@ -16,6 +17,7 @@ func (svr *Server) ConfigAdd(ctx context.Context, req *rpc.ConfigAddRequest) (*r
 	var sshConf = util.ParseSshFromRPC(req.SshJump)
 	file, err := util.ConvertToTempKubeconfigFile([]byte(req.KubeconfigBytes))
 	if err != nil {
+		err = errors.New("util.ConvertToTempKubeconfigFile([]byte(req.KubeconfigBytes)): " + err.Error())
 		return nil, err
 	}
 	flags := pflag.NewFlagSet("", pflag.ContinueOnError)
@@ -28,6 +30,7 @@ func (svr *Server) ConfigAdd(ctx context.Context, req *rpc.ConfigAddRequest) (*r
 	path, err = handler.SshJump(sshCtx, sshConf, flags, true)
 	CancelFunc[path] = sshCancel
 	if err != nil {
+		err = errors.New("sshCancel: " + err.Error())
 		return nil, err
 	}
 

@@ -42,10 +42,12 @@ import (
 func GetAvailableUDPPortOrDie() (int, error) {
 	address, err := net.ResolveUDPAddr("udp", fmt.Sprintf("%s:0", "localhost"))
 	if err != nil {
+		err = errors.New("net.ResolveUDPAddr(\"udp\", fmt.Sprintf(\"%s:0\", \"localhost\")): " + err.Error())
 		return 0, err
 	}
 	listener, err := net.ListenUDP("udp", address)
 	if err != nil {
+		err = errors.New("net.ListenUDP(\"udp\", address): " + err.Error())
 		return 0, err
 	}
 	defer listener.Close()
@@ -55,10 +57,12 @@ func GetAvailableUDPPortOrDie() (int, error) {
 func GetAvailableTCPPortOrDie() (int, error) {
 	address, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:0", "localhost"))
 	if err != nil {
+		err = errors.New("net.ResolveTCPAddr(\"tcp\", fmt.Sprintf(\"%s:0\", \"localhost\")): " + err.Error())
 		return 0, err
 	}
 	listener, err := net.ListenTCP("tcp", address)
 	if err != nil {
+		err = errors.New("net.ListenTCP(\"tcp\", address): " + err.Error())
 		return 0, err
 	}
 	defer listener.Close()
@@ -139,6 +143,7 @@ func RolloutStatus(ctx1 context.Context, factory cmdutil.Factory, namespace, wor
 			case watch.Added, watch.Modified:
 				status, done, err := statusViewer.Status(e.Object.(k8sruntime.Unstructured), 0)
 				if err != nil {
+					err = errors.New("statusViewer.Status(e.Object.(k8sruntime.Unstructured), 0): " + err.Error())
 					return false, err
 				}
 				log.Info(strings.TrimSpace(status))
@@ -237,6 +242,7 @@ func CanI(clientset *kubernetes.Clientset, sa, ns string, resource *rbacv1.Polic
 	var roleBindingList *rbacv1.RoleBindingList
 	roleBindingList, err = clientset.RbacV1().RoleBindings(ns).List(context.Background(), metav1.ListOptions{})
 	if err != nil {
+		err = errors.New("clientset.RbacV1().RoleBindings(ns).List(context.Background(), metav1.ListOptions{}): " + err.Error())
 		return false, err
 	}
 	for _, item := range roleBindingList.Items {
@@ -245,6 +251,7 @@ func CanI(clientset *kubernetes.Clientset, sa, ns string, resource *rbacv1.Polic
 				var role *rbacv1.Role
 				role, err = clientset.RbacV1().Roles(ns).Get(context.Background(), item.RoleRef.Name, metav1.GetOptions{})
 				if err != nil {
+					err = errors.New("clientset.RbacV1().Roles(ns).Get(context.Background(), item.RoleRef.Name, metav1.GetOptions{}): " + err.Error())
 					return false, err
 				}
 				for _, rule := range role.Rules {
@@ -266,6 +273,7 @@ func CanI(clientset *kubernetes.Clientset, sa, ns string, resource *rbacv1.Polic
 				var role *rbacv1.ClusterRole
 				role, err = clientset.RbacV1().ClusterRoles().Get(context.Background(), item.RoleRef.Name, metav1.GetOptions{})
 				if err != nil {
+					err = errors.New("clientset.RbacV1().ClusterRoles().Get(context.Background(), item.RoleRef.Name, metav1.GetOptions{}): " + err.Error())
 					return false, err
 				}
 				for _, rule := range role.Rules {
@@ -335,6 +343,7 @@ func CleanExtensionLib() {
 	}
 	path, err := os.Executable()
 	if err != nil {
+		err = errors.New("os.Executable(): " + err.Error())
 		return
 	}
 	filename := filepath.Join(filepath.Dir(path), "wintun.dll")
@@ -381,6 +390,7 @@ func StartupPProf(port int) {
 func MoveToTemp() {
 	path, err := os.Executable()
 	if err != nil {
+		err = errors.New("os.Executable(): " + err.Error())
 		return
 	}
 	filename := filepath.Join(filepath.Dir(path), "wintun.dll")

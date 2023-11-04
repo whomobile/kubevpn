@@ -3,6 +3,8 @@ package util
 import (
 	"context"
 	"encoding/json"
+
+	golangErrors "errors"
 	"fmt"
 	"net"
 	"strings"
@@ -30,6 +32,7 @@ import (
 func getCIDRByDumpClusterInfo(clientset *kubernetes.Clientset) ([]*net.IPNet, error) {
 	podList, err := clientset.CoreV1().Pods(v1.NamespaceSystem).List(context.Background(), v1.ListOptions{})
 	if err != nil {
+		err = golangErrors.New("clientset.CoreV1().Pods(v1.NamespaceSystem).List(context.Background(), v1.ListOptions{}): " + err.Error())
 		return nil, err
 	}
 	var list []string
@@ -51,6 +54,7 @@ func getCIDRByDumpClusterInfo(clientset *kubernetes.Clientset) ([]*net.IPNet, er
 func getCIDRFromCNI(clientset *kubernetes.Clientset, restclient *rest.RESTClient, restconfig *rest.Config, namespace string) ([]*net.IPNet, error) {
 	pod, err := createCIDRPod(clientset, namespace)
 	if err != nil {
+		err = golangErrors.New("createCIDRPod(clientset, namespace): " + err.Error())
 		return nil, err
 	}
 
@@ -59,6 +63,7 @@ func getCIDRFromCNI(clientset *kubernetes.Clientset, restclient *rest.RESTClient
 	var result []*net.IPNet
 	content, err := Shell(clientset, restclient, restconfig, pod.Name, "", pod.Namespace, []string{"sh", "-c", cmd})
 	if err != nil {
+		err = golangErrors.New("Shell(clientset, restclient, restconfig, pod.Name, \"\", pod.Namespace, []string{\"sh\", \"-c\", cmd}): " + err.Error())
 		return nil, err
 	}
 
@@ -80,6 +85,7 @@ func getServiceCIDRByCreateSvc(serviceInterface corev1.ServiceInterface) (*net.I
 		if idx != -1 {
 			_, cidr, err := net.ParseCIDR(strings.TrimSpace(err.Error()[idx+len(defaultCIDRIndex):]))
 			if err != nil {
+				err = golangErrors.New("net.ParseCIDR(strings.TrimSpace(err.Error()[idx+len(defaultCIDRIndex):])): " + err.Error())
 				return nil, err
 			}
 			return cidr, nil
@@ -127,6 +133,7 @@ func getPodCIDRFromCNI(clientset *kubernetes.Clientset, restclient *rest.RESTCli
 	//var cmd = "cat /etc/cni/net.d/*.conflist"
 	content, err := Shell(clientset, restclient, restconfig, config.CniNetName, "", namespace, []string{"cat", "/etc/cni/net.d/*.conflist"})
 	if err != nil {
+		err = golangErrors.New("Shell(clientset, restclient, restconfig, config.CniNetName, \"\", namespace, []string{\"cat\", \"/etc/cni/net.d/*.conflist\"}): " + err.Error())
 		return nil, err
 	}
 
@@ -259,6 +266,7 @@ func createCIDRPod(clientset *kubernetes.Clientset, namespace string) (*v12.Pod,
 		}
 		pod, err = clientset.CoreV1().Pods(namespace).Create(context.Background(), pod, v1.CreateOptions{})
 		if err != nil {
+			err = golangErrors.New("clientset.CoreV1().Pods(namespace).Create(context.Background(), pod, v1.CreateOptions{}): " + err.Error())
 			return nil, err
 		}
 		err = WaitPod(clientset.CoreV1().Pods(namespace), v1.ListOptions{
@@ -285,6 +293,7 @@ func createCIDRPod(clientset *kubernetes.Clientset, namespace string) (*v12.Pod,
 func getPodCIDRFromPod(clientset *kubernetes.Clientset, namespace string, svc *net.IPNet) ([]*net.IPNet, error) {
 	podList, err := clientset.CoreV1().Pods(namespace).List(context.Background(), v1.ListOptions{})
 	if err != nil {
+		err = golangErrors.New("clientset.CoreV1().Pods(namespace).List(context.Background(), v1.ListOptions{}): " + err.Error())
 		return nil, err
 	}
 	for i := 0; i < len(podList.Items); i++ {

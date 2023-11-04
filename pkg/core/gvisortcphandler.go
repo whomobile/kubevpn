@@ -25,14 +25,17 @@ func (c *gvisorTCPTunnelConnector) ConnectContext(ctx context.Context, conn net.
 	case *net.TCPConn:
 		err := con.SetNoDelay(true)
 		if err != nil {
+			err = errors.New("con.SetNoDelay(true): " + err.Error())
 			return nil, err
 		}
 		err = con.SetKeepAlive(true)
 		if err != nil {
+			err = errors.New("con.SetKeepAlive(true): " + err.Error())
 			return nil, err
 		}
 		err = con.SetKeepAlivePeriod(15 * time.Second)
 		if err != nil {
+			err = errors.New("con.SetKeepAlivePeriod(15 * time.Second): " + err.Error())
 			return nil, err
 		}
 	}
@@ -92,10 +95,12 @@ func GvisorTCPListener(addr string) (net.Listener, error) {
 	log.Debug("gvisor tcp listen addr", addr)
 	laddr, err := net.ResolveTCPAddr("tcp", addr)
 	if err != nil {
+		err = errors.New("net.ResolveTCPAddr(\"tcp\", addr): " + err.Error())
 		return nil, err
 	}
 	ln, err := net.ListenTCP("tcp", laddr)
 	if err != nil {
+		err = errors.New("net.ListenTCP(\"tcp\", laddr): " + err.Error())
 		return nil, err
 	}
 	return &tcpKeepAliveListener{TCPListener: ln}, nil

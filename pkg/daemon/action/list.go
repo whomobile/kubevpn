@@ -2,6 +2,7 @@ package action
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -21,6 +22,7 @@ func (svr *Server) List(ctx context.Context, req *rpc.ListRequest) (*rpc.ListRes
 	mapInterface := svr.connect.GetClientset().CoreV1().ConfigMaps(svr.connect.Namespace)
 	configMap, err := mapInterface.Get(ctx, config.ConfigMapPodTrafficManager, metav1.GetOptions{})
 	if err != nil {
+		err = errors.New("mapInterface.Get(ctx, config.ConfigMapPodTrafficManager, metav1.GetOptions{}): " + err.Error())
 		return nil, err
 	}
 	var v = make([]*controlplane.Virtual, 0)
@@ -36,6 +38,7 @@ func (svr *Server) List(ctx context.Context, req *rpc.ListRequest) (*rpc.ListRes
 	}
 	bytes, err := k8syaml.Marshal(v)
 	if err != nil {
+		err = errors.New("k8syaml.Marshal(v): " + err.Error())
 		return nil, err
 	}
 	return &rpc.ListResponse{Message: string(bytes)}, nil

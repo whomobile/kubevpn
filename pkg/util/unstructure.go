@@ -54,6 +54,7 @@ func GetUnstructuredObjectList(f util.Factory, namespace string, workloads []str
 	}
 	infos, err := do.Infos()
 	if err != nil {
+		err = errors.New("do.Infos(): " + err.Error())
 		return nil, err
 	}
 	if len(infos) == 0 {
@@ -102,6 +103,7 @@ func GetPodTemplateSpecPath(u *unstructured.Unstructured) (*v1.PodTemplateSpec, 
 	}
 	marshal, err := json.Marshal(stringMap)
 	if err != nil {
+		err = errors.New("json.Marshal(stringMap): " + err.Error())
 		return nil, nil, err
 	}
 	var p v1.PodTemplateSpec
@@ -114,6 +116,7 @@ func GetPodTemplateSpecPath(u *unstructured.Unstructured) (*v1.PodTemplateSpec, 
 func GetAnnotation(f util.Factory, ns string, resources string) (map[string]string, error) {
 	ownerReference, err := GetTopOwnerReference(f, ns, resources)
 	if err != nil {
+		err = errors.New("GetTopOwnerReference(f, ns, resources): " + err.Error())
 		return nil, err
 	}
 	u, ok := ownerReference.Object.(*unstructured.Unstructured)

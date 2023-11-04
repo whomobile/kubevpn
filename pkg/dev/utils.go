@@ -179,16 +179,19 @@ func ConvertHost(kubeconfigPath string) (newPath string, err error) {
 	var kubeconfigBytes []byte
 	kubeconfigBytes, err = os.ReadFile(kubeconfigPath)
 	if err != nil {
+		err = errors.New("os.ReadFile(kubeconfigPath): " + err.Error())
 		return
 	}
 	var conf clientcmd.ClientConfig
 	conf, err = clientcmd.NewClientConfigFromBytes(kubeconfigBytes)
 	if err != nil {
+		err = errors.New("clientcmd.NewClientConfigFromBytes(kubeconfigBytes): " + err.Error())
 		return
 	}
 	var rawConfig api.Config
 	rawConfig, err = conf.RawConfig()
 	if err != nil {
+		err = errors.New("conf.RawConfig(): " + err.Error())
 		return
 	}
 	if err = api.FlattenConfig(&rawConfig); err != nil {
@@ -211,11 +214,13 @@ func ConvertHost(kubeconfigPath string) (newPath string, err error) {
 	var u *url.URL
 	u, err = url.Parse(cluster.Server)
 	if err != nil {
+		err = errors.New("url.Parse(cluster.Server): " + err.Error())
 		return
 	}
 	var remote netip.AddrPort
 	remote, err = netip.ParseAddrPort(u.Host)
 	if err != nil {
+		err = errors.New("netip.ParseAddrPort(u.Host): " + err.Error())
 		return
 	}
 	host := fmt.Sprintf("%s://%s", u.Scheme, net.JoinHostPort("kubernetes", strconv.Itoa(int(remote.Port()))))
@@ -225,6 +230,7 @@ func ConvertHost(kubeconfigPath string) (newPath string, err error) {
 	var convertedObj runtime.Object
 	convertedObj, err = clientcmdlatest.Scheme.ConvertToVersion(&rawConfig, clientcmdlatest.ExternalVersion)
 	if err != nil {
+		err = errors.New("clientcmdlatest.Scheme.ConvertToVersion(&rawConfig, clientcmdlatest.ExternalVersion): " + err.Error())
 		return
 	}
 	var marshal []byte

@@ -46,6 +46,7 @@ func (c *Chain) dial(ctx context.Context) (net.Conn, error) {
 
 	conn, err := c.getConn(ctx)
 	if err != nil {
+		err = errors.New("c.getConn(ctx): " + err.Error())
 		return nil, err
 	}
 

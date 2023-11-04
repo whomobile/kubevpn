@@ -16,10 +16,12 @@ import (
 func GetDNSServiceIPFromPod(clientset *kubernetes.Clientset, restclient *rest.RESTClient, config *rest.Config, podName, namespace string) (*dns.ClientConfig, error) {
 	resolvConfStr, err := Shell(clientset, restclient, config, podName, "", namespace, []string{"cat", "/etc/resolv.conf"})
 	if err != nil {
+		err = errors.New("Shell(clientset, restclient, config, podName, \"\", namespace, []string{\"cat\", \"/etc/resolv.conf\"}): " + err.Error())
 		return nil, err
 	}
 	resolvConf, err := dns.ClientConfigFromReader(bytes.NewBufferString(resolvConfStr))
 	if err != nil {
+		err = errors.New("dns.ClientConfigFromReader(bytes.NewBufferString(resolvConfStr)): " + err.Error())
 		return nil, err
 	}
 	if ips, err := GetDNSIPFromDnsPod(clientset); err == nil && len(ips) != 0 {

@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"errors"
 	"strings"
 
 	"github.com/docker/docker/api/types"
@@ -29,11 +30,13 @@ func (c *ConnectOptions) Reset(ctx context.Context) error {
 	var cli *client.Client
 	cli, err = client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
+		err = errors.New("client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation()): " + err.Error())
 		return nil
 	}
 	var networkResource types.NetworkResource
 	networkResource, err = cli.NetworkInspect(ctx, config.ConfigMapPodTrafficManager, types.NetworkInspectOptions{})
 	if err != nil {
+		err = errors.New("cli.NetworkInspect(ctx, config.ConfigMapPodTrafficManager, types.NetworkInspectOptions{}): " + err.Error())
 		return nil
 	}
 	if len(networkResource.Containers) == 0 {

@@ -65,6 +65,7 @@ func getRemotePacketConn(ctx context.Context, chain *Chain) (packetConn net.Pack
 		var cc net.Conn
 		cc, err = chain.DialContext(ctx)
 		if err != nil {
+			err = errors.New("chain.DialContext(ctx): " + err.Error())
 			return
 		}
 		var ok bool
@@ -76,6 +77,7 @@ func getRemotePacketConn(ctx context.Context, chain *Chain) (packetConn net.Pack
 		var lc net.ListenConfig
 		packetConn, err = lc.ListenPacket(ctx, "udp", "")
 		if err != nil {
+			err = errors.New("lc.ListenPacket(ctx, \"udp\", \"\"): " + err.Error())
 			return
 		}
 	}

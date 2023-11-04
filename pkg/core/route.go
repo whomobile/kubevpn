@@ -42,6 +42,7 @@ func (r *Route) parseChain() (*Chain, error) {
 	// parse the base nodes
 	node, err := parseChainNode(r.ChainNode)
 	if err != nil {
+		err = errors.New("parseChainNode(r.ChainNode): " + err.Error())
 		return nil, err
 	}
 	return NewChain(r.Retries, node), nil

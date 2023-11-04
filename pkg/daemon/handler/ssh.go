@@ -36,16 +36,19 @@ func Ws(conn *websocket.Conn, sshConfig *util.SshConfig) {
 
 	err := remoteInstallKubevpnIfCommandNotFound(ctx, sshConfig)
 	if err != nil {
+		err = errors.New("remoteInstallKubevpnIfCommandNotFound(ctx, sshConfig): " + err.Error())
 		return
 	}
 
 	clientIP, err := util.GetIPBaseNic()
 	if err != nil {
+		err = errors.New("util.GetIPBaseNic(): " + err.Error())
 		return
 	}
 
 	local, err := portMap(cancel, sshConfig)
 	if err != nil {
+		err = errors.New("portMap(cancel, sshConfig): " + err.Error())
 		return
 	}
 	cmd := fmt.Sprintf(`export %s=%s && kubevpn ssh-daemon --client-ip %s`, config.EnvStartSudoKubeVPNByKubeVPN, "true", clientIP.String())
@@ -58,6 +61,7 @@ func Ws(conn *websocket.Conn, sshConfig *util.SshConfig) {
 	}
 	ip, _, err := net.ParseCIDR(string(serverIP))
 	if err != nil {
+		err = errors.New("net.ParseCIDR(string(serverIP)): " + err.Error())
 		return
 	}
 	r := core.Route{
@@ -77,6 +81,7 @@ func Ws(conn *websocket.Conn, sshConfig *util.SshConfig) {
 	}()
 	tun, err := util.GetTunDevice(clientIP.IP)
 	if err != nil {
+		err = errors.New("util.GetTunDevice(clientIP.IP): " + err.Error())
 		return
 	}
 	log.Info("tunnel connected")
@@ -101,16 +106,19 @@ func portMap(ctx context.Context, conf *util.SshConfig) (localPort int, err erro
 	removePort := 10800
 	localPort, err = util.GetAvailableTCPPortOrDie()
 	if err != nil {
+		err = errors.New("util.GetAvailableTCPPortOrDie(): " + err.Error())
 		return
 	}
 	var remote netip.AddrPort
 	remote, err = netip.ParseAddrPort(net.JoinHostPort("127.0.0.1", strconv.Itoa(removePort)))
 	if err != nil {
+		err = errors.New("netip.ParseAddrPort(net.JoinHostPort(\"127.0.0.1\", strconv.Itoa(removePort))): " + err.Error())
 		return
 	}
 	var local netip.AddrPort
 	local, err = netip.ParseAddrPort(net.JoinHostPort("127.0.0.1", strconv.Itoa(localPort)))
 	if err != nil {
+		err = errors.New("netip.ParseAddrPort(net.JoinHostPort(\"127.0.0.1\", strconv.Itoa(localPort))): " + err.Error())
 		return
 	}
 
@@ -118,6 +126,7 @@ func portMap(ctx context.Context, conf *util.SshConfig) (localPort int, err erro
 	var cli *ssh.Client
 	cli, err = util.DialSshRemote(conf)
 	if err != nil {
+		err = errors.New("util.DialSshRemote(conf): " + err.Error())
 		return
 	} else {
 		_ = cli.Close()

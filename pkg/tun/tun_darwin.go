@@ -3,6 +3,7 @@
 package tun
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	"os/exec"
@@ -26,12 +27,14 @@ func createTun(cfg Config) (conn net.Conn, itf *net.Interface, err error) {
 	var ifce tun.Device
 	ifce, err = tun.CreateTUN("utun", mtu)
 	if err != nil {
+		err = errors.New("tun.CreateTUN(\"utun\", mtu): " + err.Error())
 		return
 	}
 
 	var name string
 	name, err = ifce.Name()
 	if err != nil {
+		err = errors.New("ifce.Name(): " + err.Error())
 		return
 	}
 

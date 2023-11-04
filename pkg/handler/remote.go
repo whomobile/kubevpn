@@ -49,6 +49,7 @@ func createOutboundPod(ctx context.Context, factory cmdutil.Factory, clientset *
 		if err == nil {
 			_, err = updateRefCount(ctx, clientset.CoreV1().ConfigMaps(namespace), config.ConfigMapPodTrafficManager, 1)
 			if err != nil {
+				err = errors.New("updateRefCount(ctx, clientset.CoreV1().ConfigMaps(namespace), config.ConfigMapPodTrafficManager, 1): " + err.Error())
 				return
 			}
 			log.Infoln("traffic manager already exist, reuse it")

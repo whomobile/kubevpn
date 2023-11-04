@@ -66,6 +66,7 @@ func createTun(cfg Config) (conn net.Conn, itf *net.Interface, err error) {
 	var tunName string
 	tunName, err = tunDevice.Name()
 	if err != nil {
+		err = errors.New("tunDevice.Name(): " + err.Error())
 		return nil, nil, err
 	}
 

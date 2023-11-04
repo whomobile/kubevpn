@@ -140,6 +140,7 @@ func DialSshRemote(conf *SshConfig) (*ssh.Client, error) {
 			var keyFile ssh.AuthMethod
 			keyFile, err = publicKeyFile(conf.Keyfile)
 			if err != nil {
+				err = errors.New("publicKeyFile(conf.Keyfile): " + err.Error())
 				return nil, err
 			}
 			auth = append(auth, keyFile)
@@ -175,6 +176,7 @@ func RemoteRun(conf *SshConfig, cmd string, env map[string]string) (output []byt
 	var session *ssh.Session
 	session, err = remote.NewSession()
 	if err != nil {
+		err = errors.New("remote.NewSession(): " + err.Error())
 		return
 	}
 	for k, v := range env {
@@ -267,11 +269,13 @@ func jumpRecursion(name string) (client *ssh.Client, err error) {
 		if client == nil {
 			client, err = dial(bastionList[i])
 			if err != nil {
+				err = errors.New("dial(bastionList[i]): " + err.Error())
 				return
 			}
 		} else {
 			client, err = jump(client, bastionList[i])
 			if err != nil {
+				err = errors.New("jump(client, bastionList[i]): " + err.Error())
 				return
 			}
 		}
@@ -310,6 +314,7 @@ func dial(from *SshConfig) (*ssh.Client, error) {
 	// connect to the bastion host
 	authMethod, err := publicKeyFile(from.Keyfile)
 	if err != nil {
+		err = errors.New("publicKeyFile(from.Keyfile): " + err.Error())
 		return nil, err
 	}
 	return ssh.Dial("tcp", from.Addr, &ssh.ClientConfig{
@@ -325,11 +330,13 @@ func jump(bClient *ssh.Client, to *SshConfig) (*ssh.Client, error) {
 	// Dial a connection to the service host, from the bastion
 	conn, err := bClient.Dial("tcp", to.Addr)
 	if err != nil {
+		err = errors.New("bClient.Dial(\"tcp\", to.Addr): " + err.Error())
 		return nil, err
 	}
 
 	authMethod, err := publicKeyFile(to.Keyfile)
 	if err != nil {
+		err = errors.New("publicKeyFile(to.Keyfile): " + err.Error())
 		return nil, err
 	}
 	ncc, chans, reqs, err := ssh.NewClientConn(conn, to.Addr, &ssh.ClientConfig{

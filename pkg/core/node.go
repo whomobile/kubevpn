@@ -27,6 +27,7 @@ func ParseNode(s string) (*Node, error) {
 	}
 	u, err := url.Parse(s)
 	if err != nil {
+		err = errors.New("url.Parse(s): " + err.Error())
 		return nil, err
 	}
 	return &Node{

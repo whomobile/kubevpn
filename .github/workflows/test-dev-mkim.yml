@@ -23,9 +23,9 @@ jobs:
           export VERSION=test
           export REGISTRY_TARGET=ghcr.io
           export REGISTRY_USERNAME=${{ github.actor }}
-          export NO_GO_PROXY=true
-          export NO_UBUNTU_MIRROR=true
-          export NO_DOCKER_TIMEZONE=true
+          export SET_NO_GO_PROXY=true
+          export SET_NO_UBUNTU_MIRROR=true
+          export SET_NO_DOCKER_TIMEZONE=true
           make container
   linux:
     runs-on: ubuntu-latest

@@ -25,6 +25,7 @@ jobs:
           export REGISTRY_USERNAME=${{ github.actor }}
           export NO_GO_PROXY=true
           export NO_UBUNTU_MIRROR=true
+          export NO_DOCKER_TIMEZONE=true
           make container
   linux:
     runs-on: ubuntu-latest

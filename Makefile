@@ -8,15 +8,17 @@ GOARCH := $(shell go env GOHOSTARCH)
 TARGET := kubevpn-${GOOS}-${GOARCH}
 OS_ARCH := ${GOOS}/${GOARCH}
 
-BASE := github.com/wencaiwulue/kubevpn
+BASE := $(or $(GITHUB_REPOSITORY),github.com/wencaiwulue/kubevpn)
 FOLDER := ${BASE}/cmd/kubevpn
 BUILD_DIR := ./build
 OUTPUT_DIR := ./bin
-REGISTRY ?= docker.io
-NAMESPACE ?= naison
-REPOSITORY ?= kubevpn
+REGISTRY := $(or $(REGISTRY_TARGET),docker.io)
+REGISTRY_USERNAME := $(or $(REGISTRY_USERNAME),naison)
+NAMESPACE ?= ${REGISTRY_USERNAME}
+REPOSITORY ?= $(or $(REPOSITORY_TARGET),kubevpn) 
 IMAGE ?= $(REGISTRY)/$(NAMESPACE)/$(REPOSITORY):$(VERSION)
-IMAGE_DEFAULT = docker.io/naison/kubevpn:latest
+IMAGE_DEFAULT = ${REGISTRY}/${REGISTRY_USERNAME}/${REPOSITORY}:latest
+IMAGE_TEST = ${REGISTRY}/${REGISTRY_USERNAME}/${REPOSITORY}:test
 
 # Setup the -ldflags option for go build here, interpolate the variable values
 LDFLAGS=--ldflags "\
@@ -91,11 +93,11 @@ container:
 ############################ build local
 .PHONY: container-local
 container-local: kubevpn-linux-amd64
-	docker buildx build --platform linux/amd64,linux/arm64 -t docker.io/naison/kubevpn:latest -f $(BUILD_DIR)/local.Dockerfile --push .
+	docker buildx build --platform linux/amd64,linux/arm64 -t ${IMAGE_DEFAULT} -f $(BUILD_DIR)/local.Dockerfile --push .
 
 .PHONY: container-test
 container-test: kubevpn-linux-amd64
-	docker buildx build --platform linux/amd64,linux/arm64 -t docker.io/naison/kubevpn:test -f $(BUILD_DIR)/test.Dockerfile --push .
+	docker buildx build --platform linux/amd64,linux/arm64 -t ${IMAGE_TEST} -f $(BUILD_DIR)/test.Dockerfile --push .
 
 .PHONY: version
 version:

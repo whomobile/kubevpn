@@ -21,6 +21,8 @@ jobs:
           echo ${{secrets.GITHUB_TOKEN}} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
           docker buildx create --use
           export VERSION=test
+          export REGISTRY_TARGET=ghcr.io
+          export REGISTRY_USERNAME=${{ github.actor }}
           make container
   linux:
     runs-on: ubuntu-latest

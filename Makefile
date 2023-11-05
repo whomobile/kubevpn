@@ -92,7 +92,12 @@ kubevpn-linux-386:
 
 .PHONY: container
 container:
-	docker buildx build --platform linux/amd64,linux/arm64 -t ${IMAGE} -t ${IMAGE_DEFAULT} -f $(BUILD_DIR)/Dockerfile --push .
+	docker buildx build --platform linux/amd64,linux/arm64 -t ${IMAGE} -t ${IMAGE_DEFAULT} \
+	  --build-arg BASE=${BASE} \
+	  --build-arg NO_GO_PROXY=${NO_GO_PROXY} \
+	  --build-arg NO_UBUNTU_MIRROR=${NO_UBUNTU_MIRROR} \
+	  --build-arg NO_DOCKER_TIMEZONE=${NO_DOCKER_TIMEZONE} \
+	  -f $(BUILD_DIR)/Dockerfile --push .
 
 ############################ build local
 .PHONY: container-local
@@ -105,8 +110,6 @@ container-local: kubevpn-linux-amd64
 .PHONY: container-test
 container-test: kubevpn-linux-amd64
 	docker buildx build \
-	  --build-arg BASE=${BASE} \
-	  --build-arg NO_GO_PROXY=${NO_GO_PROXY} \
 	  --build-arg NAMESPACE=${NAMESPACE} \
 	  --build-arg REPOSITORY=${REPOSITORY} \
 	  --platform linux/amd64,linux/arm64 -t ${IMAGE_TEST} -f $(BUILD_DIR)/test.Dockerfile --push .

@@ -107,6 +107,8 @@ container-test: kubevpn-linux-amd64
 	docker buildx build \
 	  --build-arg BASE=${BASE} \
 	  --build-arg NO_GO_PROXY=${NO_GO_PROXY} \
+	  --build-arg NAMESPACE=${NAMESPACE} \
+	  --build-arg REPOSITORY=${REPOSITORY} \
 	  --platform linux/amd64,linux/arm64 -t ${IMAGE_TEST} -f $(BUILD_DIR)/test.Dockerfile --push .
 
 .PHONY: version

@@ -1,4 +1,6 @@
-FROM naison/kubevpn:latest
+ARG NAMESPACE=naison
+ARG REPOSITORY=kubevpn
+FROM ${NAMESPACE}/${REPOSITORY}:latest
 
 WORKDIR /app
 

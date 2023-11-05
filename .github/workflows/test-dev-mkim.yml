@@ -23,7 +23,8 @@ jobs:
           export VERSION=test
           export REGISTRY_TARGET=ghcr.io
           export REGISTRY_USERNAME=${{ github.actor }}
-          expoet NO_GO_PROXY=true
+          export NO_GO_PROXY=true
+          export NO_UBUNTU_MIRROR=true
           make container
   linux:
     runs-on: ubuntu-latest

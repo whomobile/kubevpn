@@ -20,6 +20,7 @@ IMAGE ?= $(REGISTRY)/$(NAMESPACE)/$(REPOSITORY):$(VERSION)
 IMAGE_DEFAULT = ${REGISTRY}/${REGISTRY_USERNAME}/${REPOSITORY}:latest
 IMAGE_TEST = ${REGISTRY}/${REGISTRY_USERNAME}/${REPOSITORY}:test
 NO_GO_PROXY = $(or $(NO_GO_PROXY),false)
+NO_UBUNTU_MIRROR = $(or $(NO_UBUNTU_MIRROR),false)
 
 # Setup the -ldflags option for go build here, interpolate the variable values
 LDFLAGS=--ldflags "\

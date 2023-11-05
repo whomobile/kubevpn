@@ -93,11 +93,13 @@ container:
 ############################ build local
 .PHONY: container-local
 container-local: kubevpn-linux-amd64
-	docker buildx build --platform linux/amd64,linux/arm64 -t ${IMAGE_DEFAULT} -f $(BUILD_DIR)/local.Dockerfile --push .
+	docker buildx build --build-arg BASE=${BASE} \
+	  --platform linux/amd64,linux/arm64 -t ${IMAGE_DEFAULT} -f $(BUILD_DIR)/local.Dockerfile --push .
 
 .PHONY: container-test
 container-test: kubevpn-linux-amd64
-	docker buildx build --platform linux/amd64,linux/arm64 -t ${IMAGE_TEST} -f $(BUILD_DIR)/test.Dockerfile --push .
+	docker buildx build --build-arg BASE=${BASE} \
+	  --platform linux/amd64,linux/arm64 -t ${IMAGE_TEST} -f $(BUILD_DIR)/test.Dockerfile --push .
 
 .PHONY: version
 version:

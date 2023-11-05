@@ -57,9 +57,14 @@ container with same environment、volume、and network. you can develop your app
 ```
 
 ### Install bookinfo as demo application
+ For details how bookinfo works, please refer to [bookinfo](https://istio.io/latest/docs/examples/bookinfo/)
 
 ```shell
 kubectl apply -f https://raw.githubusercontent.com/KubeNetworks/kubevpn/master/samples/bookinfo.yaml
+```
+or 
+```
+kubectl apply -f ./samples/bookinfo.yaml
 ```
 
 For clean up after test

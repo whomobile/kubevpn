@@ -19,6 +19,7 @@ REPOSITORY ?= $(or $(REPOSITORY_TARGET),kubevpn)
 IMAGE ?= $(REGISTRY)/$(NAMESPACE)/$(REPOSITORY):$(VERSION)
 IMAGE_DEFAULT = ${REGISTRY}/${REGISTRY_USERNAME}/${REPOSITORY}:latest
 IMAGE_TEST = ${REGISTRY}/${REGISTRY_USERNAME}/${REPOSITORY}:test
+NO_GO_PROXY = $(or $(NO_GO_PROXY),false)
 
 # Setup the -ldflags option for go build here, interpolate the variable values
 LDFLAGS=--ldflags "\
@@ -93,12 +94,16 @@ container:
 ############################ build local
 .PHONY: container-local
 container-local: kubevpn-linux-amd64
-	docker buildx build --build-arg BASE=${BASE} \
+	docker buildx build \
+	  --build-arg BASE=${BASE} \
+	  --build-arg NO_GO_PROXY=${NO_GO_PROXY} \
 	  --platform linux/amd64,linux/arm64 -t ${IMAGE_DEFAULT} -f $(BUILD_DIR)/local.Dockerfile --push .
 
 .PHONY: container-test
 container-test: kubevpn-linux-amd64
-	docker buildx build --build-arg BASE=${BASE} \
+	docker buildx build \
+	  --build-arg BASE=${BASE} \
+	  --build-arg NO_GO_PROXY=${NO_GO_PROXY} \
 	  --platform linux/amd64,linux/arm64 -t ${IMAGE_TEST} -f $(BUILD_DIR)/test.Dockerfile --push .
 
 .PHONY: version

@@ -1,12 +1,13 @@
 FROM envoyproxy/envoy:v1.25.0 AS envoy
 FROM golang:1.20 AS builder
 ARG BASE=github.com/wencaiwulue/kubevpn
+ARG NO_GO_PROXY
 
 COPY . /go/src/$BASE
 
 WORKDIR /go/src/$BASE
 
-RUN go env -w GO111MODULE=on && go env -w GOPROXY=https://goproxy.cn,direct
+RUN if [ "$NO_GO_PROXY" != "true" ]; then go env -w GO111MODULE=on && go env -w GOPROXY=https://goproxy.cn,direct; fi
 RUN make kubevpn
 RUN go install github.com/go-delve/delve/cmd/dlv@latest
 

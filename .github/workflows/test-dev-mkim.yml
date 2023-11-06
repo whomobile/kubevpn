@@ -120,8 +120,13 @@ jobs:
           route -n
           sudo ln /usr/bin/resolvectl /usr/bin/systemd-resolve
 
+      - name: Setup Test
+        run: |
+          ls -l ~/.ssh 
+          # ConfigAlias: "ry-dev-agd", ConfigHost: "ry-dev-agd"
+
       - name: Test
-        run: go test -v -failfast ./... -timeout=20m
+        run: go test -v -failfast ./... -timeout=10m  && echo "Test Success" || (echo "Test Failed" && exit 1)
 
   macos:
     runs-on: macos-latest
@@ -194,7 +199,8 @@ jobs:
           netstat -anr
 
       - name: Test
-        run: go test -v -failfast ./... -timeout=20m
+        run: |
+          go test -v -failfast ./... -timeout=10m && echo "Test Success" || (echo "Test Failed" && exit 1)
 
   windows:
     runs-on: windows-latest

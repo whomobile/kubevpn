@@ -2,7 +2,7 @@ name: Test-dev-mkim
 
 on:
   push:
-    branches: [ dev-mkim ]
+    branches: [ dev-mkim, fix-build-env ]
   pull_request:
     branches: [ master ]
 

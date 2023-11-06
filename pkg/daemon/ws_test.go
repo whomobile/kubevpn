@@ -13,7 +13,7 @@ import (
 	"github.com/wencaiwulue/kubevpn/pkg/errors"
 )
 
-func AccessUnixSocket(t *testing.T) {
+func TestAccessUnixSocket(t *testing.T) {
 	httpc := http.Client{
 		Transport: &http.Transport{
 			DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {

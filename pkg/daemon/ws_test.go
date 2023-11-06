@@ -9,9 +9,11 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 )
 
-func AccessTestWS(t *testing.T) {
+func AccessUnixSocket(t *testing.T) {
 	httpc := http.Client{
 		Transport: &http.Transport{
 			DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
@@ -25,6 +27,7 @@ func AccessTestWS(t *testing.T) {
 
 	resp, err := httpc.Get("http://test" + "/ws")
 	if err != nil {
+		err = errors.Wrap(err, "httpc.Get(\"http://test\" + \"/ws\"): ")
 		t.Fatal(err)
 	}
 

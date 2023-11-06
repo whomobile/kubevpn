@@ -124,6 +124,15 @@ jobs:
         run: |
           ls -l ~/.ssh || echo "test failed but continue"
           # ConfigAlias: "ry-dev-agd", ConfigHost: "ry-dev-agd"
+          mkdir -p ~/.ssh
+          MINIKUBE_IP=$(minikube ip)
+          cat <<EOF > ~/.ssh/config
+          Host ry-dev-agd
+            HostName $MINIKUBE_IP
+            User docker
+            Port 22
+            IdentityFile ~/.minikube/machines/minikube/id_rsa
+          EOF
 
       - name: Test
         run: |
@@ -203,6 +212,20 @@ jobs:
           ifconfig
           netstat -anr
 
+      - name: Setup Test
+        run: |
+          ls -l ~/.ssh || echo "test failed but continue"
+          # ConfigAlias: "ry-dev-agd", ConfigHost: "ry-dev-agd"
+          mkdir -p ~/.ssh
+          MINIKUBE_IP=$(minikube ip)
+          cat <<EOF > ~/.ssh/config
+          Host ry-dev-agd
+            HostName $MINIKUBE_IP
+            User docker
+            Port 22
+            IdentityFile ~/.minikube/machines/minikube/id_rsa
+          EOF
+  
       - name: Test
         run: |
           go test -v -x -failfast ./... -timeout=20m && echo "Test Success at $(date)" || (echo "Test Failed at $(date)" && exit 1)

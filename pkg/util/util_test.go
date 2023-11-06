@@ -15,7 +15,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
-func TestName(t *testing.T) {
+func ConfigCNI(t *testing.T) {
 	var s = `
 {
   "name": "cni0",

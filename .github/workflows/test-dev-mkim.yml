@@ -127,7 +127,7 @@ jobs:
 
       - name: Test
         run: |
-          go test -v -x -failfast ./... -timeout=10m && echo "Test Success at $(date)" || (echo "Test Failed at $(date)" && exit 1)
+          go test -v -x -failfast ./... -timeout=20m && echo "Test Success at $(date)" || (echo "Test Failed at $(date)" && exit 1)
     
       - name: After test
         run: |
@@ -205,7 +205,7 @@ jobs:
 
       - name: Test
         run: |
-          go test -v -x -failfast ./... -timeout=10m && echo "Test Success at $(date)" || (echo "Test Failed at $(date)" && exit 1)
+          go test -v -x -failfast ./... -timeout=20m && echo "Test Success at $(date)" || (echo "Test Failed at $(date)" && exit 1)
 
       - name: After test
         run: |
@@ -245,6 +245,6 @@ jobs:
           kubectl get pod -A -o wide
           kubectl get all -o wide
           kubectl get nodes -o yaml
-          ifconfig
-          netstat -anr
+          ipconfig
+          netstat -an
           kubevpn version

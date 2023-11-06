@@ -64,7 +64,7 @@ func CmdClone(f cmdutil.Factory) *cobra.Command {
 		PreRunE: func(cmd *cobra.Command, args []string) (err error) {
 			// not support temporally
 			if options.Engine == config.EngineGvisor {
-				return fmt.Errorf(`not support type engine: %s, support ("%s"|"%s")`, config.EngineGvisor, config.EngineMix, config.EngineRaw)
+				return errors.Errorf(`not support type engine: %s, support ("%s"|"%s")`, config.EngineGvisor, config.EngineMix, config.EngineRaw)
 			}
 			// startup daemon process and sudo process
 			return daemon.StartupDaemon(cmd.Context())

@@ -230,3 +230,12 @@ jobs:
       - name: Build
         run: |
           make kubevpn-windows-amd64
+
+      - name: Test Execution
+        run: |
+          kubectl get pod -A -o wide
+          kubectl get all -o wide
+          kubectl get nodes -o yaml
+          ifconfig
+          netstat -anr
+          kubevpn version

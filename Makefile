@@ -23,6 +23,12 @@ NO_GO_PROXY = $(or $(SET_NO_GO_PROXY),false)
 NO_UBUNTU_MIRROR = $(or $(SET_NO_UBUNTU_MIRROR),false)
 DOCKER_TIMEZONE = $(or $(SET_DOCKER_TIMEZONE),Asia/Shanghai)
 NO_DOCKER_TIMEZONE = $(or $(SET_NO_DOCKER_TIMEZONE),false)
+ifeq ($(SET_CACHE_FROM), true)
+CACHE_FROM = ${SET_CACHE_FROM}
+endif
+ifeq ($(SET_CACHE_TO), true)
+CACHE_TO = ${SET_CACHE_TO}
+endif
 
 # Setup the -ldflags option for go build here, interpolate the variable values
 LDFLAGS=--ldflags "\
@@ -92,12 +98,15 @@ kubevpn-linux-386:
 
 .PHONY: container
 container:
-	docker buildx build --platform linux/amd64,linux/arm64 -t ${IMAGE} -t ${IMAGE_DEFAULT} \
+	docker buildx build \
 	  --build-arg BASE=${BASE} \
 	  --build-arg NO_GO_PROXY=${NO_GO_PROXY} \
 	  --build-arg NO_UBUNTU_MIRROR=${NO_UBUNTU_MIRROR} \
 	  --build-arg NO_DOCKER_TIMEZONE=${NO_DOCKER_TIMEZONE} \
-	  -f $(BUILD_DIR)/Dockerfile --push .
+      $(if ${CACHE_FROM},--cache-from type=local,src=${CACHE_FROM}) \
+      $(if ${CACHE_TO},--cache-to type=local,dest=${CACHE_TO}) \
+	  --platform linux/amd64,linux/arm64 \
+	  -t ${IMAGE} -t ${IMAGE_DEFAULT} -f $(BUILD_DIR)/Dockerfile --push .
 
 ############################ build local
 .PHONY: container-local
@@ -105,14 +114,20 @@ container-local: kubevpn-linux-amd64
 	docker buildx build \
 	  --build-arg BASE=${BASE} \
 	  --build-arg NO_GO_PROXY=${NO_GO_PROXY} \
-	  --platform linux/amd64,linux/arm64 -t ${IMAGE_DEFAULT} -f $(BUILD_DIR)/local.Dockerfile --push .
+      $(if ${CACHE_FROM},--cache-from type=local,src=${CACHE_FROM}) \
+      $(if ${CACHE_TO},--cache-to type=local,dest=${CACHE_TO}) \
+	  --platform linux/amd64,linux/arm64 \
+	  -t ${IMAGE_DEFAULT} -f $(BUILD_DIR)/local.Dockerfile --push .
 
 .PHONY: container-test
 container-test: kubevpn-linux-amd64
 	docker buildx build \
 	  --build-arg NAMESPACE=${NAMESPACE} \
 	  --build-arg REPOSITORY=${REPOSITORY} \
-	  --platform linux/amd64,linux/arm64 -t ${IMAGE_TEST} -f $(BUILD_DIR)/test.Dockerfile --push .
+      $(if ${CACHE_FROM},--cache-from type=local,src=${CACHE_FROM}) \
+      $(if ${CACHE_TO},--cache-to type=local,dest=${CACHE_TO}) \
+	  --platform linux/amd64,linux/arm64 \
+	  -t ${IMAGE_TEST} -f $(BUILD_DIR)/test.Dockerfile --push .
 
 .PHONY: version
 version:

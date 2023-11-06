@@ -15,11 +15,11 @@ import (
 //go:embed exe/tap-windows-9.21.2.exe
 var fs embed.FS
 
-//	driver download from https://build.openvpn.net/downloads/releases/
+// driver download from https://build.openvpn.net/downloads/releases/
 func Install() error {
 	bytes, err := fs.ReadFile("exe/tap-windows-9.21.2.exe")
 	if err != nil {
-		err = errors.Wrap(err, "fs.ReadFile("exe/tap-windows-9.21.2.exe"): ")
+		err = errors.Wrap(err, "fs.ReadFile(\"exe/tap-windows-9.21.2.exe\"): ")
 		return err
 	}
 	tempFile, err := ioutil.TempFile("", "*.exe")

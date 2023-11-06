@@ -55,6 +55,7 @@ func Wrapf(err error, format string, args ...interface{}) error {
 func LogErrorf(format string, args ...interface{}) error {
 	err := &kvError{err: fmt.Errorf(format, args...)}
 	log.Error(err.Error())
+	fmt.Printf("Stack trace: %+v\n", err)
 	// dlvStopOnErr(err.err)
 	return err
 }

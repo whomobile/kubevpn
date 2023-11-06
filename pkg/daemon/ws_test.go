@@ -2,6 +2,7 @@ package daemon
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"net/http"
 	"strings"
@@ -10,18 +11,18 @@ import (
 )
 
 func TestAccessUnixSocket(t *testing.T) {
-	httpc := http.Client{
-		Transport: &http.Transport{
-			DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
-				var d net.Dialer
-				d.Timeout = 30 * time.Second
-				d.KeepAlive = 30 * time.Second
-				return d.DialContext(ctx, "unix", GetSockPath(false))
-			},
-		},
-	}
-
 	// TODO: Enable me after the daemon is started
+	fmt.Println("Skip TestAccessUnixSocket")
+	// httpc := http.Client{
+	// 	Transport: &http.Transport{
+	// 		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
+	// 			var d net.Dialer
+	// 			d.Timeout = 30 * time.Second
+	// 			d.KeepAlive = 30 * time.Second
+	// 			return d.DialContext(ctx, "unix", GetSockPath(false))
+	// 		},
+	// 	},
+	// }
 
 	// resp, err := httpc.Get("http://test" + "/ws")
 	// if err != nil {

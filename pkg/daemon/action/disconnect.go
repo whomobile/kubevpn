@@ -77,7 +77,7 @@ func (svr *Server) Disconnect(req *rpc.DisconnectRequest, resp rpc.Daemon_Discon
 			svr.secondaryConnect[index].Cleanup()
 			svr.secondaryConnect = append(svr.secondaryConnect[:index], svr.secondaryConnect[index+1:]...)
 		} else {
-			log.Errorf("index %d out of range", req.GetID())
+			errors.LogErrorf("index %d out of range", req.GetID())
 		}
 	}
 

@@ -94,14 +94,14 @@ func (svr *Server) Clone(req *rpc.CloneRequest, resp rpc.Daemon_CloneServer) err
 	f := InitFactoryByPath(path, req.Namespace)
 	err = options.InitClient(f)
 	if err != nil {
-		log.Errorf("init client failed: %v", err)
+		errors.LogErrorf("init client failed: %v", err)
 		return err
 	}
 	config.Image = req.Image
 	log.Infof("clone workloads...")
 	err = options.DoClone(resp.Context())
 	if err != nil {
-		log.Errorf("clone workloads failed: %v", err)
+		errors.LogErrorf("clone workloads failed: %v", err)
 		_ = options.Cleanup()
 		return err
 	}

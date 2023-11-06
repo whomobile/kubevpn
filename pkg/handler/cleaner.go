@@ -48,7 +48,7 @@ func (c *ConnectOptions) Cleanup() {
 	if c.dhcp != nil {
 		err := c.dhcp.ReleaseIP(ctx, ips...)
 		if err != nil {
-			log.Errorf("failed to release ip to dhcp, err: %v", err)
+			errors.LogErrorf("failed to release ip to dhcp, err: %v", err)
 		}
 	}
 	if c.clientset != nil {
@@ -62,7 +62,7 @@ func (c *ConnectOptions) Cleanup() {
 			}
 		}
 		if err != nil {
-			log.Errorf("can not update ref-count: %v", err)
+			errors.LogErrorf("can not update ref-count: %v", err)
 		}
 	}
 	for _, function := range c.getRolloutFunc() {
@@ -75,7 +75,7 @@ func (c *ConnectOptions) Cleanup() {
 	// leave proxy resources
 	err := c.LeaveProxyResources(context.Background())
 	if err != nil {
-		log.Errorf("leave proxy resources error: %v", err)
+		errors.LogErrorf("leave proxy resources error: %v", err)
 	}
 	if c.cancel != nil {
 		c.cancel()
@@ -130,7 +130,7 @@ func updateRefCount(ctx context.Context, configMapInterface v12.ConfigMapInterfa
 			return
 		})
 	if err != nil {
-		log.Errorf("update ref count error, increment: %d, error: %v", increment, err)
+		errors.LogErrorf("update ref count error, increment: %d, error: %v", increment, err)
 		return
 	}
 	log.Info("update ref count successfully")

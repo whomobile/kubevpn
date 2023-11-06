@@ -3,6 +3,8 @@ package errors
 import (
 	"fmt"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/pkg/errors"
 )
 
@@ -48,4 +50,11 @@ func Wrapf(err error, format string, args ...interface{}) error {
 	wrappedErr := &kvError{err: errors.Wrapf(err, format, args...)}
 	dlvStopOnErr(wrappedErr.err)
 	return wrappedErr
+}
+
+func LogErrorf(format string, args ...interface{}) error {
+	err := &kvError{err: fmt.Errorf(format, args...)}
+	log.Error(err.Error())
+	// dlvStopOnErr(err.err)
+	return err
 }

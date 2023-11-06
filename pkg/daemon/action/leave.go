@@ -31,7 +31,7 @@ func (svr *Server) Leave(req *rpc.LeaveRequest, resp rpc.Daemon_LeaveServer) err
 		log.Infof("leave workload %s", workload)
 		err := handler.UnPatchContainer(factory, maps, namespace, workload, svr.connect.GetLocalTunIPv4())
 		if err != nil {
-			log.Errorf("leave workload %s failed: %v", workload, err)
+			errors.LogErrorf("leave workload %s failed: %v", workload, err)
 			continue
 		}
 		log.Infof("leave workload %s successfully", workload)

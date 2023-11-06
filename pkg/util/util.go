@@ -86,7 +86,7 @@ func RolloutStatus(ctx1 context.Context, factory cmdutil.Factory, namespace, wor
 	log.Infof("rollout status for %s", workloads)
 	defer func() {
 		if err != nil {
-			log.Errorf("rollout status for %s failed: %s", workloads, err.Error())
+			errors.LogErrorf("rollout status for %s failed: %s", workloads, err.Error())
 		} else {
 			log.Infof("rollout status for %s successfully", workloads)
 		}

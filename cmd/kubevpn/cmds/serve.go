@@ -5,7 +5,6 @@ import (
 	"runtime"
 	"time"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"go.uber.org/automaxprocs/maxprocs"
 	cmdutil "k8s.io/kubectl/pkg/cmd/util"
@@ -46,12 +45,12 @@ func CmdServe(_ cmdutil.Factory) *cobra.Command {
 			defer func() {
 				err := handler.ReleaseIPIfNeeded()
 				if err != nil {
-					log.Errorf("release ip failed: %v", err)
+					errors.LogErrorf("release ip failed: %v", err)
 				}
 			}()
 			servers, err := handler.Parse(*route)
 			if err != nil {
-				log.Errorf("parse server failed: %v", err)
+				errors.LogErrorf("parse server failed: %v", err)
 				return err
 			}
 			ctx := cmd.Context()

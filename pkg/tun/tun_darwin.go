@@ -67,7 +67,7 @@ func createTun(cfg Config) (conn net.Conn, itf *net.Interface, err error) {
 	}
 
 	if err = addTunRoutes(name, cfg.Routes...); err != nil {
-		log.Errorf("add tun routes failed: %v", err)
+		errors.LogErrorf("add tun routes failed: %v", err)
 		return
 	}
 

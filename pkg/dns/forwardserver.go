@@ -62,7 +62,7 @@ func (s *server) ServeDNS(w miekgdns.ResponseWriter, r *miekgdns.Msg) {
 	err := s.fwdSem.Acquire(ctx, 1)
 	if err != nil {
 		s.logInverval.Do(func() {
-			log.Errorf("dns-server more than %v concurrent queries", maxConcurrent)
+			errors.LogErrorf("dns-server more than %v concurrent queries", maxConcurrent)
 		})
 		r.SetRcode(r, miekgdns.RcodeRefused)
 		return

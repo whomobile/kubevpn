@@ -54,9 +54,9 @@ func Ws(conn *websocket.Conn, sshConfig *util.SshConfig) {
 	cmd := fmt.Sprintf(`export %s=%s && kubevpn ssh-daemon --client-ip %s`, config.EnvStartSudoKubeVPNByKubeVPN, "true", clientIP.String())
 	serverIP, stderr, err := util.RemoteRun(sshConfig, cmd, nil)
 	if err != nil {
-		log.Errorf("run error: %v", err)
-		log.Errorf("run stdout: %v", string(serverIP))
-		log.Errorf("run stderr: %v", string(stderr))
+		errors.LogErrorf("run error: %v", err)
+		errors.LogErrorf("run stdout: %v", string(serverIP))
+		errors.LogErrorf("run stderr: %v", string(stderr))
 		return
 	}
 	ip, _, err := net.ParseCIDR(string(serverIP))
@@ -73,7 +73,7 @@ func Ws(conn *websocket.Conn, sshConfig *util.SshConfig) {
 	}
 	servers, err := handler.Parse(r)
 	if err != nil {
-		log.Errorf("parse route error: %v", err)
+		errors.LogErrorf("parse route error: %v", err)
 		return
 	}
 	go func() {
@@ -144,7 +144,7 @@ func portMap(ctx context.Context, conf *util.SshConfig) (localPort int, err erro
 			err := util.Main(ctx, remote, local, conf, readyChan)
 			if err != nil {
 				if !errors.Is(err, context.Canceled) {
-					log.Errorf("ssh forward failed err: %v", err)
+					errors.LogErrorf("ssh forward failed err: %v", err)
 				}
 				select {
 				case errChan <- err:
@@ -157,7 +157,7 @@ func portMap(ctx context.Context, conf *util.SshConfig) (localPort int, err erro
 	case <-readyChan:
 		return
 	case err = <-errChan:
-		log.Errorf("ssh proxy err: %v", err)
+		errors.LogErrorf("ssh proxy err: %v", err)
 		return
 	}
 }

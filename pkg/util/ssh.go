@@ -63,7 +63,7 @@ func Main(pctx context.Context, remoteEndpoint, localEndpoint netip.AddrPort, co
 
 	sshClient, err := DialSshRemote(conf)
 	if err != nil {
-		log.Errorf("Dial into remote server error: %s", err)
+		errors.LogErrorf("Dial into remote server error: %s", err)
 		return err
 	}
 
@@ -75,7 +75,7 @@ func Main(pctx context.Context, remoteEndpoint, localEndpoint netip.AddrPort, co
 		case <-ticker.C:
 			_, _, err := sshClient.SendRequest("keepalive@golang.org", true, nil)
 			if err != nil {
-				log.Errorf("failed to send keep alive error: %s", err)
+				errors.LogErrorf("failed to send keep alive error: %s", err)
 			}
 		case <-ctx.Done():
 			return
@@ -112,7 +112,7 @@ func Main(pctx context.Context, remoteEndpoint, localEndpoint netip.AddrPort, co
 			defer local.Close()
 			conn, err := sshClient.Dial("tcp", remoteEndpoint.String())
 			if err != nil {
-				log.Errorf("Failed to dial %s: %s", remoteEndpoint.String(), err)
+				errors.LogErrorf("Failed to dial %s: %s", remoteEndpoint.String(), err)
 				cancelFunc()
 				return
 			}
@@ -169,7 +169,7 @@ func RemoteRun(conf *SshConfig, cmd string, env map[string]string) (output []byt
 	var remote *ssh.Client
 	remote, err = DialSshRemote(conf)
 	if err != nil {
-		log.Errorf("Dial into remote server error: %s", err)
+		errors.LogErrorf("Dial into remote server error: %s", err)
 		return
 	}
 	defer remote.Close()

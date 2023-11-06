@@ -77,7 +77,7 @@ func createOutboundPod(ctx context.Context, factory cmdutil.Factory, clientset *
 	log.Infof("label namespace %s", namespace)
 	ns, err := clientset.CoreV1().Namespaces().Get(ctx, namespace, metav1.GetOptions{})
 	if err != nil {
-		log.Errorf("get namespace error: %s", err.Error())
+		errors.LogErrorf("get namespace error: %s", err.Error())
 		return err
 	}
 	if ns.Labels == nil {
@@ -119,7 +119,7 @@ func createOutboundPod(ctx context.Context, factory cmdutil.Factory, clientset *
 		}},
 	}, metav1.CreateOptions{})
 	if err != nil {
-		log.Errorf("create roles error: %s", err.Error())
+		errors.LogErrorf("create roles error: %s", err.Error())
 		return err
 	}
 
@@ -143,7 +143,7 @@ func createOutboundPod(ctx context.Context, factory cmdutil.Factory, clientset *
 		},
 	}, metav1.CreateOptions{})
 	if err != nil {
-		log.Errorf("create roleBinding error: %s", err.Error())
+		errors.LogErrorf("create roleBinding error: %s", err.Error())
 		return err
 	}
 
@@ -185,7 +185,7 @@ func createOutboundPod(ctx context.Context, factory cmdutil.Factory, clientset *
 		},
 	}, metav1.CreateOptions{})
 	if err != nil {
-		log.Errorf("create service error: %s", err.Error())
+		errors.LogErrorf("create service error: %s", err.Error())
 		return err
 	}
 
@@ -214,7 +214,7 @@ func createOutboundPod(ctx context.Context, factory cmdutil.Factory, clientset *
 	var crt, key []byte
 	crt, key, err = cert.GenerateSelfSignedCertKey(domain, nil, nil)
 	if err != nil {
-		log.Errorf("generate self signed cert and key error: %s", err.Error())
+		errors.LogErrorf("generate self signed cert and key error: %s", err.Error())
 		return err
 	}
 
@@ -235,7 +235,7 @@ func createOutboundPod(ctx context.Context, factory cmdutil.Factory, clientset *
 	_, err = clientset.CoreV1().Secrets(namespace).Create(ctx, secret, metav1.CreateOptions{})
 
 	if err != nil && !k8serrors.IsAlreadyExists(err) {
-		log.Errorf("create secret error: %s", err.Error())
+		errors.LogErrorf("create secret error: %s", err.Error())
 		return err
 	}
 
@@ -393,12 +393,12 @@ kubevpn serve -L "tcp://:10800" -L "tun://:8422?net=${TunIPv4}" -L "gtcp://:1080
 		LabelSelector: fields.OneTermEqualSelector("app", config.ConfigMapPodTrafficManager).String(),
 	})
 	if err != nil {
-		log.Errorf("Failed to create watch for %s: %v", config.ConfigMapPodTrafficManager, err)
+		errors.LogErrorf("Failed to create watch for %s: %v", config.ConfigMapPodTrafficManager, err)
 		return err
 	}
 	defer watchStream.Stop()
 	if _, err = clientset.AppsV1().Deployments(namespace).Create(ctx, deployment, metav1.CreateOptions{}); err != nil {
-		log.Errorf("Failed to create deployment for %s: %v", config.ConfigMapPodTrafficManager, err)
+		errors.LogErrorf("Failed to create deployment for %s: %v", config.ConfigMapPodTrafficManager, err)
 		return err
 	}
 	var ok bool
@@ -409,7 +409,7 @@ kubevpn serve -L "tcp://:10800" -L "tun://:8422?net=${TunIPv4}" -L "gtcp://:1080
 			LabelSelector: fields.OneTermEqualSelector("app", config.ConfigMapPodTrafficManager).String(),
 		})
 		if err != nil {
-			log.Errorf("Failed to list pods for %s: %v", config.ConfigMapPodTrafficManager, err)
+			errors.LogErrorf("Failed to list pods for %s: %v", config.ConfigMapPodTrafficManager, err)
 			return
 		}
 
@@ -443,7 +443,7 @@ kubevpn serve -L "tcp://:10800" -L "tun://:8422?net=${TunIPv4}" -L "gtcp://:1080
 		}
 	}, time.Second*3)
 	if !ok {
-		log.Errorf("wait pod %s to be ready timeout", config.ConfigMapPodTrafficManager)
+		errors.LogErrorf("wait pod %s to be ready timeout", config.ConfigMapPodTrafficManager)
 		return errors.New(fmt.Sprintf("wait pod %s to be ready timeout", config.ConfigMapPodTrafficManager))
 	}
 
@@ -488,7 +488,7 @@ kubevpn serve -L "tcp://:10800" -L "tun://:8422?net=${TunIPv4}" -L "gtcp://:1080
 	}
 	_, err = updateRefCount(ctx, clientset.CoreV1().ConfigMaps(namespace), config.ConfigMapPodTrafficManager, 1)
 	if err != nil {
-		log.Errorf("Failed to update ref count for %s: %v", config.ConfigMapPodTrafficManager, err)
+		errors.LogErrorf("Failed to update ref count for %s: %v", config.ConfigMapPodTrafficManager, err)
 		return
 	}
 	return
@@ -559,7 +559,7 @@ func InjectVPNSidecar(ctx1 context.Context, factory cmdutil.Factory, namespace, 
 		marshal, _ := json.Marshal(append(p, removePatch...))
 		_, err = helper.Patch(object.Namespace, object.Name, types.JSONPatchType, marshal, &metav1.PatchOptions{})
 		if err != nil {
-			log.Errorf("error while inject proxy container, err: %v, exiting...", err)
+			errors.LogErrorf("error while inject proxy container, err: %v, exiting...", err)
 			return err
 		}
 
@@ -587,7 +587,7 @@ func CreateAfterDeletePod(factory cmdutil.Factory, p *v1.Pod, helper *pkgresourc
 		GracePeriodSeconds: pointer.Int64(0),
 	})
 	if err != nil {
-		log.Errorf("error while delete resource: %s %s, ignore, err: %v", p.Namespace, p.Name, err)
+		errors.LogErrorf("error while delete resource: %s %s, ignore, err: %v", p.Namespace, p.Name, err)
 	}
 	err = retry.OnError(wait.Backoff{
 		Steps:    10,
@@ -614,7 +614,7 @@ func CreateAfterDeletePod(factory cmdutil.Factory, p *v1.Pod, helper *pkgresourc
 		if k8serrors.IsAlreadyExists(err) {
 			return nil
 		}
-		log.Errorf("error while create resource: %s %s, err: %v", p.Namespace, p.Name, err)
+		errors.LogErrorf("error while create resource: %s %s, err: %v", p.Namespace, p.Name, err)
 		return err
 	}
 	return nil
@@ -696,7 +696,7 @@ func patch(spec v1.PodTemplateSpec, path []string) (remove []P, restore []P) {
 			}
 			marshal, err := k8sjson.Marshal(p)
 			if err != nil {
-				log.Errorf("error while json marshal: %v", err)
+				errors.LogErrorf("error while json marshal: %v", err)
 				return ""
 			}
 			return string(marshal)
@@ -753,7 +753,7 @@ func fromPatchToProbe(spec *v1.PodTemplateSpec, path []string, patch []P) {
 			if !ok {
 				marshal, err := k8sjson.Marshal(value)
 				if err != nil {
-					log.Errorf("error while json marshal: %v", err)
+					errors.LogErrorf("error while json marshal: %v", err)
 					return nil
 				}
 				str = string(marshal)
@@ -761,7 +761,7 @@ func fromPatchToProbe(spec *v1.PodTemplateSpec, path []string, patch []P) {
 			var probe v1.Probe
 			err := k8sjson.Unmarshal([]byte(str), &probe)
 			if err != nil {
-				log.Errorf("error while json unmarsh: %v", err)
+				errors.LogErrorf("error while json unmarsh: %v", err)
 				return nil
 			}
 			return &probe

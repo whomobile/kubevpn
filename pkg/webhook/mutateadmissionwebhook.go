@@ -65,7 +65,7 @@ func serve(w http.ResponseWriter, r *http.Request, admit admitHandler) {
 	// verify the content type is accurate
 	contentType := r.Header.Get("Content-Type")
 	if contentType != "application/json" {
-		log.Errorf("contentType=%s, expect application/json", contentType)
+		errors.LogErrorf("contentType=%s, expect application/json", contentType)
 		return
 	}
 
@@ -85,7 +85,7 @@ func serve(w http.ResponseWriter, r *http.Request, admit admitHandler) {
 	case v1beta1.SchemeGroupVersion.WithKind("AdmissionReview"):
 		requestedAdmissionReview, ok := obj.(*v1beta1.AdmissionReview)
 		if !ok {
-			log.Errorf("Expected v1beta1.AdmissionReview but got: %T", obj)
+			errors.LogErrorf("Expected v1beta1.AdmissionReview but got: %T", obj)
 			return
 		}
 		responseAdmissionReview := &v1beta1.AdmissionReview{}
@@ -96,7 +96,7 @@ func serve(w http.ResponseWriter, r *http.Request, admit admitHandler) {
 	case v1.SchemeGroupVersion.WithKind("AdmissionReview"):
 		requestedAdmissionReview, ok := obj.(*v1.AdmissionReview)
 		if !ok {
-			log.Errorf("Expected v1.AdmissionReview but got: %T", obj)
+			errors.LogErrorf("Expected v1.AdmissionReview but got: %T", obj)
 			return
 		}
 		responseAdmissionReview := &v1.AdmissionReview{}
@@ -114,13 +114,13 @@ func serve(w http.ResponseWriter, r *http.Request, admit admitHandler) {
 	log.Infof("sending response: %v", responseObj)
 	respBytes, err := json.Marshal(responseObj)
 	if err != nil {
-		log.Errorf("Unable to encode response: %v", err)
+		errors.LogErrorf("Unable to encode response: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
 	if _, err := w.Write(respBytes); err != nil {
-		log.Errorf("Unable to write response: %v", err)
+		errors.LogErrorf("Unable to write response: %v", err)
 	}
 }
 

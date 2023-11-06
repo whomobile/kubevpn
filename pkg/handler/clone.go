@@ -773,7 +773,7 @@ func (d *CloneOptions) Cleanup(workloads ...string) error {
 		log.Infof("start to clean up clone workload: %s", workload)
 		object, err := util.GetUnstructuredObject(d.factory, d.Namespace, workload)
 		if err != nil {
-			log.Errorf("get unstructured object error: %s", err.Error())
+			errors.LogErrorf("get unstructured object error: %s", err.Error())
 			return err
 		}
 		labelsMap := map[string]string{
@@ -783,13 +783,13 @@ func (d *CloneOptions) Cleanup(workloads ...string) error {
 		selector := labels.SelectorFromSet(labelsMap)
 		controller, err := util.GetTopOwnerReferenceBySelector(d.targetFactory, d.TargetNamespace, selector.String())
 		if err != nil {
-			log.Errorf("get controller error: %s", err.Error())
+			errors.LogErrorf("get controller error: %s", err.Error())
 			return err
 		}
 		var client dynamic.Interface
 		client, err = d.targetFactory.DynamicClient()
 		if err != nil {
-			log.Errorf("get dynamic client error: %s", err.Error())
+			errors.LogErrorf("get dynamic client error: %s", err.Error())
 			return err
 		}
 		for _, cloneName := range controller.UnsortedList() {
@@ -799,7 +799,7 @@ func (d *CloneOptions) Cleanup(workloads ...string) error {
 			}
 			err = client.Resource(object.Mapping.Resource).Namespace(d.TargetNamespace).Delete(context.Background(), cloneName, metav1.DeleteOptions{})
 			if err != nil && !apierrors.IsNotFound(err) {
-				log.Errorf("delete clone object error: %s", err.Error())
+				errors.LogErrorf("delete clone object error: %s", err.Error())
 				return err
 			}
 			log.Infof("delete clone object: %s", cloneName)

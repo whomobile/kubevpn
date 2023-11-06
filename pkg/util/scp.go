@@ -17,7 +17,7 @@ import (
 func SCP(conf *SshConfig, filename, to string, commands ...string) error {
 	remote, err := DialSshRemote(conf)
 	if err != nil {
-		log.Errorf("Dial into remote server error: %s", err)
+		errors.LogErrorf("Dial into remote server error: %s", err)
 		return err
 	}
 
@@ -28,7 +28,7 @@ func SCP(conf *SshConfig, filename, to string, commands ...string) error {
 	}
 	err = main(sess, filename, to)
 	if err != nil {
-		log.Errorf("Copy file to remote error: %s", err)
+		errors.LogErrorf("Copy file to remote error: %s", err)
 		return err
 	}
 	sess, err = remote.NewSession()
@@ -69,7 +69,7 @@ func main(sess *ssh.Session, filename string, to string) error {
 		fmt.Fprintln(w, "C0644", stat.Size(), filepath.Base(filename))
 		err := sCopy(w, open, stat.Size())
 		if err != nil {
-			log.Errorf("failed to transfer file to remote: %v", err)
+			errors.LogErrorf("failed to transfer file to remote: %v", err)
 			return
 		}
 		fmt.Fprint(w, "\x00") // transfer end with \x00
@@ -101,11 +101,11 @@ func sCopy(dst io.Writer, src io.Reader, size int64) error {
 	buf := make([]byte, 10<<(10*2)) // 10M
 	written, err := io.CopyBuffer(io.MultiWriter(dst, bar), src, buf)
 	if err != nil {
-		log.Errorf("failed to transfer file to remote: %v", err)
+		errors.LogErrorf("failed to transfer file to remote: %v", err)
 		return err
 	}
 	if written != size {
-		log.Errorf("failed to transfer file to remote: written size %d but actuall is %d", written, size)
+		errors.LogErrorf("failed to transfer file to remote: written size %d but actuall is %d", written, size)
 		return err
 	}
 	return nil

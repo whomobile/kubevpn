@@ -107,7 +107,7 @@ func (svr *Server) Connect(req *rpc.ConnectRequest, resp rpc.Daemon_ConnectServe
 	config.Image = req.Image
 	err = svr.connect.DoConnect(sshCtx, false)
 	if err != nil {
-		log.Errorf("do connect error: %v", err)
+		errors.LogErrorf("do connect error: %v", err)
 		svr.connect.Cleanup()
 		svr.connect = nil
 		svr.t = time.Time{}
@@ -217,7 +217,7 @@ func (svr *Server) redirectToSudoDaemon(req *rpc.ConnectRequest, resp rpc.Daemon
 			ID: pointer.Int32(int32(0)),
 		})
 		if err != nil {
-			log.Errorf("disconnect error: %v", err)
+			errors.LogErrorf("disconnect error: %v", err)
 			return err
 		}
 		for {

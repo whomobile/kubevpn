@@ -174,7 +174,7 @@ func (c *ConnectOptions) CreateRemoteInboundPod(ctx context.Context) (err error)
 			err = InjectVPNSidecar(ctx, c.factory, c.Namespace, workload, configInfo)
 		}
 		if err != nil {
-			log.Errorf("create remote inbound pod for %s failed: %s", workload, err.Error())
+			errors.LogErrorf("create remote inbound pod for %s failed: %s", workload, err.Error())
 			return err
 		}
 		log.Infof("create remote inbound pod for %s successfully", workload)
@@ -213,12 +213,12 @@ func (c *ConnectOptions) DoConnect(ctx context.Context, isLite bool) (err error)
 
 	log.Info("start to connect")
 	if err = c.InitDHCP(c.ctx); err != nil {
-		log.Errorf("init dhcp failed: %s", err.Error())
+		errors.LogErrorf("init dhcp failed: %s", err.Error())
 		return
 	}
 	c.addCleanUpResourceHandler()
 	if err = c.getCIDR(c.ctx); err != nil {
-		log.Errorf("get cidr failed: %s", err.Error())
+		errors.LogErrorf("get cidr failed: %s", err.Error())
 		return
 	}
 	log.Info("get cidr successfully")
@@ -261,21 +261,21 @@ func (c *ConnectOptions) DoConnect(ctx context.Context, isLite bool) (err error)
 	core.GvisorTCPForwardAddr = fmt.Sprintf("tcp://127.0.0.1:%d", gvisorTCPForwardPort)
 	core.GvisorUDPForwardAddr = fmt.Sprintf("tcp://127.0.0.1:%d", gvisorUDPForwardPort)
 	if err = c.startLocalTunServe(c.ctx, forward, isLite); err != nil {
-		log.Errorf("start local tun service failed: %v", err)
+		errors.LogErrorf("start local tun service failed: %v", err)
 		return
 	}
 	log.Infof("adding route...")
 	if err = c.addRouteDynamic(c.ctx); err != nil {
-		log.Errorf("add route dynamic failed: %v", err)
+		errors.LogErrorf("add route dynamic failed: %v", err)
 		return
 	}
 	c.deleteFirewallRule(c.ctx)
 	if err = c.addExtraRoute(c.ctx); err != nil {
-		log.Errorf("add extra route failed: %v", err)
+		errors.LogErrorf("add extra route failed: %v", err)
 		return
 	}
 	if err = c.setupDNS(c.ctx, isLite); err != nil {
-		log.Errorf("set up dns failed: %v", err)
+		errors.LogErrorf("set up dns failed: %v", err)
 		return
 	}
 	go c.heartbeats(c.ctx)
@@ -331,7 +331,7 @@ func (c *ConnectOptions) portForward(ctx context.Context, portPair []string) err
 				}
 				if strings.Contains(err.Error(), "unable to listen on any of the requested ports") ||
 					strings.Contains(err.Error(), "address already in use") {
-					log.Errorf("port %s already in use, needs to release it manually", portPair)
+					errors.LogErrorf("port %s already in use, needs to release it manually", portPair)
 					time.Sleep(time.Second * 5)
 				} else {
 					log.Debugf("port-forward occurs error, err: %v, retrying", err)
@@ -419,7 +419,7 @@ func (c *ConnectOptions) startLocalTunServe(ctx context.Context, forwardAddress 
 	log.Debugf("ipv4: %s, ipv6: %s", c.localTunIPv4.IP.String(), c.localTunIPv6.IP.String())
 	servers, err := Parse(r)
 	if err != nil {
-		log.Errorf("parse route error: %v", err)
+		errors.LogErrorf("parse route error: %v", err)
 		return err
 	}
 	go func() {
@@ -635,7 +635,7 @@ func (c *ConnectOptions) setupDNS(ctx context.Context, lite bool) error {
 	const port = 53
 	pod, err := c.GetRunningPodList(ctx)
 	if err != nil {
-		log.Errorf("get running pod list failed, err: %v", err)
+		errors.LogErrorf("get running pod list failed, err: %v", err)
 		return err
 	}
 	relovConf, err := util.GetDNSServiceIPFromPod(c.clientset, c.restclient, c.config, pod[0].GetName(), c.Namespace)
@@ -910,7 +910,7 @@ func SshJump(ctx context.Context, conf *util.SshConfig, flags *pflag.FlagSet, pr
 			err := util.Main(ctx, remote, local, conf, readyChan)
 			if err != nil {
 				if !errors.Is(err, context.Canceled) {
-					log.Errorf("ssh forward failed err: %v", err)
+					errors.LogErrorf("ssh forward failed err: %v", err)
 				}
 				select {
 				case errChan <- err:
@@ -925,7 +925,7 @@ func SshJump(ctx context.Context, conf *util.SshConfig, flags *pflag.FlagSet, pr
 	select {
 	case <-readyChan:
 	case err = <-errChan:
-		log.Errorf("ssh proxy err: %v", err)
+		errors.LogErrorf("ssh proxy err: %v", err)
 		return
 	}
 
@@ -1190,7 +1190,7 @@ func (c *ConnectOptions) addExtraRoute(ctx context.Context) error {
 	var tunName string
 	tunName, err = c.GetTunDeviceName()
 	if err != nil {
-		log.Errorf("get tun interface failed: %s", err.Error())
+		errors.LogErrorf("get tun interface failed: %s", err.Error())
 		return err
 	}
 
@@ -1543,7 +1543,7 @@ func (c *ConnectOptions) setImage(ctx context.Context) error {
 			DryRun(false).
 			Patch(p.Info.Namespace, p.Info.Name, pkgtypes.StrategicMergePatchType, p.Patch, nil)
 		if err != nil {
-			log.Errorf("failed to patch image update to pod template: %v", err)
+			errors.LogErrorf("failed to patch image update to pod template: %v", err)
 			return err
 		}
 		err = util.RolloutStatus(ctx, c.factory, c.Namespace, fmt.Sprintf("%s/%s", p.Info.Mapping.Resource.GroupResource().String(), p.Info.Name), time.Minute*60)

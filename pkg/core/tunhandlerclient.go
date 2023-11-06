@@ -15,7 +15,7 @@ func (h *tunHandler) HandleClient(ctx context.Context, tun net.Conn) {
 	defer tun.Close()
 	remoteAddr, err := net.ResolveUDPAddr("udp", h.node.Remote)
 	if err != nil {
-		log.Errorf("[tun] %s: remote addr: %v", tun.LocalAddr(), err)
+		errors.LogErrorf("[tun] %s: remote addr: %v", tun.LocalAddr(), err)
 		return
 	}
 	in := make(chan *DataElem, MaxSize)
@@ -138,7 +138,7 @@ func (d *ClientDevice) Start(ctx context.Context) {
 
 	select {
 	case err := <-d.chExit:
-		log.Errorf("[tun-client]: %v", err)
+		errors.LogErrorf("[tun-client]: %v", err)
 		return
 	case <-ctx.Done():
 		return

@@ -95,7 +95,7 @@ func (h *fakeUdpHandler) Handle(ctx context.Context, tcpConn net.Conn) {
 		} else if util.IsIPv6(bb) {
 			src = bb[8:24]
 		} else {
-			log.Errorf("[tcpserver] unknown packet")
+			errors.LogErrorf("[tcpserver] unknown packet")
 			continue
 		}
 		value, loaded := h.connNAT.LoadOrStore(src.String(), tcpConn)

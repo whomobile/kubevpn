@@ -34,14 +34,14 @@ func (c *Config) SetupDNS() error {
 		var addr netip.Addr
 		addr, err = netip.ParseAddr(s)
 		if err != nil {
-			log.Errorf("parse %s failed: %s", s, err)
+			errors.LogErrorf("parse %s failed: %s", s, err)
 			return err
 		}
 		servers = append(servers, addr)
 	}
 	err = luid.SetDNS(windows.AF_INET, servers, clientConfig.Search)
 	if err != nil {
-		log.Errorf("set DNS failed: %s", err)
+		errors.LogErrorf("set DNS failed: %s", err)
 		return err
 	}
 	//_ = updateNicMetric(tunName)

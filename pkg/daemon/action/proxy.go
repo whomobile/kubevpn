@@ -97,7 +97,7 @@ func (svr *Server) Proxy(req *rpc.ConnectRequest, resp rpc.Daemon_ProxyServer) e
 				if err == io.EOF {
 					break
 				} else if err != nil {
-					log.Errorf("recv from disconnect failed, %v", err)
+					errors.LogErrorf("recv from disconnect failed, %v", err)
 					return err
 				}
 				err = resp.Send(&rpc.ConnectResponse{Message: recv.Message})
@@ -139,7 +139,7 @@ func (svr *Server) Proxy(req *rpc.ConnectRequest, resp rpc.Daemon_ProxyServer) e
 	svr.connect.Headers = req.Headers
 	err = svr.connect.CreateRemoteInboundPod(ctx)
 	if err != nil {
-		log.Errorf("create remote inbound pod failed: %s", err.Error())
+		errors.LogErrorf("create remote inbound pod failed: %s", err.Error())
 		return err
 	}
 	return nil

@@ -87,7 +87,7 @@ func (d *Options) Main(ctx context.Context, tempContainerConfig *containerConfig
 	rand.Seed(time.Now().UnixNano())
 	object, err := util.GetUnstructuredObject(d.Factory, d.Namespace, d.Workload)
 	if err != nil {
-		log.Errorf("get unstructured object error: %v", err)
+		errors.LogErrorf("get unstructured object error: %v", err)
 		return err
 	}
 
@@ -118,7 +118,7 @@ func (d *Options) Main(ctx context.Context, tempContainerConfig *containerConfig
 	lab := labels.SelectorFromSet(templateSpec.Labels).String()
 	firstPod, _, err := polymorphichelpers.GetFirstPod(set.CoreV1(), d.Namespace, lab, time.Second*60, sortBy)
 	if err != nil {
-		log.Errorf("get first running pod from k8s: %v", err)
+		errors.LogErrorf("get first running pod from k8s: %v", err)
 		return err
 	}
 
@@ -126,17 +126,17 @@ func (d *Options) Main(ctx context.Context, tempContainerConfig *containerConfig
 
 	env, err := util.GetEnv(ctx, d.Factory, d.Namespace, pod)
 	if err != nil {
-		log.Errorf("get env from k8s: %v", err)
+		errors.LogErrorf("get env from k8s: %v", err)
 		return err
 	}
 	volume, err := GetVolume(ctx, d.Factory, d.Namespace, pod, d)
 	if err != nil {
-		log.Errorf("get volume from k8s: %v", err)
+		errors.LogErrorf("get volume from k8s: %v", err)
 		return err
 	}
 	dns, err := GetDNS(ctx, d.Factory, d.Namespace, pod)
 	if err != nil {
-		log.Errorf("get dns from k8s: %v", err)
+		errors.LogErrorf("get dns from k8s: %v", err)
 		return err
 	}
 
@@ -144,7 +144,7 @@ func (d *Options) Main(ctx context.Context, tempContainerConfig *containerConfig
 	runConfigList := ConvertKubeResourceToContainer(d.Namespace, *templateSpec, env, volume, dns)
 	err = mergeDockerOptions(runConfigList, d, tempContainerConfig)
 	if err != nil {
-		log.Errorf("can not fill docker options, err: %v", err)
+		errors.LogErrorf("can not fill docker options, err: %v", err)
 		return err
 	}
 	// check resource
@@ -176,7 +176,7 @@ func (d *Options) Main(ctx context.Context, tempContainerConfig *containerConfig
 		var networkID string
 		networkID, err = createKubevpnNetwork(ctx, d.Cli)
 		if err != nil {
-			log.Errorf("create network for %s: %v", d.Workload, err)
+			errors.LogErrorf("create network for %s: %v", d.Workload, err)
 			return err
 		}
 		log.Infof("create docker network %s", networkID)
@@ -304,17 +304,17 @@ func (l ConfigList) copyToContainer(ctx context.Context, volume []mount.Mount, c
 		log.Debugf("from %s to %s", v.Source, v.Target)
 		srcInfo, err := archive.CopyInfoSourcePath(v.Source, true)
 		if err != nil {
-			log.Errorf("copy info source path, err: %v", err)
+			errors.LogErrorf("copy info source path, err: %v", err)
 			return err
 		}
 		srcArchive, err := archive.TarResource(srcInfo)
 		if err != nil {
-			log.Errorf("tar resource failed, err: %v", err)
+			errors.LogErrorf("tar resource failed, err: %v", err)
 			return err
 		}
 		dstDir, preparedArchive, err := archive.PrepareArchiveCopy(srcArchive, srcInfo, archive.CopyInfo{Path: v.Target})
 		if err != nil {
-			log.Errorf("can not prepare archive copy, err: %v", err)
+			errors.LogErrorf("can not prepare archive copy, err: %v", err)
 			return err
 		}
 
@@ -346,12 +346,12 @@ func createFolder(ctx context.Context, cli *client.Client, id string, src string
 		Cmd:          []string{"mkdir", "-p", target},
 	})
 	if err != nil {
-		log.Errorf("create folder %s previoully failed, err: %v", target, err)
+		errors.LogErrorf("create folder %s previoully failed, err: %v", target, err)
 		return "", err
 	}
 	err = cli.ContainerExecStart(ctx, create.ID, types.ExecStartCheck{})
 	if err != nil {
-		log.Errorf("create folder %s previoully failed, err: %v", target, err)
+		errors.LogErrorf("create folder %s previoully failed, err: %v", target, err)
 		return "", err
 	}
 	log.Infof("wait create folder %s in container %s to be done...", target, id)
@@ -403,7 +403,7 @@ func DoDev(ctx context.Context, devOption *Options, conf *util.SshConfig, flags 
 		var inspect types.ContainerJSON
 		inspect, err = cli.ContainerInspect(ctx, mode.ConnectedContainer())
 		if err != nil {
-			log.Errorf("can not inspect container %s, err: %v", mode.ConnectedContainer(), err)
+			errors.LogErrorf("can not inspect container %s, err: %v", mode.ConnectedContainer(), err)
 			return err
 		}
 		if inspect.State == nil {
@@ -429,7 +429,7 @@ func DoDev(ctx context.Context, devOption *Options, conf *util.SshConfig, flags 
 	// connect to cluster, in container or host
 	cancel, err := devOption.doConnect(ctx, f, conf, transferImage)
 	if err != nil {
-		log.Errorf("connect to cluster failed, err: %v", err)
+		errors.LogErrorf("connect to cluster failed, err: %v", err)
 		return err
 	}
 	defer func() {
@@ -536,7 +536,7 @@ func (d *Options) doConnect(ctx context.Context, f cmdutil.Factory, conf *util.S
 		var resp rpc.Daemon_ConnectClient
 		resp, err = daemonCli.Proxy(ctx, req)
 		if err != nil {
-			log.Errorf("connect to cluster error: %s", err.Error())
+			errors.LogErrorf("connect to cluster error: %s", err.Error())
 			return
 		}
 		for {
@@ -618,7 +618,7 @@ func disconnect(ctx context.Context, daemonClient rpc.DaemonClient) func() {
 			ID: pointer.Int32(0),
 		})
 		if err != nil {
-			log.Errorf("disconnect error: %v", err)
+			errors.LogErrorf("disconnect error: %v", err)
 			return
 		}
 		for {
@@ -626,7 +626,7 @@ func disconnect(ctx context.Context, daemonClient rpc.DaemonClient) func() {
 			if err == io.EOF {
 				return
 			} else if err != nil {
-				log.Errorf("disconnect error: %v", err)
+				errors.LogErrorf("disconnect error: %v", err)
 				return
 			}
 			fmt.Fprint(os.Stdout, msg.Message)

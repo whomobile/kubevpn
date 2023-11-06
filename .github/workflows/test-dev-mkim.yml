@@ -210,11 +210,11 @@ jobs:
       - name: Set up Docker
         uses: crazy-max/ghaction-setup-docker@v2
       - run: |
-         dir /s C:\hostedtoolcache\windows\
-         dir C:\hostedtoolcache\windows\docker-stable\24.0.5\x64 
-         C:\hostedtoolcache\windows\docker-stable\24.0.5\x64\docker-proxy.exe --help
-         C:\hostedtoolcache\windows\docker-stable\24.0.5\x64\dockerd.exe --help
-         C:\hostedtoolcache\windows\docker-stable\24.0.5\x64\docker.exe --help
+         C:
+         dir C:\hostedtoolcache\windows\docker-stable\24.0.7\x64
+         C:\hostedtoolcache\windows\docker-stable\24.0.7\x64\docker-proxy.exe --help
+         C:\hostedtoolcache\windows\docker-stable\24.0.7\x64\dockerd.exe --help
+         C:\hostedtoolcache\windows\docker-stable\24.0.7\x64\docker.exe --help
          docker info --format '{{.OSType}}'
       - run: |
          choco install minikube

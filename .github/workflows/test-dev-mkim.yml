@@ -270,4 +270,4 @@ jobs:
           kubectl get nodes -o yaml
           ipconfig
           netstat -an
-          kubevpn version
+          .\bin\kubevpn version

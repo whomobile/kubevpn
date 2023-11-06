@@ -45,8 +45,8 @@ jobs:
           export SET_NO_GO_PROXY=true
           export SET_NO_UBUNTU_MIRROR=true
           export SET_NO_DOCKER_TIMEZONE=true
-          export SET_CACHE_FROM="type=local,src=/tmp/.buildx-cache"
-          export SET_CACHE_TO="type=local,src=/tmp/.buildx-cache"
+          export SET_CACHE_FROM="type=gha"
+          export SET_CACHE_TO="type=gha,mode=max"
           docker buildx create --use
           make container
   linux:
@@ -94,8 +94,8 @@ jobs:
           export SET_NO_GO_PROXY=true
           export SET_NO_UBUNTU_MIRROR=true
           export SET_NO_DOCKER_TIMEZONE=true
-          export SET_CACHE_FROM="type=local,src=/tmp/.buildx-cache"
-          export SET_CACHE_TO="type=local,src=/tmp/.buildx-cache"
+          export SET_CACHE_FROM="type=gha"
+          export SET_CACHE_TO="type=gha,mode=max"
           make kubevpn-linux-amd64
           chmod +x ./bin/kubevpn
           cp ./bin/kubevpn /usr/local/bin/kubevpn
@@ -167,8 +167,8 @@ jobs:
           export SET_NO_GO_PROXY=true
           export SET_NO_UBUNTU_MIRROR=true
           export SET_NO_DOCKER_TIMEZONE=true
-          export SET_CACHE_FROM="type=local,src=/tmp/.buildx-cache"
-          export SET_CACHE_TO="type=local,src=/tmp/.buildx-cache"
+          export SET_CACHE_FROM="type=gha"
+          export SET_CACHE_TO="type=gha,mode=max"
           make kubevpn-darwin-amd64
           chmod +x ./bin/kubevpn
           cp ./bin/kubevpn /usr/local/bin/kubevpn
@@ -220,6 +220,6 @@ jobs:
           export SET_NO_GO_PROXY=true
           export SET_NO_UBUNTU_MIRROR=true
           export SET_NO_DOCKER_TIMEZONE=true
-          export SET_CACHE_FROM="type=local,src=/tmp/.buildx-cache"
-          export SET_CACHE_TO="type=local,src=/tmp/.buildx-cache"
+          export SET_CACHE_FROM="type=gha"
+          export SET_CACHE_TO="type=gha,mode=max"
           make kubevpn-windows-amd64

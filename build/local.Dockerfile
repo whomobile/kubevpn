@@ -5,7 +5,8 @@ RUN if [ "$NO_GO_PROXY" != "true" ]; then go env -w GO111MODULE=on && go env -w 
 RUN go install github.com/go-delve/delve/cmd/dlv@latest
 
 FROM envoyproxy/envoy:v1.25.0 AS envoy
-FROM ubuntu:latest
+ARG UBUNTUBASE=ubuntu:latest
+FROM ${UBUNTUBASE}
 ARG NO_UBUNTU_MIRROR
 ARG DOCKER_TIMEZONE=Asia/Shanghai
 ARG NO_DOCKER_TIMEZONE

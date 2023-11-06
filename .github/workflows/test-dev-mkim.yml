@@ -43,10 +43,21 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-golang-
 
+      - name: Build and push Base Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./build/ubuntu-base.Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository }}/ubuntu:latest
+          cache-from: type=registry,ref=ghcr.io/${{ github.repository }}/ubuntu:latest
+          cache-to: type=inline
+
       - name: Build and Push image to registry
         run: |
           export VERSION=test
           export REGISTRY_TARGET=ghcr.io
+          export UBUNTUBASE=ghcr.io/${{ github.repository }}/ubuntu:latest
           export REGISTRY_USERNAME=${{ github.actor }}
           export SET_NO_GO_PROXY=true
           export SET_NO_UBUNTU_MIRROR=true

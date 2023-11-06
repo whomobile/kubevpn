@@ -1,0 +1,4 @@
+./bin
+.vscode/
+.mypy_cache/
+.github

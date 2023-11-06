@@ -23,11 +23,11 @@ NO_GO_PROXY = $(or $(SET_NO_GO_PROXY),false)
 NO_UBUNTU_MIRROR = $(or $(SET_NO_UBUNTU_MIRROR),false)
 DOCKER_TIMEZONE = $(or $(SET_DOCKER_TIMEZONE),Asia/Shanghai)
 NO_DOCKER_TIMEZONE = $(or $(SET_NO_DOCKER_TIMEZONE),false)
-ifeq ($(SET_CACHE_FROM), true)
-CACHE_FROM = ${SET_CACHE_FROM}
+ifneq ($(strip ${SET_CACHE_FROM}),)
+CACHE_FROM =--cache-from type=local,src=${SET_CACHE_FROM}
 endif
-ifeq ($(SET_CACHE_TO), true)
-CACHE_TO = ${SET_CACHE_TO}
+ifneq ($(strip ${SET_CACHE_TO}),)
+CACHE_TO =--cache-from type=local,src=${SET_CACHE_TO}
 endif
 
 # Setup the -ldflags option for go build here, interpolate the variable values
@@ -103,8 +103,8 @@ container:
 	  --build-arg NO_GO_PROXY=${NO_GO_PROXY} \
 	  --build-arg NO_UBUNTU_MIRROR=${NO_UBUNTU_MIRROR} \
 	  --build-arg NO_DOCKER_TIMEZONE=${NO_DOCKER_TIMEZONE} \
-      $(if ${CACHE_FROM},--cache-from type=local,src=${CACHE_FROM}) \
-      $(if ${CACHE_TO},--cache-to type=local,dest=${CACHE_TO}) \
+      $(if ${CACHE_FROM},${CACHE_FROM}) \
+      $(if ${CACHE_TO},${CACHE_TO},) \
 	  --platform linux/amd64,linux/arm64 \
 	  -t ${IMAGE} -t ${IMAGE_DEFAULT} -f $(BUILD_DIR)/Dockerfile --push .
 
@@ -114,8 +114,8 @@ container-local: kubevpn-linux-amd64
 	docker buildx build \
 	  --build-arg BASE=${BASE} \
 	  --build-arg NO_GO_PROXY=${NO_GO_PROXY} \
-      $(if ${CACHE_FROM},--cache-from type=local,src=${CACHE_FROM}) \
-      $(if ${CACHE_TO},--cache-to type=local,dest=${CACHE_TO}) \
+      $(if ${CACHE_FROM},${CACHE_FROM}) \
+      $(if ${CACHE_TO},${CACHE_TO},) \
 	  --platform linux/amd64,linux/arm64 \
 	  -t ${IMAGE_DEFAULT} -f $(BUILD_DIR)/local.Dockerfile --push .
 
@@ -124,8 +124,8 @@ container-test: kubevpn-linux-amd64
 	docker buildx build \
 	  --build-arg NAMESPACE=${NAMESPACE} \
 	  --build-arg REPOSITORY=${REPOSITORY} \
-      $(if ${CACHE_FROM},--cache-from type=local,src=${CACHE_FROM}) \
-      $(if ${CACHE_TO},--cache-to type=local,dest=${CACHE_TO}) \
+      $(if ${CACHE_FROM},${CACHE_FROM}) \
+      $(if ${CACHE_TO},${CACHE_TO},) \
 	  --platform linux/amd64,linux/arm64 \
 	  -t ${IMAGE_TEST} -f $(BUILD_DIR)/test.Dockerfile --push .
 

@@ -121,7 +121,7 @@ jobs:
           sudo ln /usr/bin/resolvectl /usr/bin/systemd-resolve
 
       - name: Test
-        run: go test -v -failfast ./... -timeout=60m
+        run: go test -v -failfast ./... -timeout=20m
 
   macos:
     runs-on: macos-latest
@@ -194,7 +194,7 @@ jobs:
           netstat -anr
 
       - name: Test
-        run: go test -v -failfast ./... -timeout=60m
+        run: go test -v -failfast ./... -timeout=20m
 
   windows:
     runs-on: windows-latest

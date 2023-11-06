@@ -14,7 +14,6 @@ import (
 	"golang.org/x/sys/windows"
 
 	"github.com/wencaiwulue/kubevpn/pkg/errors"
-
 )
 
 // ref https://stackoverflow.com/questions/31558066/how-to-ask-for-administer-privileges-on-windows-with-go
@@ -43,7 +42,7 @@ func RunWithElevatedInnerExec() error {
 	var pi windows.ProcessInformation
 	path, err := exec.LookPath("Powershell")
 	if err != nil {
-		err = errors.Wrap(err, "exec.LookPath("Powershell"): ")
+		err = errors.Wrap(err, "exec.LookPath(\"Powershell\"): ")
 		return err
 	}
 	executable, _ := os.Executable()

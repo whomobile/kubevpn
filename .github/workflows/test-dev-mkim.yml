@@ -126,7 +126,12 @@ jobs:
           # ConfigAlias: "ry-dev-agd", ConfigHost: "ry-dev-agd"
 
       - name: Test
-        run: go test -v -failfast ./... -timeout=10m  && echo "Test Success" || (echo "Test Failed" && exit 1)
+        run: |
+          go test -v -x -failfast ./... -timeout=10m && echo "Test Success at $(date)" || (echo "Test Failed at $(date)" && exit 1)
+    
+      - name: After test
+        run: |
+          echo "After test at $(date)"
 
   macos:
     runs-on: macos-latest
@@ -200,8 +205,12 @@ jobs:
 
       - name: Test
         run: |
-          go test -v -failfast ./... -timeout=10m && echo "Test Success" || (echo "Test Failed" && exit 1)
+          go test -v -x -failfast ./... -timeout=10m && echo "Test Success at $(date)" || (echo "Test Failed at $(date)" && exit 1)
 
+      - name: After test
+        run: |
+          echo "After test at $(date)"
+    
   windows:
     runs-on: windows-latest
     needs: [ "image" ]

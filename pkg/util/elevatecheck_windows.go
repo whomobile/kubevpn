@@ -12,6 +12,9 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"golang.org/x/sys/windows"
+
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
+
 )
 
 // ref https://stackoverflow.com/questions/31558066/how-to-ask-for-administer-privileges-on-windows-with-go

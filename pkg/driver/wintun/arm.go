@@ -5,6 +5,8 @@ package wintun
 
 import (
 	"embed"
+
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 )
 
 //go:embed bin/arm/wintun.dll

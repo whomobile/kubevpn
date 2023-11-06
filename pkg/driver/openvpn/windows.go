@@ -8,6 +8,8 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 )
 
 //go:embed exe/tap-windows-9.21.2.exe

@@ -46,8 +46,8 @@ jobs:
       - name: Build and Push image to registry
         run: |
           export VERSION=test
+          export GITHUB_REPOSITORY=${{ github.repository }}
           export REGISTRY_TARGET=ghcr.io
-          export SET_UBUNTU_BASE=ghcr.io/${{ github.repository }}/ubuntu:latest
           export REGISTRY_USERNAME=${{ github.actor }}
           export SET_NO_GO_PROXY=true
           export SET_NO_UBUNTU_MIRROR=true
@@ -169,6 +169,7 @@ jobs:
       - name: Build
         run: |
           export VERSION=test
+          export GITHUB_REPOSITORY=${{ github.repository }}
           export REGISTRY_TARGET=ghcr.io
           export REGISTRY_USERNAME=${{ github.actor }}
           export SET_NO_GO_PROXY=true
@@ -221,12 +222,4 @@ jobs:
 
       - name: Build
         run: |
-          export VERSION=test
-          export REGISTRY_TARGET=ghcr.io
-          export REGISTRY_USERNAME=${{ github.actor }}
-          export SET_NO_GO_PROXY=true
-          export SET_NO_UBUNTU_MIRROR=true
-          export SET_NO_DOCKER_TIMEZONE=true
-          export SET_CACHE_FROM="type=gha"
-          export SET_CACHE_TO="type=gha,mode=max"
           make kubevpn-windows-amd64

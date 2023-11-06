@@ -8,7 +8,7 @@ GOARCH := $(shell go env GOHOSTARCH)
 TARGET := kubevpn-${GOOS}-${GOARCH}
 OS_ARCH := ${GOOS}/${GOARCH}
 
-BASE := $(or $(GITHUB_REPOSITORY),github.com/wencaiwulue/kubevpn)
+BASE := github.com/wencaiwulue/kubevpn
 FOLDER := ${BASE}/cmd/kubevpn
 BUILD_DIR := ./build
 OUTPUT_DIR := ./bin

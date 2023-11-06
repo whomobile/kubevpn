@@ -2,6 +2,8 @@ FROM envoyproxy/envoy:v1.25.0 AS envoy
 FROM golang:1.20 AS builder
 ARG BASE=github.com/wencaiwulue/kubevpn
 ARG NO_GO_PROXY
+ARG REGISTRY_TARGET=docker.io
+ARG REGISTRY_USERNAME=naison
 
 COPY . /go/src/$BASE
 
@@ -16,6 +18,8 @@ ARG BASE=github.com/wencaiwulue/kubevpn
 ARG NO_UBUNTU_MIRROR
 ARG DOCKER_TIMEZONE=Asia/Shanghai
 ARG NO_DOCKER_TIMEZONE
+ARG REGISTRY_TARGET=docker.io
+ARG REGISTRY_USERNAME=naison
 
 RUN if [ "$NO_UBUNTU_MIRROR" != "true" ]; then \
       sed -i s@/security.ubuntu.com/@/mirrors.aliyun.com/@g /etc/apt/sources.list && \

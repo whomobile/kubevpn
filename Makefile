@@ -103,6 +103,8 @@ container:
 	  --build-arg NO_GO_PROXY=${NO_GO_PROXY} \
 	  --build-arg NO_UBUNTU_MIRROR=${NO_UBUNTU_MIRROR} \
 	  --build-arg NO_DOCKER_TIMEZONE=${NO_DOCKER_TIMEZONE} \
+	  --build-arg REGISTRY_TARGET=${REGISTRY_TARGET} \
+	  --build-arg REGISTRY_USERNAME=${REGISTRY_USERNAME} \
       $(if ${CACHE_FROM},${CACHE_FROM}) \
       $(if ${CACHE_TO},${CACHE_TO},) \
 	  --platform linux/amd64,linux/arm64 \
@@ -131,7 +133,7 @@ container-test: kubevpn-linux-amd64
 
 .PHONY: version
 version:
-	go run github.com/wencaiwulue/kubevpn/pkg/util/krew
+	go run ${BASE}/pkg/util/krew
 
 .PHONY: gen
 gen:

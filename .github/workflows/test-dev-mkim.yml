@@ -32,6 +32,10 @@ jobs:
         with:
           go-version: '1.20'
           check-latest: true
+          # cache-dependency-path: |
+          #        subdir/go.sum
+          #        tools/go.sum
+          cache-dependency-path: "**/*.sum"
 
       - name: Build and Push image to registry
         run: |
@@ -56,6 +60,7 @@ jobs:
         with:
           go-version: '1.20'
           check-latest: true
+
       - name: Setup Minikube
         id: minikube
         timeout-minutes: 30
@@ -84,6 +89,13 @@ jobs:
       - name: Build
         run: |
           export VERSION=test
+          export REGISTRY_TARGET=ghcr.io
+          export REGISTRY_USERNAME=${{ github.actor }}
+          export SET_NO_GO_PROXY=true
+          export SET_NO_UBUNTU_MIRROR=true
+          export SET_NO_DOCKER_TIMEZONE=true
+          export SET_CACHE_FROM="type=local,src=/tmp/.buildx-cache"
+          export SET_CACHE_TO="type=local,src=/tmp/.buildx-cache"
           make kubevpn-linux-amd64
           chmod +x ./bin/kubevpn
           cp ./bin/kubevpn /usr/local/bin/kubevpn
@@ -115,6 +127,7 @@ jobs:
         with:
           go-version: '1.20'
           check-latest: true
+
       - name: Set up Docker
         uses: crazy-max/ghaction-setup-docker@v1.4.0
 
@@ -149,6 +162,13 @@ jobs:
       - name: Build
         run: |
           export VERSION=test
+          export REGISTRY_TARGET=ghcr.io
+          export REGISTRY_USERNAME=${{ github.actor }}
+          export SET_NO_GO_PROXY=true
+          export SET_NO_UBUNTU_MIRROR=true
+          export SET_NO_DOCKER_TIMEZONE=true
+          export SET_CACHE_FROM="type=local,src=/tmp/.buildx-cache"
+          export SET_CACHE_TO="type=local,src=/tmp/.buildx-cache"
           make kubevpn-darwin-amd64
           chmod +x ./bin/kubevpn
           cp ./bin/kubevpn /usr/local/bin/kubevpn
@@ -193,4 +213,13 @@ jobs:
          choco install make
 
       - name: Build
-        run: make kubevpn-windows-amd64
+        run: |
+          export VERSION=test
+          export REGISTRY_TARGET=ghcr.io
+          export REGISTRY_USERNAME=${{ github.actor }}
+          export SET_NO_GO_PROXY=true
+          export SET_NO_UBUNTU_MIRROR=true
+          export SET_NO_DOCKER_TIMEZONE=true
+          export SET_CACHE_FROM="type=local,src=/tmp/.buildx-cache"
+          export SET_CACHE_TO="type=local,src=/tmp/.buildx-cache"
+          make kubevpn-windows-amd64

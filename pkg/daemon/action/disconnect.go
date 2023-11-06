@@ -1,7 +1,6 @@
 package action
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"time"
@@ -10,6 +9,7 @@ import (
 
 	"github.com/wencaiwulue/kubevpn/pkg/daemon/rpc"
 	"github.com/wencaiwulue/kubevpn/pkg/dns"
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 )
 
 func (svr *Server) Disconnect(req *rpc.DisconnectRequest, resp rpc.Daemon_DisconnectServer) error {
@@ -20,7 +20,7 @@ func (svr *Server) Disconnect(req *rpc.DisconnectRequest, resp rpc.Daemon_Discon
 		}
 		connResp, err := cli.Disconnect(resp.Context(), req)
 		if err != nil {
-			err = errors.New("cli.Disconnect(resp.Context(), req): " + err.Error())
+			err = errors.Wrap(err, "cli.Disconnect(resp.Context(), req): ")
 			return err
 		}
 		var recv *rpc.DisconnectResponse
@@ -33,7 +33,7 @@ func (svr *Server) Disconnect(req *rpc.DisconnectRequest, resp rpc.Daemon_Discon
 			}
 			err = resp.Send(recv)
 			if err != nil {
-				err = errors.New("resp.Send(recv): " + err.Error())
+				err = errors.Wrap(err, "resp.Send(recv): ")
 				return err
 			}
 		}

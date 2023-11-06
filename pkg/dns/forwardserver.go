@@ -3,7 +3,6 @@ package dns
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"math"
 	"math/rand"
 	"net"
@@ -18,6 +17,8 @@ import (
 	"golang.org/x/sync/semaphore"
 	"golang.org/x/time/rate"
 	"k8s.io/apimachinery/pkg/util/cache"
+
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 )
 
 var (

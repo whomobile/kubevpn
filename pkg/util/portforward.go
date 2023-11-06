@@ -1,7 +1,6 @@
 package util
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -13,11 +12,13 @@ import (
 	"sync/atomic"
 	"time"
 
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/util/httpstream"
 	"k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/tools/portforward"
+
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 )
 
 // PortForwarder knows how to listen for local connections and forward them to
@@ -144,7 +145,7 @@ func NewOnAddresses(dialer httpstream.Dialer, addresses []string, ports []string
 	}
 	parsedAddresses, err := parseAddresses(addresses)
 	if err != nil {
-		err = errors.New("parseAddresses(addresses): " + err.Error())
+		err = errors.Wrap(err, "parseAddresses(addresses): ")
 		return nil, err
 	}
 	if len(ports) == 0 {
@@ -152,7 +153,7 @@ func NewOnAddresses(dialer httpstream.Dialer, addresses []string, ports []string
 	}
 	parsedPorts, err := parsePorts(ports)
 	if err != nil {
-		err = errors.New("parsePorts(ports): " + err.Error())
+		err = errors.Wrap(err, "parsePorts(ports): ")
 		return nil, err
 	}
 	return &PortForwarder{
@@ -255,7 +256,7 @@ func (pf *PortForwarder) listenOnPort(port *ForwardedPort) error {
 func (pf *PortForwarder) listenOnPortAndAddress(port *ForwardedPort, protocol string, address string) error {
 	listener, err := pf.getListener(protocol, address, port)
 	if err != nil {
-		err = errors.New("pf.getListener(protocol, address, port): " + err.Error())
+		err = errors.Wrap(err, "pf.getListener(protocol, address, port): ")
 		return err
 	}
 	pf.listeners = append(pf.listeners, listener)

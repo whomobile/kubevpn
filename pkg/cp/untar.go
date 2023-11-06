@@ -2,9 +2,10 @@ package cp
 
 import (
 	"archive/tar"
-	"errors"
 	"io"
 	"os"
+
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 )
 
 // copy from another real file
@@ -21,14 +22,14 @@ func copyFromLink(fileHeaderList []tar.Header, currFile tar.Header, genDstFilena
 	// read from origin file
 	r, err = os.OpenFile(genDstFilename(currFile.Linkname).String(), os.O_RDONLY, 0644)
 	if err != nil {
-		err = errors.New("os.OpenFile(genDstFilename(currFile.Linkname).String(), os.O_RDONLY, 0644): " + err.Error())
+		err = errors.Wrap(err, "os.OpenFile(genDstFilename(currFile.Linkname).String(), os.O_RDONLY, 0644): ")
 		return err
 	}
 
 	// write to current file
 	w, err = os.OpenFile(genDstFilename(currFile.Name).String(), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
-		err = errors.New("os.OpenFile(genDstFilename(currFile.Name).String(), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644): " + err.Error())
+		err = errors.Wrap(err, "os.OpenFile(genDstFilename(currFile.Name).String(), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644): ")
 		return err
 	}
 	_, err = io.Copy(w, r)

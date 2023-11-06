@@ -1,7 +1,6 @@
 package cmds
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -18,6 +17,7 @@ import (
 	"github.com/wencaiwulue/kubevpn/pkg/config"
 	"github.com/wencaiwulue/kubevpn/pkg/daemon"
 	"github.com/wencaiwulue/kubevpn/pkg/daemon/rpc"
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 	"github.com/wencaiwulue/kubevpn/pkg/handler"
 	"github.com/wencaiwulue/kubevpn/pkg/util"
 )
@@ -84,7 +84,7 @@ func CmdClone(f cmdutil.Factory) *cobra.Command {
 
 			bytes, ns, err := util.ConvertToKubeconfigBytes(f)
 			if err != nil {
-				err = errors.New("util.ConvertToKubeconfigBytes(f): " + err.Error())
+				err = errors.Wrap(err, "util.ConvertToKubeconfigBytes(f): ")
 				return err
 			}
 			req := &rpc.CloneRequest{
@@ -111,7 +111,7 @@ func CmdClone(f cmdutil.Factory) *cobra.Command {
 			cli := daemon.GetClient(false)
 			resp, err := cli.Clone(cmd.Context(), req)
 			if err != nil {
-				err = errors.New("cli.Clone(cmd.Context(), req): " + err.Error())
+				err = errors.Wrap(err, "cli.Clone(cmd.Context(), req): ")
 				return err
 			}
 			for {

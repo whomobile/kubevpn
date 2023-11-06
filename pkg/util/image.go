@@ -2,7 +2,6 @@ package util
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -18,9 +17,11 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/jsonmessage"
 	"github.com/moby/term"
-	"github.com/opencontainers/image-spec/specs-go/v1"
+	v1 "github.com/opencontainers/image-spec/specs-go/v1"
 	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
+
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 )
 
 func GetClient() (*client.Client, *command.DockerCli, error) {
@@ -119,7 +120,7 @@ func TransferImage(ctx context.Context, conf *SshConfig, remoteTemp, to string, 
 	defer responseReader.Close()
 	file, err := os.CreateTemp("", "*.tar")
 	if err != nil {
-		err = errors.New("os.CreateTemp(\"\", \"*.tar\"): " + err.Error())
+		err = errors.Wrap(err, "os.CreateTemp(\"\", \"*.tar\"): ")
 		return err
 	}
 	logrus.Infof("saving image %s to temp file %s", to, file.Name())
@@ -140,7 +141,7 @@ func TransferImage(ctx context.Context, conf *SshConfig, remoteTemp, to string, 
 	)
 	err = SCP(conf, file.Name(), remoteTemp, []string{cmd}...)
 	if err != nil {
-		err = errors.New("SCP(conf, file.Name(), remoteTemp, []string{cmd}...): " + err.Error())
+		err = errors.Wrap(err, "SCP(conf, file.Name(), remoteTemp, []string{cmd}...): ")
 		return err
 	}
 	logrus.Infof("Loaded image: %s", to)

@@ -10,10 +10,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/pkg/errors"
 	"github.com/schollz/progressbar/v3"
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 	"k8s.io/apimachinery/pkg/util/sets"
+
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 )
 
 var (
@@ -88,7 +89,7 @@ func GetManifest(httpCli *http.Client, os string, arch string) (version string, 
 func Download(client *http.Client, url string, filename string) error {
 	get, err := client.Get(url)
 	if err != nil {
-		err = errors.New("client.Get(url): " + err.Error())
+		err = errors.Wrap(err, "client.Get(url): ")
 		return err
 	}
 	defer get.Body.Close()
@@ -98,7 +99,7 @@ func Download(client *http.Client, url string, filename string) error {
 	var f *os.File
 	f, err = os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
 	if err != nil {
-		err = errors.New("os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755): " + err.Error())
+		err = errors.Wrap(err, "os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755): ")
 		return err
 	}
 	defer f.Close()
@@ -127,7 +128,7 @@ func Download(client *http.Client, url string, filename string) error {
 func UnzipKubeVPNIntoFile(zipFile, filename string) error {
 	archive, err := zip.OpenReader(zipFile)
 	if err != nil {
-		err = errors.New("zip.OpenReader(zipFile): " + err.Error())
+		err = errors.Wrap(err, "zip.OpenReader(zipFile): ")
 		return err
 	}
 	defer archive.Close()
@@ -146,14 +147,14 @@ func UnzipKubeVPNIntoFile(zipFile, filename string) error {
 
 	err = os.MkdirAll(filepath.Dir(filename), os.ModePerm)
 	if err != nil {
-		err = errors.New("os.MkdirAll(filepath.Dir(filename), os.ModePerm): " + err.Error())
+		err = errors.Wrap(err, "os.MkdirAll(filepath.Dir(filename), os.ModePerm): ")
 		return err
 	}
 
 	var dstFile *os.File
 	dstFile, err = os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, fi.Mode())
 	if err != nil {
-		err = errors.New("os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, fi.Mode()): " + err.Error())
+		err = errors.Wrap(err, "os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, fi.Mode()): ")
 		return err
 	}
 	defer dstFile.Close()
@@ -161,7 +162,7 @@ func UnzipKubeVPNIntoFile(zipFile, filename string) error {
 	var fileInArchive io.ReadCloser
 	fileInArchive, err = fi.Open()
 	if err != nil {
-		err = errors.New("fi.Open(): " + err.Error())
+		err = errors.Wrap(err, "fi.Open(): ")
 		return err
 	}
 	defer fileInArchive.Close()

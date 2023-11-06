@@ -2,7 +2,6 @@ package core
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"math/rand"
 	"net"
@@ -15,6 +14,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/wencaiwulue/kubevpn/pkg/config"
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 	"github.com/wencaiwulue/kubevpn/pkg/util"
 )
 
@@ -246,7 +246,7 @@ func heartbeats(tun net.Conn, in chan<- *DataElem) {
 	}
 	srcIPv4, srcIPv6, err := util.GetLocalTunIP(conn.Name)
 	if err != nil {
-		err = errors.New("util.GetLocalTunIP(conn.Name): " + err.Error())
+		err = errors.Wrap(err, "util.GetLocalTunIP(conn.Name): ")
 		return
 	}
 	if config.RouterIP.To4().Equal(srcIPv4) {

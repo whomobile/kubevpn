@@ -2,7 +2,6 @@ package action
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	defaultlog "log"
@@ -13,6 +12,7 @@ import (
 
 	"github.com/wencaiwulue/kubevpn/pkg/config"
 	"github.com/wencaiwulue/kubevpn/pkg/daemon/rpc"
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 	"github.com/wencaiwulue/kubevpn/pkg/handler"
 	"github.com/wencaiwulue/kubevpn/pkg/util"
 )
@@ -48,13 +48,13 @@ func (svr *Server) ConnectFork(req *rpc.ConnectRequest, resp rpc.Daemon_ConnectF
 	if transferImage {
 		err := util.TransferImage(ctx, sshConf, config.OriginImage, req.Image, out)
 		if err != nil {
-			err = errors.New("util.TransferImage(ctx, sshConf, config.OriginImage, req.Image, out): " + err.Error())
+			err = errors.Wrap(err, "util.TransferImage(ctx, sshConf, config.OriginImage, req.Image, out): ")
 			return err
 		}
 	}
 	file, err := util.ConvertToTempKubeconfigFile([]byte(req.KubeconfigBytes))
 	if err != nil {
-		err = errors.New("util.ConvertToTempKubeconfigFile([]byte(req.KubeconfigBytes)): " + err.Error())
+		err = errors.Wrap(err, "util.ConvertToTempKubeconfigFile([]byte(req.KubeconfigBytes)): ")
 		return err
 	}
 	flags := pflag.NewFlagSet("", pflag.ContinueOnError)
@@ -71,22 +71,22 @@ func (svr *Server) ConnectFork(req *rpc.ConnectRequest, resp rpc.Daemon_ConnectF
 	var path string
 	path, err = handler.SshJump(sshCtx, sshConf, flags, false)
 	if err != nil {
-		err = errors.New("handler.SshJump(sshCtx, sshConf, flags, false): " + err.Error())
+		err = errors.Wrap(err, "handler.SshJump(sshCtx, sshConf, flags, false): ")
 		return err
 	}
 	err = connect.InitClient(InitFactoryByPath(path, req.Namespace))
 	if err != nil {
-		err = errors.New("connect.InitClient(InitFactoryByPath(path, req.Namespace)): " + err.Error())
+		err = errors.Wrap(err, "connect.InitClient(InitFactoryByPath(path, req.Namespace)): ")
 		return err
 	}
 	err = connect.PreCheckResource()
 	if err != nil {
-		err = errors.New("connect.PreCheckResource(): " + err.Error())
+		err = errors.Wrap(err, "connect.PreCheckResource(): ")
 		return err
 	}
 	_, err = connect.RentInnerIP(ctx)
 	if err != nil {
-		err = errors.New("connect.RentInnerIP(ctx): " + err.Error())
+		err = errors.Wrap(err, "connect.RentInnerIP(ctx): ")
 		return err
 	}
 
@@ -120,7 +120,7 @@ func (svr *Server) redirectConnectForkToSudoDaemon(req *rpc.ConnectRequest, resp
 	var sshConf = util.ParseSshFromRPC(req.SshJump)
 	file, err := util.ConvertToTempKubeconfigFile([]byte(req.KubeconfigBytes))
 	if err != nil {
-		err = errors.New("util.ConvertToTempKubeconfigFile([]byte(req.KubeconfigBytes)): " + err.Error())
+		err = errors.Wrap(err, "util.ConvertToTempKubeconfigFile([]byte(req.KubeconfigBytes)): ")
 		return err
 	}
 	flags := pflag.NewFlagSet("", pflag.ContinueOnError)
@@ -136,17 +136,17 @@ func (svr *Server) redirectConnectForkToSudoDaemon(req *rpc.ConnectRequest, resp
 	var path string
 	path, err = handler.SshJump(sshCtx, sshConf, flags, true)
 	if err != nil {
-		err = errors.New("handler.SshJump(sshCtx, sshConf, flags, true): " + err.Error())
+		err = errors.Wrap(err, "handler.SshJump(sshCtx, sshConf, flags, true): ")
 		return err
 	}
 	err = connect.InitClient(InitFactoryByPath(path, req.Namespace))
 	if err != nil {
-		err = errors.New("connect.InitClient(InitFactoryByPath(path, req.Namespace)): " + err.Error())
+		err = errors.Wrap(err, "connect.InitClient(InitFactoryByPath(path, req.Namespace)): ")
 		return err
 	}
 	err = connect.PreCheckResource()
 	if err != nil {
-		err = errors.New("connect.PreCheckResource(): " + err.Error())
+		err = errors.Wrap(err, "connect.PreCheckResource(): ")
 		return err
 	}
 
@@ -165,13 +165,13 @@ func (svr *Server) redirectConnectForkToSudoDaemon(req *rpc.ConnectRequest, resp
 
 	ctx, err := connect.RentInnerIP(resp.Context())
 	if err != nil {
-		err = errors.New("connect.RentInnerIP(resp.Context()): " + err.Error())
+		err = errors.Wrap(err, "connect.RentInnerIP(resp.Context()): ")
 		return err
 	}
 
 	connResp, err := cli.ConnectFork(ctx, req)
 	if err != nil {
-		err = errors.New("cli.ConnectFork(ctx, req): " + err.Error())
+		err = errors.Wrap(err, "cli.ConnectFork(ctx, req): ")
 		return err
 	}
 	for {
@@ -183,7 +183,7 @@ func (svr *Server) redirectConnectForkToSudoDaemon(req *rpc.ConnectRequest, resp
 		}
 		err = resp.Send(recv)
 		if err != nil {
-			err = errors.New("resp.Send(recv): " + err.Error())
+			err = errors.Wrap(err, "resp.Send(recv): ")
 			return err
 		}
 	}

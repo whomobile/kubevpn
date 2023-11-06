@@ -2,10 +2,11 @@ package core
 
 import (
 	"encoding/binary"
-	"errors"
 	"fmt"
 	"io"
 	"net"
+
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 
 	"github.com/wencaiwulue/kubevpn/pkg/config"
 )
@@ -37,7 +38,7 @@ func (addr *datagramPacket) Addr() net.Addr {
 func readDatagramPacket(r io.Reader, b []byte) (*datagramPacket, error) {
 	_, err := io.ReadFull(r, b[:2])
 	if err != nil {
-		err = errors.New("io.ReadFull(r, b[:2]): " + err.Error())
+		err = errors.Wrap(err, "io.ReadFull(r, b[:2]): ")
 		return nil, err
 	}
 	dataLength := binary.BigEndian.Uint16(b[:2])
@@ -52,7 +53,7 @@ func readDatagramPacket(r io.Reader, b []byte) (*datagramPacket, error) {
 func readDatagramPacketServer(r io.Reader, b []byte) (*datagramPacket, error) {
 	_, err := io.ReadFull(r, b[:2])
 	if err != nil {
-		err = errors.New("io.ReadFull(r, b[:2]): " + err.Error())
+		err = errors.Wrap(err, "io.ReadFull(r, b[:2]): ")
 		return nil, err
 	}
 	dataLength := binary.BigEndian.Uint16(b[:2])

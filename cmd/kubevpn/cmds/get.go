@@ -1,7 +1,6 @@
 package cmds
 
 import (
-	"errors"
 	"fmt"
 	"os"
 
@@ -13,6 +12,7 @@ import (
 
 	"github.com/wencaiwulue/kubevpn/pkg/daemon"
 	"github.com/wencaiwulue/kubevpn/pkg/daemon/rpc"
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 )
 
 func CmdGet(f cmdutil.Factory) *cobra.Command {
@@ -41,7 +41,7 @@ func CmdGet(f cmdutil.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			namespace, _, err := f.ToRawKubeConfigLoader().Namespace()
 			if err != nil {
-				err = errors.New("f.ToRawKubeConfigLoader().Namespace(): " + err.Error())
+				err = errors.Wrap(err, "f.ToRawKubeConfigLoader().Namespace(): ")
 				return err
 			}
 			client, err := daemon.GetClient(false).Get(
@@ -56,7 +56,7 @@ func CmdGet(f cmdutil.Factory) *cobra.Command {
 			}
 			marshal, err := yaml.Marshal(client.Metadata)
 			if err != nil {
-				err = errors.New("yaml.Marshal(client.Metadata): " + err.Error())
+				err = errors.Wrap(err, "yaml.Marshal(client.Metadata): ")
 				return err
 			}
 			fmt.Fprint(os.Stdout, string(marshal))

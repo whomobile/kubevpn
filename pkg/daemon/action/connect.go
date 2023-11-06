@@ -2,7 +2,6 @@ package action
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	defaultlog "log"
@@ -22,6 +21,7 @@ import (
 
 	"github.com/wencaiwulue/kubevpn/pkg/config"
 	"github.com/wencaiwulue/kubevpn/pkg/daemon/rpc"
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 	"github.com/wencaiwulue/kubevpn/pkg/handler"
 	"github.com/wencaiwulue/kubevpn/pkg/util"
 )
@@ -63,13 +63,13 @@ func (svr *Server) Connect(req *rpc.ConnectRequest, resp rpc.Daemon_ConnectServe
 	if transferImage {
 		err := util.TransferImage(ctx, sshConf, config.OriginImage, req.Image, out)
 		if err != nil {
-			err = errors.New("util.TransferImage(ctx, sshConf, config.OriginImage, req.Image, out): " + err.Error())
+			err = errors.Wrap(err, "util.TransferImage(ctx, sshConf, config.OriginImage, req.Image, out): ")
 			return err
 		}
 	}
 	file, err := util.ConvertToTempKubeconfigFile([]byte(req.KubeconfigBytes))
 	if err != nil {
-		err = errors.New("util.ConvertToTempKubeconfigFile([]byte(req.KubeconfigBytes)): " + err.Error())
+		err = errors.Wrap(err, "util.ConvertToTempKubeconfigFile([]byte(req.KubeconfigBytes)): ")
 		return err
 	}
 	flags := pflag.NewFlagSet("", pflag.ContinueOnError)
@@ -86,22 +86,22 @@ func (svr *Server) Connect(req *rpc.ConnectRequest, resp rpc.Daemon_ConnectServe
 	var path string
 	path, err = handler.SshJump(sshCtx, sshConf, flags, false)
 	if err != nil {
-		err = errors.New("handler.SshJump(sshCtx, sshConf, flags, false): " + err.Error())
+		err = errors.Wrap(err, "handler.SshJump(sshCtx, sshConf, flags, false): ")
 		return err
 	}
 	err = svr.connect.InitClient(InitFactoryByPath(path, req.Namespace))
 	if err != nil {
-		err = errors.New("svr.connect.InitClient(InitFactoryByPath(path, req.Namespace)): " + err.Error())
+		err = errors.Wrap(err, "svr.connect.InitClient(InitFactoryByPath(path, req.Namespace)): ")
 		return err
 	}
 	err = svr.connect.PreCheckResource()
 	if err != nil {
-		err = errors.New("svr.connect.PreCheckResource(): " + err.Error())
+		err = errors.Wrap(err, "svr.connect.PreCheckResource(): ")
 		return err
 	}
 	_, err = svr.connect.RentInnerIP(ctx)
 	if err != nil {
-		err = errors.New("svr.connect.RentInnerIP(ctx): " + err.Error())
+		err = errors.Wrap(err, "svr.connect.RentInnerIP(ctx): ")
 		return err
 	}
 
@@ -135,7 +135,7 @@ func (svr *Server) redirectToSudoDaemon(req *rpc.ConnectRequest, resp rpc.Daemon
 	var sshConf = util.ParseSshFromRPC(req.SshJump)
 	file, err := util.ConvertToTempKubeconfigFile([]byte(req.KubeconfigBytes))
 	if err != nil {
-		err = errors.New("util.ConvertToTempKubeconfigFile([]byte(req.KubeconfigBytes)): " + err.Error())
+		err = errors.Wrap(err, "util.ConvertToTempKubeconfigFile([]byte(req.KubeconfigBytes)): ")
 		return err
 	}
 	flags := pflag.NewFlagSet("", pflag.ContinueOnError)
@@ -151,17 +151,17 @@ func (svr *Server) redirectToSudoDaemon(req *rpc.ConnectRequest, resp rpc.Daemon
 	var path string
 	path, err = handler.SshJump(sshCtx, sshConf, flags, true)
 	if err != nil {
-		err = errors.New("handler.SshJump(sshCtx, sshConf, flags, true): " + err.Error())
+		err = errors.Wrap(err, "handler.SshJump(sshCtx, sshConf, flags, true): ")
 		return err
 	}
 	err = connect.InitClient(InitFactoryByPath(path, req.Namespace))
 	if err != nil {
-		err = errors.New("connect.InitClient(InitFactoryByPath(path, req.Namespace)): " + err.Error())
+		err = errors.Wrap(err, "connect.InitClient(InitFactoryByPath(path, req.Namespace)): ")
 		return err
 	}
 	err = connect.PreCheckResource()
 	if err != nil {
-		err = errors.New("connect.PreCheckResource(): " + err.Error())
+		err = errors.Wrap(err, "connect.PreCheckResource(): ")
 		return err
 	}
 
@@ -180,13 +180,13 @@ func (svr *Server) redirectToSudoDaemon(req *rpc.ConnectRequest, resp rpc.Daemon
 
 	ctx, err := connect.RentInnerIP(resp.Context())
 	if err != nil {
-		err = errors.New("connect.RentInnerIP(resp.Context()): " + err.Error())
+		err = errors.Wrap(err, "connect.RentInnerIP(resp.Context()): ")
 		return err
 	}
 
 	connResp, err := cli.Connect(ctx, req)
 	if err != nil {
-		err = errors.New("cli.Connect(ctx, req): " + err.Error())
+		err = errors.Wrap(err, "cli.Connect(ctx, req): ")
 		return err
 	}
 	for {
@@ -198,7 +198,7 @@ func (svr *Server) redirectToSudoDaemon(req *rpc.ConnectRequest, resp rpc.Daemon
 		}
 		err = resp.Send(recv)
 		if err != nil {
-			err = errors.New("resp.Send(recv): " + err.Error())
+			err = errors.Wrap(err, "resp.Send(recv): ")
 			return err
 		}
 	}
@@ -267,17 +267,17 @@ func InitFactory(kubeconfigBytes string, ns string) cmdutil.Factory {
 	// todo optimize here
 	temp, err := os.CreateTemp("", "*.json")
 	if err != nil {
-		err = errors.New("os.CreateTemp(\"\", \"*.json\"): " + err.Error())
+		err = errors.Wrap(err, "os.CreateTemp(\"\", \"*.json\"): ")
 		return nil
 	}
 	err = temp.Close()
 	if err != nil {
-		err = errors.New("temp.Close(): " + err.Error())
+		err = errors.Wrap(err, "temp.Close(): ")
 		return nil
 	}
 	err = os.WriteFile(temp.Name(), []byte(kubeconfigBytes), os.ModePerm)
 	if err != nil {
-		err = errors.New("os.WriteFile(temp.Name(), []byte(kubeconfigBytes), os.ModePerm): " + err.Error())
+		err = errors.Wrap(err, "os.WriteFile(temp.Name(), []byte(kubeconfigBytes), os.ModePerm): ")
 		return nil
 	}
 	configFlags.KubeConfig = pointer.String(temp.Name())

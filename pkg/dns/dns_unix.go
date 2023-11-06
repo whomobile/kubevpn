@@ -5,7 +5,6 @@ package dns
 import (
 	"bytes"
 	"context"
-	"errors"
 	"fmt"
 	"io/fs"
 	"net"
@@ -21,6 +20,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/util/sets"
 
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 	"github.com/wencaiwulue/kubevpn/pkg/util"
 )
 
@@ -213,7 +213,7 @@ func networkSetup(ip string, namespace string) {
 	networkCancel()
 	b, err := exec.Command("networksetup", "-listallnetworkservices").Output()
 	if err != nil {
-		err = errors.New("exec.Command(\"networksetup\", \"-listallnetworkservices\").Output(): " + err.Error())
+		err = errors.Wrap(err, "exec.Command(\"networksetup\", \"-listallnetworkservices\").Output(): ")
 		return
 	}
 	services := strings.Split(string(b), "\n")
@@ -266,7 +266,7 @@ func networkSetup(ip string, namespace string) {
 func networkCancel() {
 	b, err := exec.Command("networksetup", "-listallnetworkservices").CombinedOutput()
 	if err != nil {
-		err = errors.New("exec.Command(\"networksetup\", \"-listallnetworkservices\").CombinedOutput(): " + err.Error())
+		err = errors.Wrap(err, "exec.Command(\"networksetup\", \"-listallnetworkservices\").CombinedOutput(): ")
 		return
 	}
 	services := strings.Split(string(b), "\n")

@@ -8,7 +8,6 @@ import (
 
 	"github.com/cilium/ipam/service/allocator"
 	"github.com/cilium/ipam/service/ipallocator"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	v1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -17,6 +16,7 @@ import (
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 
 	"github.com/wencaiwulue/kubevpn/pkg/config"
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 )
 
 type DHCPManager struct {
@@ -81,7 +81,7 @@ func (d *DHCPManager) initDHCP(ctx context.Context) error {
 func (d *DHCPManager) RentIPBaseNICAddress(ctx context.Context) (*net.IPNet, *net.IPNet, error) {
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {
-		err = errors.New("net.InterfaceAddrs(): " + err.Error())
+		err = errors.Wrap(err, "net.InterfaceAddrs(): ")
 		return nil, nil, err
 	}
 	var isAlreadyExistedFunc = func(ips ...net.IP) bool {
@@ -126,7 +126,7 @@ func (d *DHCPManager) RentIPBaseNICAddress(ctx context.Context) (*net.IPNet, *ne
 func (d *DHCPManager) RentIPRandom(ctx context.Context) (*net.IPNet, *net.IPNet, error) {
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {
-		err = errors.New("net.InterfaceAddrs(): " + err.Error())
+		err = errors.Wrap(err, "net.InterfaceAddrs(): ")
 		return nil, nil, err
 	}
 	var isAlreadyExistedFunc = func(ips ...net.IP) bool {
@@ -209,7 +209,7 @@ func (d *DHCPManager) updateDHCPConfigMap(ctx context.Context, f func(ipv4 *ipal
 	if err == nil {
 		err = dhcp.Restore(d.cidr, str)
 		if err != nil {
-			err = errors.New("dhcp.Restore(d.cidr, str): " + err.Error())
+			err = errors.Wrap(err, "dhcp.Restore(d.cidr, str): ")
 			return err
 		}
 	}
@@ -225,7 +225,7 @@ func (d *DHCPManager) updateDHCPConfigMap(ctx context.Context, f func(ipv4 *ipal
 	if err == nil {
 		err = dhcp6.Restore(d.cidr6, str)
 		if err != nil {
-			err = errors.New("dhcp6.Restore(d.cidr6, str): " + err.Error())
+			err = errors.Wrap(err, "dhcp6.Restore(d.cidr6, str): ")
 			return err
 		}
 	}
@@ -274,7 +274,7 @@ func (d *DHCPManager) Set(key, value string) error {
 func (d *DHCPManager) Get(ctx2 context.Context, key string) (string, error) {
 	cm, err := d.client.Get(ctx2, config.ConfigMapPodTrafficManager, metav1.GetOptions{})
 	if err != nil {
-		err = errors.New("d.client.Get(ctx2, config.ConfigMapPodTrafficManager, metav1.GetOptions{}): " + err.Error())
+		err = errors.Wrap(err, "d.client.Get(ctx2, config.ConfigMapPodTrafficManager, metav1.GetOptions{}): ")
 		return "", err
 	}
 	if cm != nil && cm.Data != nil {
@@ -302,12 +302,12 @@ func (d *DHCPManager) ForEach(fn func(net.IP)) error {
 	}
 	str, err := base64.StdEncoding.DecodeString(cm.Data[config.KeyDHCP])
 	if err != nil {
-		err = errors.New("base64.StdEncoding.DecodeString(cm.Data[config.KeyDHCP]): " + err.Error())
+		err = errors.Wrap(err, "base64.StdEncoding.DecodeString(cm.Data[config.KeyDHCP]): ")
 		return err
 	}
 	err = dhcp.Restore(d.cidr, str)
 	if err != nil {
-		err = errors.New("dhcp.Restore(d.cidr, str): " + err.Error())
+		err = errors.Wrap(err, "dhcp.Restore(d.cidr, str): ")
 		return err
 	}
 	dhcp.ForEach(fn)

@@ -17,13 +17,13 @@ var fs embed.FS
 func Install() error {
 	bytes, err := fs.ReadFile("exe/tap-windows-9.21.2.exe")
 	if err != nil {
-		err = errors.New("fs.ReadFile("exe/tap-windows-9.21.2.exe"): " + err.Error())
+		err = errors.Wrap(err, "fs.ReadFile("exe/tap-windows-9.21.2.exe"): ")
 		return err
 	}
 	tempFile, err := ioutil.TempFile("", "*.exe")
 	defer func() { _ = os.Remove(tempFile.Name()) }()
 	if err != nil {
-		err = errors.New("os.Remove(tempFile.Name()) }(): " + err.Error())
+		err = errors.Wrap(err, "os.Remove(tempFile.Name()) }(): ")
 		return err
 	}
 	if _, err = tempFile.Write(bytes); err != nil {

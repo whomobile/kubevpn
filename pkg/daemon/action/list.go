@@ -2,7 +2,6 @@ package action
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 
@@ -13,6 +12,7 @@ import (
 	"github.com/wencaiwulue/kubevpn/pkg/config"
 	"github.com/wencaiwulue/kubevpn/pkg/controlplane"
 	"github.com/wencaiwulue/kubevpn/pkg/daemon/rpc"
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 )
 
 func (svr *Server) List(ctx context.Context, req *rpc.ListRequest) (*rpc.ListResponse, error) {
@@ -22,7 +22,7 @@ func (svr *Server) List(ctx context.Context, req *rpc.ListRequest) (*rpc.ListRes
 	mapInterface := svr.connect.GetClientset().CoreV1().ConfigMaps(svr.connect.Namespace)
 	configMap, err := mapInterface.Get(ctx, config.ConfigMapPodTrafficManager, metav1.GetOptions{})
 	if err != nil {
-		err = errors.New("mapInterface.Get(ctx, config.ConfigMapPodTrafficManager, metav1.GetOptions{}): " + err.Error())
+		err = errors.Wrap(err, "mapInterface.Get(ctx, config.ConfigMapPodTrafficManager, metav1.GetOptions{}): ")
 		return nil, err
 	}
 	var v = make([]*controlplane.Virtual, 0)
@@ -38,7 +38,7 @@ func (svr *Server) List(ctx context.Context, req *rpc.ListRequest) (*rpc.ListRes
 	}
 	bytes, err := k8syaml.Marshal(v)
 	if err != nil {
-		err = errors.New("k8syaml.Marshal(v): " + err.Error())
+		err = errors.Wrap(err, "k8syaml.Marshal(v): ")
 		return nil, err
 	}
 	return &rpc.ListResponse{Message: string(bytes)}, nil

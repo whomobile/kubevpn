@@ -12,7 +12,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -28,6 +27,7 @@ import (
 	cmdutil "k8s.io/kubectl/pkg/cmd/util"
 	"sigs.k8s.io/yaml"
 
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 	"github.com/wencaiwulue/kubevpn/pkg/util"
 )
 
@@ -253,7 +253,7 @@ func udpclient(ip string, port int) error {
 
 	err = udpConn.SetDeadline(time.Now().Add(time.Second * 30))
 	if err != nil {
-		err = errors.New("udpConn.SetDeadline(time.Now().Add(time.Second * 30)): " + err.Error())
+		err = errors.Wrap(err, "udpConn.SetDeadline(time.Now().Add(time.Second * 30)): ")
 		return err
 	}
 

@@ -1,14 +1,11 @@
 package core
 
 import (
-	"errors"
 	"net/url"
 	"strconv"
 	"strings"
-)
 
-var (
-	ErrorInvalidNode = errors.New("invalid node")
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 )
 
 type Node struct {
@@ -23,11 +20,11 @@ type Node struct {
 func ParseNode(s string) (*Node, error) {
 	s = strings.TrimSpace(s)
 	if len(s) == 0 {
-		return nil, ErrorInvalidNode
+		return nil, errors.New("invalid node")
 	}
 	u, err := url.Parse(s)
 	if err != nil {
-		err = errors.New("url.Parse(s): " + err.Error())
+		err = errors.Wrap(err, "url.Parse(s): ")
 		return nil, err
 	}
 	return &Node{

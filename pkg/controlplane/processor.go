@@ -3,7 +3,6 @@ package controlplane
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"math"
 	"math/rand"
@@ -16,6 +15,7 @@ import (
 	"github.com/envoyproxy/go-control-plane/pkg/cache/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/resource/v3"
 	"github.com/sirupsen/logrus"
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 	utilcache "k8s.io/apimachinery/pkg/util/cache"
 	"k8s.io/apimachinery/pkg/util/yaml"
 )
@@ -104,7 +104,7 @@ func ParseYaml(file string) ([]*Virtual, error) {
 
 	err = yaml.Unmarshal(yamlFile, &virtualList)
 	if err != nil {
-		err = errors.New("yaml.Unmarshal(yamlFile, &virtualList): " + err.Error())
+		err = errors.Wrap(err, "yaml.Unmarshal(yamlFile, &virtualList): ")
 		return nil, err
 	}
 

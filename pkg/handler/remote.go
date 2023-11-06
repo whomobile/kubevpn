@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net"
 	"strconv"
@@ -35,6 +34,7 @@ import (
 	"k8s.io/utils/pointer"
 
 	"github.com/wencaiwulue/kubevpn/pkg/config"
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 	"github.com/wencaiwulue/kubevpn/pkg/exchange"
 	"github.com/wencaiwulue/kubevpn/pkg/util"
 )
@@ -49,7 +49,7 @@ func createOutboundPod(ctx context.Context, factory cmdutil.Factory, clientset *
 		if err == nil {
 			_, err = updateRefCount(ctx, clientset.CoreV1().ConfigMaps(namespace), config.ConfigMapPodTrafficManager, 1)
 			if err != nil {
-				err = errors.New("updateRefCount(ctx, clientset.CoreV1().ConfigMaps(namespace), config.ConfigMapPodTrafficManager, 1): " + err.Error())
+				err = errors.Wrap(err, "updateRefCount(ctx, clientset.CoreV1().ConfigMaps(namespace), config.ConfigMapPodTrafficManager, 1): ")
 				return
 			}
 			log.Infoln("traffic manager already exist, reuse it")
@@ -497,7 +497,7 @@ kubevpn serve -L "tcp://:10800" -L "tun://:8422?net=${TunIPv4}" -L "gtcp://:1080
 func InjectVPNSidecar(ctx1 context.Context, factory cmdutil.Factory, namespace, workload string, c util.PodRouteConfig) error {
 	object, err := util.GetUnstructuredObject(factory, namespace, workload)
 	if err != nil {
-		err = errors.New("util.GetUnstructuredObject(factory, namespace, workload): " + err.Error())
+		err = errors.Wrap(err, "util.GetUnstructuredObject(factory, namespace, workload): ")
 		return err
 	}
 
@@ -505,7 +505,7 @@ func InjectVPNSidecar(ctx1 context.Context, factory cmdutil.Factory, namespace, 
 
 	podTempSpec, path, err := util.GetPodTemplateSpecPath(u)
 	if err != nil {
-		err = errors.New("util.GetPodTemplateSpecPath(u): " + err.Error())
+		err = errors.Wrap(err, "util.GetPodTemplateSpecPath(u): ")
 		return err
 	}
 
@@ -623,7 +623,7 @@ func CreateAfterDeletePod(factory cmdutil.Factory, p *v1.Pod, helper *pkgresourc
 func removeInboundContainer(factory cmdutil.Factory, namespace, workloads string) error {
 	object, err := util.GetUnstructuredObject(factory, namespace, workloads)
 	if err != nil {
-		err = errors.New("util.GetUnstructuredObject(factory, namespace, workloads): " + err.Error())
+		err = errors.Wrap(err, "util.GetUnstructuredObject(factory, namespace, workloads): ")
 		return err
 	}
 
@@ -631,7 +631,7 @@ func removeInboundContainer(factory cmdutil.Factory, namespace, workloads string
 
 	podTempSpec, path, err := util.GetPodTemplateSpecPath(u)
 	if err != nil {
-		err = errors.New("util.GetPodTemplateSpecPath(u): " + err.Error())
+		err = errors.Wrap(err, "util.GetPodTemplateSpecPath(u): ")
 		return err
 	}
 

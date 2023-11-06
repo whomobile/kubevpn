@@ -1,7 +1,6 @@
 package cmds
 
 import (
-	"errors"
 	"math/rand"
 	"runtime"
 	"time"
@@ -15,6 +14,7 @@ import (
 
 	"github.com/wencaiwulue/kubevpn/pkg/config"
 	"github.com/wencaiwulue/kubevpn/pkg/core"
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 	"github.com/wencaiwulue/kubevpn/pkg/handler"
 	"github.com/wencaiwulue/kubevpn/pkg/util"
 )
@@ -40,7 +40,7 @@ func CmdServe(_ cmdutil.Factory) *cobra.Command {
 			_, _ = maxprocs.Set(maxprocs.Logger(nil))
 			err := handler.RentIPIfNeeded(route)
 			if err != nil {
-				err = errors.New("handler.RentIPIfNeeded(route): " + err.Error())
+				err = errors.Wrap(err, "handler.RentIPIfNeeded(route): ")
 				return err
 			}
 			defer func() {

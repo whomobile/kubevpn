@@ -2,12 +2,13 @@ package dev
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"math/rand"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 
 	"github.com/docker/cli/cli/command"
 	"github.com/docker/cli/cli/command/container"

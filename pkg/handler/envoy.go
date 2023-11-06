@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -24,6 +23,7 @@ import (
 
 	"github.com/wencaiwulue/kubevpn/pkg/config"
 	"github.com/wencaiwulue/kubevpn/pkg/controlplane"
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 	"github.com/wencaiwulue/kubevpn/pkg/mesh"
 	"github.com/wencaiwulue/kubevpn/pkg/util"
 )
@@ -35,7 +35,7 @@ func InjectVPNAndEnvoySidecar(ctx1 context.Context, factory cmdutil.Factory, cli
 	var object *runtimeresource.Info
 	object, err = util.GetUnstructuredObject(factory, namespace, workload)
 	if err != nil {
-		err = errors.New("util.GetUnstructuredObject(factory, namespace, workload): " + err.Error())
+		err = errors.Wrap(err, "util.GetUnstructuredObject(factory, namespace, workload): ")
 		return err
 	}
 
@@ -44,7 +44,7 @@ func InjectVPNAndEnvoySidecar(ctx1 context.Context, factory cmdutil.Factory, cli
 	var path []string
 	templateSpec, path, err = util.GetPodTemplateSpecPath(u)
 	if err != nil {
-		err = errors.New("util.GetPodTemplateSpecPath(u): " + err.Error())
+		err = errors.Wrap(err, "util.GetPodTemplateSpecPath(u): ")
 		return err
 	}
 
@@ -104,7 +104,7 @@ func InjectVPNAndEnvoySidecar(ctx1 context.Context, factory cmdutil.Factory, cli
 	var bytes []byte
 	bytes, err = k8sjson.Marshal(append(ps, removePatch...))
 	if err != nil {
-		err = errors.New("k8sjson.Marshal(append(ps, removePatch...)): " + err.Error())
+		err = errors.Wrap(err, "k8sjson.Marshal(append(ps, removePatch...)): ")
 		return err
 	}
 	_, err = helper.Patch(object.Namespace, object.Name, types.JSONPatchType, bytes, &metav1.PatchOptions{})
@@ -194,7 +194,7 @@ func UnPatchContainer(factory cmdutil.Factory, mapInterface v12.ConfigMapInterfa
 func addEnvoyConfig(mapInterface v12.ConfigMapInterface, nodeID string, tunIP util.PodRouteConfig, headers map[string]string, port []v1.ContainerPort) error {
 	configMap, err := mapInterface.Get(context.Background(), config.ConfigMapPodTrafficManager, metav1.GetOptions{})
 	if err != nil {
-		err = errors.New("mapInterface.Get(context.Background(), config.ConfigMapPodTrafficManager, metav1.GetOptions{}): " + err.Error())
+		err = errors.Wrap(err, "mapInterface.Get(context.Background(), config.ConfigMapPodTrafficManager, metav1.GetOptions{}): ")
 		return err
 	}
 	var v = make([]*controlplane.Virtual, 0)
@@ -243,7 +243,7 @@ func addEnvoyConfig(mapInterface v12.ConfigMapInterface, nodeID string, tunIP ut
 
 	marshal, err := yaml.Marshal(v)
 	if err != nil {
-		err = errors.New("yaml.Marshal(v): " + err.Error())
+		err = errors.Wrap(err, "yaml.Marshal(v): ")
 		return err
 	}
 	configMap.Data[config.KeyEnvoy] = string(marshal)
@@ -289,7 +289,7 @@ func removeEnvoyConfig(mapInterface v12.ConfigMapInterface, nodeID string, local
 	var bytes []byte
 	bytes, err = yaml.Marshal(v)
 	if err != nil {
-		err = errors.New("yaml.Marshal(v): " + err.Error())
+		err = errors.Wrap(err, "yaml.Marshal(v): ")
 		return false, err
 	}
 	configMap.Data[config.KeyEnvoy] = string(bytes)

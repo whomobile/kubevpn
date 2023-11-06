@@ -1,7 +1,6 @@
 package cmds
 
 import (
-	"errors"
 	"fmt"
 	"os"
 
@@ -17,6 +16,7 @@ import (
 	"github.com/wencaiwulue/kubevpn/pkg/config"
 	"github.com/wencaiwulue/kubevpn/pkg/daemon"
 	"github.com/wencaiwulue/kubevpn/pkg/dev"
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 	"github.com/wencaiwulue/kubevpn/pkg/handler"
 	"github.com/wencaiwulue/kubevpn/pkg/util"
 )
@@ -88,7 +88,7 @@ Startup your kubernetes workloads in local Docker container with same volume、e
 			}
 			err = cmd.Flags().Parse(args[1:])
 			if err != nil {
-				err = errors.New("cmd.Flags().Parse(args[1:]): " + err.Error())
+				err = errors.Wrap(err, "cmd.Flags().Parse(args[1:]): ")
 				return err
 			}
 			util.InitLogger(false)
@@ -99,7 +99,7 @@ Startup your kubernetes workloads in local Docker container with same volume、e
 
 			err = daemon.StartupDaemon(cmd.Context())
 			if err != nil {
-				err = errors.New("daemon.StartupDaemon(cmd.Context()): " + err.Error())
+				err = errors.Wrap(err, "daemon.StartupDaemon(cmd.Context()): ")
 				return err
 			}
 			return handler.SshJumpAndSetEnv(cmd.Context(), sshConf, cmd.Flags(), false)

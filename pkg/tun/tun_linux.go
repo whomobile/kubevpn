@@ -3,7 +3,6 @@
 package tun
 
 import (
-	"errors"
 	"fmt"
 	"net"
 	"syscall"
@@ -14,6 +13,7 @@ import (
 	"golang.zx2c4.com/wireguard/tun"
 
 	"github.com/wencaiwulue/kubevpn/pkg/config"
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 )
 
 func createTun(cfg Config) (conn net.Conn, itf *net.Interface, err error) {
@@ -37,7 +37,7 @@ func createTun(cfg Config) (conn net.Conn, itf *net.Interface, err error) {
 	var name string
 	name, err = device.Name()
 	if err != nil {
-		err = errors.New("device.Name(): " + err.Error())
+		err = errors.Wrap(err, "device.Name(): ")
 		return
 	}
 	var ifc *net.Interface

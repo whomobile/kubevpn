@@ -22,9 +22,10 @@ import (
 	"github.com/docker/docker/api/types/versions"
 	"github.com/docker/docker/errdefs"
 	"github.com/docker/go-connections/nat"
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"
+
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 )
 
 var (
@@ -411,13 +412,13 @@ func parse(flags *pflag.FlagSet, copts *ContainerOptions, serverOS string) (*con
 
 	convertedOpts, err = convertToStandardNotation(publishOpts)
 	if err != nil {
-		err = errors.New("convertToStandardNotation(publishOpts): " + err.Error())
+		err = errors.Wrap(err, "convertToStandardNotation(publishOpts): ")
 		return nil, err
 	}
 
 	ports, portBindings, err = nat.ParsePortSpecs(convertedOpts)
 	if err != nil {
-		err = errors.New("nat.ParsePortSpecs(convertedOpts): " + err.Error())
+		err = errors.Wrap(err, "nat.ParsePortSpecs(convertedOpts): ")
 		return nil, err
 	}
 
@@ -433,13 +434,13 @@ func parse(flags *pflag.FlagSet, copts *ContainerOptions, serverOS string) (*con
 		// if expose a port, the start and end port are the same
 		start, end, err := nat.ParsePortRange(port)
 		if err != nil {
-			err = errors.New("nat.ParsePortRange(port): " + err.Error())
+			err = errors.Wrap(err, "nat.ParsePortRange(port): ")
 			return nil, errors.Errorf("invalid range format for --expose: %s, error: %s", e, err)
 		}
 		for i := start; i <= end; i++ {
 			p, err := nat.NewPort(proto, strconv.FormatUint(i, 10))
 			if err != nil {
-				err = errors.New("nat.NewPort(proto, strconv.FormatUint(i, 10)): " + err.Error())
+				err = errors.Wrap(err, "nat.NewPort(proto, strconv.FormatUint(i, 10)): ")
 				return nil, err
 			}
 			if _, exists := ports[p]; !exists {
@@ -461,12 +462,12 @@ func parse(flags *pflag.FlagSet, copts *ContainerOptions, serverOS string) (*con
 		)
 		validated, err = validateDevice(device, serverOS)
 		if err != nil {
-			err = errors.New("validateDevice(device, serverOS): " + err.Error())
+			err = errors.Wrap(err, "validateDevice(device, serverOS): ")
 			return nil, err
 		}
 		deviceMapping, err = parseDevice(validated, serverOS)
 		if err != nil {
-			err = errors.New("parseDevice(validated, serverOS): " + err.Error())
+			err = errors.Wrap(err, "parseDevice(validated, serverOS): ")
 			return nil, err
 		}
 		deviceMappings = append(deviceMappings, deviceMapping)
@@ -475,14 +476,14 @@ func parse(flags *pflag.FlagSet, copts *ContainerOptions, serverOS string) (*con
 	// collect all the environment variables for the container
 	envVariables, err := opts.ReadKVEnvStrings(copts.envFile.GetAll(), copts.env.GetAll())
 	if err != nil {
-		err = errors.New("opts.ReadKVEnvStrings(copts.envFile.GetAll(), copts.env.GetAll()): " + err.Error())
+		err = errors.Wrap(err, "opts.ReadKVEnvStrings(copts.envFile.GetAll(), copts.env.GetAll()): ")
 		return nil, err
 	}
 
 	// collect all the labels for the container
 	labels, err := opts.ReadKVStrings(copts.labelsFile.GetAll(), copts.labels.GetAll())
 	if err != nil {
-		err = errors.New("opts.ReadKVStrings(copts.labelsFile.GetAll(), copts.labels.GetAll()): " + err.Error())
+		err = errors.Wrap(err, "opts.ReadKVStrings(copts.labelsFile.GetAll(), copts.labels.GetAll()): ")
 		return nil, err
 	}
 
@@ -508,19 +509,19 @@ func parse(flags *pflag.FlagSet, copts *ContainerOptions, serverOS string) (*con
 
 	restartPolicy, err := opts.ParseRestartPolicy(copts.restartPolicy)
 	if err != nil {
-		err = errors.New("opts.ParseRestartPolicy(copts.restartPolicy): " + err.Error())
+		err = errors.Wrap(err, "opts.ParseRestartPolicy(copts.restartPolicy): ")
 		return nil, err
 	}
 
 	loggingOpts, err := parseLoggingOpts(copts.loggingDriver, copts.loggingOpts.GetAll())
 	if err != nil {
-		err = errors.New("parseLoggingOpts(copts.loggingDriver, copts.loggingOpts.GetAll()): " + err.Error())
+		err = errors.Wrap(err, "parseLoggingOpts(copts.loggingDriver, copts.loggingOpts.GetAll()): ")
 		return nil, err
 	}
 
 	securityOpts, err := parseSecurityOpts(copts.securityOpt.GetAll())
 	if err != nil {
-		err = errors.New("parseSecurityOpts(copts.securityOpt.GetAll()): " + err.Error())
+		err = errors.Wrap(err, "parseSecurityOpts(copts.securityOpt.GetAll()): ")
 		return nil, err
 	}
 
@@ -528,7 +529,7 @@ func parse(flags *pflag.FlagSet, copts *ContainerOptions, serverOS string) (*con
 
 	storageOpts, err := parseStorageOpts(copts.storageOpt.GetAll())
 	if err != nil {
-		err = errors.New("parseStorageOpts(copts.storageOpt.GetAll()): " + err.Error())
+		err = errors.Wrap(err, "parseStorageOpts(copts.storageOpt.GetAll()): ")
 		return nil, err
 	}
 
@@ -700,7 +701,7 @@ func parse(flags *pflag.FlagSet, copts *ContainerOptions, serverOS string) (*con
 
 	networkingConfig.EndpointsConfig, err = parseNetworkOpts(copts)
 	if err != nil {
-		err = errors.New("parseNetworkOpts(copts): " + err.Error())
+		err = errors.Wrap(err, "parseNetworkOpts(copts): ")
 		return nil, err
 	}
 
@@ -743,7 +744,7 @@ func parseNetworkOpts(copts *ContainerOptions) (map[string]*networktypes.Endpoin
 		}
 		ep, err := parseNetworkAttachmentOpt(n)
 		if err != nil {
-			err = errors.New("parseNetworkAttachmentOpt(n): " + err.Error())
+			err = errors.Wrap(err, "parseNetworkAttachmentOpt(n): ")
 			return nil, err
 		}
 		if _, ok := endpoints[n.Target]; ok {

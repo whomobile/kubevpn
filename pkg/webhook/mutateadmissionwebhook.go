@@ -3,7 +3,6 @@ package webhook
 import (
 	"crypto/tls"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -17,6 +16,7 @@ import (
 	cmdutil "k8s.io/kubectl/pkg/cmd/util"
 
 	"github.com/wencaiwulue/kubevpn/pkg/config"
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 )
 
 // admissionReviewHandler is a handler to handle business logic, holding an util.Factory
@@ -127,7 +127,7 @@ func serve(w http.ResponseWriter, r *http.Request, admit admitHandler) {
 func Main(f cmdutil.Factory) error {
 	clientset, err := f.KubernetesClientSet()
 	if err != nil {
-		err = errors.New("f.KubernetesClientSet(): " + err.Error())
+		err = errors.Wrap(err, "f.KubernetesClientSet(): ")
 		return err
 	}
 	h := &admissionReviewHandler{f: f, clientset: clientset}
@@ -142,7 +142,7 @@ func Main(f cmdutil.Factory) error {
 	var pairs []tls.Certificate
 	pairs, err = getSSLKeyPairs()
 	if err != nil {
-		err = errors.New("getSSLKeyPairs(): " + err.Error())
+		err = errors.Wrap(err, "getSSLKeyPairs(): ")
 		return err
 	}
 	server := &http.Server{Addr: fmt.Sprintf(":%d", 80), TLSConfig: &tls.Config{Certificates: pairs}}

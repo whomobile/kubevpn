@@ -3,7 +3,6 @@ package main
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -12,6 +11,8 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
+
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 )
 
 const retries = 4
@@ -20,7 +21,7 @@ const retries = 4
 func DownloadFileWithName(uri, name string) (string, error) {
 	resp, err := getWithRetry(uri)
 	if err != nil {
-		err = errors.New("getWithRetry(uri): " + err.Error())
+		err = errors.Wrap(err, "getWithRetry(uri): ")
 		return "", err
 	}
 	defer resp.Body.Close()
@@ -31,14 +32,14 @@ func DownloadFileWithName(uri, name string) (string, error) {
 
 	dir, err := os.MkdirTemp("", "")
 	if err != nil {
-		err = errors.New("os.MkdirTemp(\"\", \"\"): " + err.Error())
+		err = errors.Wrap(err, "os.MkdirTemp(\"\", \"\"): ")
 		return "", err
 	}
 
 	file := filepath.Join(dir, name)
 	out, err := os.Create(file)
 	if err != nil {
-		err = errors.New("os.Create(file): " + err.Error())
+		err = errors.Wrap(err, "os.Create(file): ")
 		return "", err
 	}
 	defer out.Close()
@@ -59,14 +60,14 @@ func downloadFile(uri string) (string, error) {
 func GetSha256ForAsset(uri string) (string, error) {
 	file, err := downloadFile(uri)
 	if err != nil {
-		err = errors.New("downloadFile(uri): " + err.Error())
+		err = errors.Wrap(err, "downloadFile(uri): ")
 		return "", err
 	}
 
 	defer os.Remove(file)
 	sha256, err := getSha256(file)
 	if err != nil {
-		err = errors.New("getSha256(file): " + err.Error())
+		err = errors.Wrap(err, "getSha256(file): ")
 		return "", err
 	}
 
@@ -76,7 +77,7 @@ func GetSha256ForAsset(uri string) (string, error) {
 func getSha256(filename string) (string, error) {
 	f, err := os.Open(filename)
 	if err != nil {
-		err = errors.New("os.Open(filename): " + err.Error())
+		err = errors.Wrap(err, "os.Open(filename): ")
 		return "", err
 	}
 	defer f.Close()

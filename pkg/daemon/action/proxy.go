@@ -1,7 +1,6 @@
 package action
 
 import (
-	"errors"
 	"fmt"
 	"io"
 
@@ -11,6 +10,7 @@ import (
 
 	"github.com/wencaiwulue/kubevpn/pkg/config"
 	"github.com/wencaiwulue/kubevpn/pkg/daemon/rpc"
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 	"github.com/wencaiwulue/kubevpn/pkg/handler"
 	"github.com/wencaiwulue/kubevpn/pkg/util"
 )
@@ -45,7 +45,7 @@ func (svr *Server) Proxy(req *rpc.ConnectRequest, resp rpc.Daemon_ProxyServer) e
 
 	file, err := util.ConvertToTempKubeconfigFile([]byte(req.KubeconfigBytes))
 	if err != nil {
-		err = errors.New("util.ConvertToTempKubeconfigFile([]byte(req.KubeconfigBytes)): " + err.Error())
+		err = errors.Wrap(err, "util.ConvertToTempKubeconfigFile([]byte(req.KubeconfigBytes)): ")
 		return err
 	}
 	flags := pflag.NewFlagSet("", pflag.ContinueOnError)
@@ -56,17 +56,17 @@ func (svr *Server) Proxy(req *rpc.ConnectRequest, resp rpc.Daemon_ProxyServer) e
 	var path string
 	path, err = handler.SshJump(ctx, sshConf, flags, false)
 	if err != nil {
-		err = errors.New("handler.SshJump(ctx, sshConf, flags, false): " + err.Error())
+		err = errors.Wrap(err, "handler.SshJump(ctx, sshConf, flags, false): ")
 		return err
 	}
 	err = connect.InitClient(InitFactoryByPath(path, req.Namespace))
 	if err != nil {
-		err = errors.New("connect.InitClient(InitFactoryByPath(path, req.Namespace)): " + err.Error())
+		err = errors.Wrap(err, "connect.InitClient(InitFactoryByPath(path, req.Namespace)): ")
 		return err
 	}
 	err = connect.PreCheckResource()
 	if err != nil {
-		err = errors.New("connect.PreCheckResource(): " + err.Error())
+		err = errors.Wrap(err, "connect.PreCheckResource(): ")
 		return err
 	}
 
@@ -103,7 +103,7 @@ func (svr *Server) Proxy(req *rpc.ConnectRequest, resp rpc.Daemon_ProxyServer) e
 				}
 				err = resp.Send(&rpc.ConnectResponse{Message: recv.Message})
 				if err != nil {
-					err = errors.New("resp.Send(&rpc.ConnectResponse{Message: recv.Message}): " + err.Error())
+					err = errors.Wrap(err, "resp.Send(&rpc.ConnectResponse{Message: recv.Message}): ")
 					return err
 				}
 			}
@@ -116,7 +116,7 @@ func (svr *Server) Proxy(req *rpc.ConnectRequest, resp rpc.Daemon_ProxyServer) e
 		var connResp rpc.Daemon_ConnectClient
 		connResp, err = daemonClient.Connect(ctx, req)
 		if err != nil {
-			err = errors.New("daemonClient.Connect(ctx, req): " + err.Error())
+			err = errors.Wrap(err, "daemonClient.Connect(ctx, req): ")
 			return err
 		}
 		var recv *rpc.ConnectResponse
@@ -129,7 +129,7 @@ func (svr *Server) Proxy(req *rpc.ConnectRequest, resp rpc.Daemon_ProxyServer) e
 			}
 			err = resp.Send(recv)
 			if err != nil {
-				err = errors.New("resp.Send(recv): " + err.Error())
+				err = errors.Wrap(err, "resp.Send(recv): ")
 				return err
 			}
 		}

@@ -2,13 +2,13 @@ package action
 
 import (
 	"context"
-	"errors"
 
 	goversion "github.com/hashicorp/go-version"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/wencaiwulue/kubevpn/pkg/config"
 	"github.com/wencaiwulue/kubevpn/pkg/daemon/rpc"
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 )
 
 func (svr *Server) Upgrade(ctx context.Context, req *rpc.UpgradeRequest) (*rpc.UpgradeResponse, error) {
@@ -16,12 +16,12 @@ func (svr *Server) Upgrade(ctx context.Context, req *rpc.UpgradeRequest) (*rpc.U
 	var clientVersion, daemonVersion *goversion.Version
 	clientVersion, err = goversion.NewVersion(req.ClientVersion)
 	if err != nil {
-		err = errors.New("goversion.NewVersion(req.ClientVersion): " + err.Error())
+		err = errors.Wrap(err, "goversion.NewVersion(req.ClientVersion): ")
 		return nil, err
 	}
 	daemonVersion, err = goversion.NewVersion(config.Version)
 	if err != nil {
-		err = errors.New("goversion.NewVersion(config.Version): " + err.Error())
+		err = errors.Wrap(err, "goversion.NewVersion(config.Version): ")
 		return nil, err
 	}
 	if clientVersion.GreaterThan(daemonVersion) || (clientVersion.Equal(daemonVersion) && req.ClientCommitId != config.GitCommit) {

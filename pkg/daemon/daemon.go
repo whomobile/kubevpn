@@ -2,7 +2,6 @@ package daemon
 
 import (
 	"context"
-	"errors"
 	"net"
 	"net/http"
 	"os"
@@ -21,6 +20,7 @@ import (
 	"github.com/wencaiwulue/kubevpn/pkg/daemon/action"
 	_ "github.com/wencaiwulue/kubevpn/pkg/daemon/handler"
 	"github.com/wencaiwulue/kubevpn/pkg/daemon/rpc"
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 	"github.com/wencaiwulue/kubevpn/pkg/util"
 )
 
@@ -48,14 +48,14 @@ func (o *SvrOption) Start(ctx context.Context) error {
 	var lc net.ListenConfig
 	lis, err := lc.Listen(o.ctx, "unix", GetSockPath(o.IsSudo))
 	if err != nil {
-		err = errors.New("lc.Listen(o.ctx, \"unix\", GetSockPath(o.IsSudo)): " + err.Error())
+		err = errors.Wrap(err, "lc.Listen(o.ctx, \"unix\", GetSockPath(o.IsSudo)): ")
 		return err
 	}
 	defer lis.Close()
 
 	err = os.Chmod(GetSockPath(o.IsSudo), 0666)
 	if err != nil {
-		err = errors.New("os.Chmod(GetSockPath(o.IsSudo), 0666): " + err.Error())
+		err = errors.Wrap(err, "os.Chmod(GetSockPath(o.IsSudo), 0666): ")
 		return err
 	}
 

@@ -1,7 +1,6 @@
 package tun
 
 import (
-	"errors"
 	"net"
 	"time"
 
@@ -11,6 +10,7 @@ import (
 	"golang.zx2c4.com/wireguard/tun"
 
 	"github.com/wencaiwulue/kubevpn/pkg/config"
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 )
 
 // Config is the config for TUN device.
@@ -89,7 +89,7 @@ func (c *tunConn) Read(b []byte) (n int, err error) {
 	var size int
 	size, err = c.ifce.Read(bytes[:], offset)
 	if err != nil {
-		err = errors.New("c.ifce.Read(bytes[:], offset): " + err.Error())
+		err = errors.Wrap(err, "c.ifce.Read(bytes[:], offset): ")
 		return 0, err
 	}
 	if size == 0 || size > device.MaxSegmentSize-device.MessageTransportHeaderSize {

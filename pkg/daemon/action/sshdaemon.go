@@ -2,7 +2,6 @@ package action
 
 import (
 	"context"
-	"errors"
 	"net"
 	"sync"
 	"time"
@@ -14,6 +13,7 @@ import (
 	"github.com/wencaiwulue/kubevpn/pkg/config"
 	"github.com/wencaiwulue/kubevpn/pkg/core"
 	"github.com/wencaiwulue/kubevpn/pkg/daemon/rpc"
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 	"github.com/wencaiwulue/kubevpn/pkg/handler"
 	"github.com/wencaiwulue/kubevpn/pkg/tun"
 	"github.com/wencaiwulue/kubevpn/pkg/util"
@@ -76,12 +76,12 @@ func (svr *Server) SshStart(ctx context.Context, req *rpc.SshStartRequest) (*rpc
 
 	serverip, _, err := net.ParseCIDR(serverIP)
 	if err != nil {
-		err = errors.New("net.ParseCIDR(serverIP): " + err.Error())
+		err = errors.Wrap(err, "net.ParseCIDR(serverIP): ")
 		return nil, err
 	}
 	tunDevice, err := util.GetTunDevice(serverip)
 	if err != nil {
-		err = errors.New("util.GetTunDevice(serverip): " + err.Error())
+		err = errors.Wrap(err, "util.GetTunDevice(serverip): ")
 		return nil, err
 	}
 	err = tun.AddRoutes(tunDevice.Name, types.Route{

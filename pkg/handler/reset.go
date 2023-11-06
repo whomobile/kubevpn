@@ -2,7 +2,6 @@ package handler
 
 import (
 	"context"
-	"errors"
 	"strings"
 
 	"github.com/docker/docker/api/types"
@@ -15,6 +14,7 @@ import (
 
 	"github.com/wencaiwulue/kubevpn/pkg/config"
 	"github.com/wencaiwulue/kubevpn/pkg/controlplane"
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 )
 
 // Reset
@@ -30,13 +30,13 @@ func (c *ConnectOptions) Reset(ctx context.Context) error {
 	var cli *client.Client
 	cli, err = client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
-		err = errors.New("client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation()): " + err.Error())
+		err = errors.Wrap(err, "client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation()): ")
 		return nil
 	}
 	var networkResource types.NetworkResource
 	networkResource, err = cli.NetworkInspect(ctx, config.ConfigMapPodTrafficManager, types.NetworkInspectOptions{})
 	if err != nil {
-		err = errors.New("cli.NetworkInspect(ctx, config.ConfigMapPodTrafficManager, types.NetworkInspectOptions{}): " + err.Error())
+		err = errors.Wrap(err, "cli.NetworkInspect(ctx, config.ConfigMapPodTrafficManager, types.NetworkInspectOptions{}): ")
 		return nil
 	}
 	if len(networkResource.Containers) == 0 {

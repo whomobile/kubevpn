@@ -2,13 +2,13 @@ package core
 
 import (
 	"context"
-	"errors"
 	"net"
 	"time"
 
 	log "github.com/sirupsen/logrus"
 
 	"github.com/wencaiwulue/kubevpn/pkg/config"
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 )
 
 func (h *tunHandler) HandleClient(ctx context.Context, tun net.Conn) {
@@ -65,7 +65,7 @@ func getRemotePacketConn(ctx context.Context, chain *Chain) (packetConn net.Pack
 		var cc net.Conn
 		cc, err = chain.DialContext(ctx)
 		if err != nil {
-			err = errors.New("chain.DialContext(ctx): " + err.Error())
+			err = errors.Wrap(err, "chain.DialContext(ctx): ")
 			return
 		}
 		var ok bool
@@ -77,7 +77,7 @@ func getRemotePacketConn(ctx context.Context, chain *Chain) (packetConn net.Pack
 		var lc net.ListenConfig
 		packetConn, err = lc.ListenPacket(ctx, "udp", "")
 		if err != nil {
-			err = errors.New("lc.ListenPacket(ctx, \"udp\", \"\"): " + err.Error())
+			err = errors.Wrap(err, "lc.ListenPacket(ctx, \"udp\", \"\"): ")
 			return
 		}
 	}

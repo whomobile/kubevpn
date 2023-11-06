@@ -108,9 +108,9 @@ container:
 	  --build-arg REGISTRY_USERNAME=${REGISTRY_USERNAME} \
       $(if ${CACHE_FROM},${CACHE_FROM}) \
       $(if ${CACHE_TO},${CACHE_TO},) \
-	  --platform linux/amd64,linux/arm64 \
+	  --platform linux/amd64 \
 	  -t ${IMAGE} -t ${IMAGE_DEFAULT} -f $(BUILD_DIR)/Dockerfile --push .
-
+#  --platform linux/amd64,linux/arm64
 ############################ build local
 .PHONY: container-local
 container-local: kubevpn-linux-amd64

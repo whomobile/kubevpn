@@ -13,7 +13,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	v12 "k8s.io/client-go/kubernetes/typed/core/v1"
@@ -21,6 +21,7 @@ import (
 	"k8s.io/utils/pointer"
 
 	"github.com/wencaiwulue/kubevpn/pkg/config"
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 	"github.com/wencaiwulue/kubevpn/pkg/util"
 )
 
@@ -109,7 +110,7 @@ func updateRefCount(ctx context.Context, configMapInterface v12.ConfigMapInterfa
 				if k8serrors.IsNotFound(err) {
 					return err
 				}
-				err = fmt.Errorf("update ref-count failed, increment: %d, error: %v", increment, err)
+				err = errors.Errorf("update ref-count failed, increment: %d, error: %v", increment, err)
 				return
 			}
 			curCount, _ := strconv.Atoi(cm.Data[config.KeyRefCount])
@@ -123,7 +124,7 @@ func updateRefCount(ctx context.Context, configMapInterface v12.ConfigMapInterfa
 				if k8serrors.IsNotFound(err) {
 					return err
 				}
-				err = fmt.Errorf("update ref count error, error: %v", err)
+				err = errors.Errorf("update ref count error, error: %v", err)
 				return
 			}
 			return
@@ -136,12 +137,12 @@ func updateRefCount(ctx context.Context, configMapInterface v12.ConfigMapInterfa
 	var cm *corev1.ConfigMap
 	cm, err = configMapInterface.Get(ctx, name, v1.GetOptions{})
 	if err != nil {
-		err = fmt.Errorf("failed to get cm: %s, err: %v", name, err)
+		err = errors.Errorf("failed to get cm: %s, err: %v", name, err)
 		return
 	}
 	current, err = strconv.Atoi(cm.Data[config.KeyRefCount])
 	if err != nil {
-		err = fmt.Errorf("failed to get ref-count, err: %v", err)
+		err = errors.Errorf("failed to get ref-count, err: %v", err)
 	}
 	return
 }

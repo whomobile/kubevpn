@@ -70,7 +70,7 @@ func RenderTemplate(templateFile string, values interface{}, sha256Map map[strin
 			logrus.Infof("getting sha256 for %s", buf.String())
 			sha256, ok := sha256Map[buf.String()]
 			if !ok {
-				panic(fmt.Errorf("can not get sha256 for link %s", buf.String()))
+				panic(errors.Errorf("can not get sha256 for link %s", buf.String()))
 			}
 
 			return fmt.Sprintf(`uri: %s

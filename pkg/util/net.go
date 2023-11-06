@@ -1,7 +1,6 @@
 package util
 
 import (
-	"fmt"
 	"net"
 	"strings"
 	"time"
@@ -34,7 +33,7 @@ func GetTunDevice(ips ...net.IP) (*net.Interface, error) {
 			}
 		}
 	}
-	return nil, fmt.Errorf("can not found any interface with ip %v", ips)
+	return nil, errors.Errorf("can not found any interface with ip %v", ips)
 }
 
 func GetTunDeviceByConn(tun net.Conn) (*net.Interface, error) {
@@ -61,7 +60,7 @@ func GetTunDeviceByConn(tun net.Conn) (*net.Interface, error) {
 			}
 		}
 	}
-	return nil, fmt.Errorf("can not found any interface with ip %v", ip)
+	return nil, errors.Errorf("can not found any interface with ip %v", ip)
 }
 
 func Ping(targetIP string) (bool, error) {

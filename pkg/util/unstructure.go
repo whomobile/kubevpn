@@ -2,7 +2,6 @@ package util
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/sirupsen/logrus"
 	v1 "k8s.io/api/core/v1"
@@ -34,7 +33,7 @@ func GetUnstructuredObject(f util.Factory, namespace string, workloads string) (
 		return nil, err
 	}
 	if len(infos) == 0 {
-		return nil, fmt.Errorf("not found workloads %s", workloads)
+		return nil, errors.Errorf("not found workloads %s", workloads)
 	}
 	return infos[0], err
 }
@@ -59,7 +58,7 @@ func GetUnstructuredObjectList(f util.Factory, namespace string, workloads []str
 		return nil, err
 	}
 	if len(infos) == 0 {
-		return nil, fmt.Errorf("not found resource %v", workloads)
+		return nil, errors.Errorf("not found resource %v", workloads)
 	}
 	return infos, err
 }
@@ -122,7 +121,7 @@ func GetAnnotation(f util.Factory, ns string, resources string) (map[string]stri
 	}
 	u, ok := ownerReference.Object.(*unstructured.Unstructured)
 	if !ok {
-		return nil, fmt.Errorf("can not convert to unstaructed")
+		return nil, errors.Errorf("can not convert to unstaructed")
 	}
 	annotations := u.GetAnnotations()
 	if annotations == nil {

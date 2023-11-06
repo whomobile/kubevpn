@@ -354,7 +354,7 @@ func TestWaitBackoff(t *testing.T) {
 			now := time.Now()
 			fmt.Println(now.Sub(last).String())
 			last = now
-			return fmt.Errorf("")
+			return errors.Errorf("")
 		})
 }
 

@@ -2,7 +2,6 @@ package action
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -17,7 +16,7 @@ import (
 
 func (svr *Server) List(ctx context.Context, req *rpc.ListRequest) (*rpc.ListResponse, error) {
 	if svr.connect == nil || svr.connect.GetClientset() == nil {
-		return nil, fmt.Errorf("not connect to any cluster")
+		return nil, errors.Errorf("not connect to any cluster")
 	}
 	mapInterface := svr.connect.GetClientset().CoreV1().ConfigMaps(svr.connect.Namespace)
 	configMap, err := mapInterface.Get(ctx, config.ConfigMapPodTrafficManager, metav1.GetOptions{})

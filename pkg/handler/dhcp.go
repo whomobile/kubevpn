@@ -44,7 +44,7 @@ func initDHCPBreakPoint() {
 func (d *DHCPManager) initDHCP(ctx context.Context) error {
 	cm, err := d.client.Get(ctx, config.ConfigMapPodTrafficManager, metav1.GetOptions{})
 	if err != nil && !apierrors.IsNotFound(err) {
-		return fmt.Errorf("failed to get configmap %s, err: %v", config.ConfigMapPodTrafficManager, err)
+		return errors.Errorf("failed to get configmap %s, err: %v", config.ConfigMapPodTrafficManager, err)
 	}
 	if err == nil {
 		// add key envoy in case of mount not exist content
@@ -56,7 +56,7 @@ func (d *DHCPManager) initDHCP(ctx context.Context) error {
 				[]byte(fmt.Sprintf(`{"data":{"%s":"%s"}}`, config.KeyEnvoy, "")),
 				metav1.PatchOptions{},
 			)
-			return fmt.Errorf("failed to patch configmap %s, err: %v", config.ConfigMapPodTrafficManager, err)
+			return errors.Errorf("failed to patch configmap %s, err: %v", config.ConfigMapPodTrafficManager, err)
 		}
 		return nil
 	}
@@ -73,7 +73,7 @@ func (d *DHCPManager) initDHCP(ctx context.Context) error {
 	}
 	_, err = d.client.Create(ctx, cm, metav1.CreateOptions{})
 	if err != nil {
-		return fmt.Errorf("create dhcp error, err: %v", err)
+		return errors.Errorf("create dhcp error, err: %v", err)
 	}
 	return nil
 }
@@ -192,7 +192,7 @@ func (d *DHCPManager) ReleaseIP(ctx context.Context, ips ...net.IP) error {
 func (d *DHCPManager) updateDHCPConfigMap(ctx context.Context, f func(ipv4 *ipallocator.Range, ipv6 *ipallocator.Range) error) error {
 	cm, err := d.client.Get(ctx, config.ConfigMapPodTrafficManager, metav1.GetOptions{})
 	if err != nil {
-		return fmt.Errorf("failed to get cm DHCP server, err: %v", err)
+		return errors.Errorf("failed to get cm DHCP server, err: %v", err)
 	}
 	if cm.Data == nil {
 		cm.Data = make(map[string]string)
@@ -248,7 +248,7 @@ func (d *DHCPManager) updateDHCPConfigMap(ctx context.Context, f func(ipv4 *ipal
 	}
 	_, err = d.client.Update(ctx, cm, metav1.UpdateOptions{})
 	if err != nil {
-		return fmt.Errorf("update dhcp failed, err: %v", err)
+		return errors.Errorf("update dhcp failed, err: %v", err)
 	}
 	return nil
 }
@@ -282,7 +282,7 @@ func (d *DHCPManager) Get(ctx2 context.Context, key string) (string, error) {
 			return v, nil
 		}
 	}
-	return "", fmt.Errorf("can not get data")
+	return "", errors.Errorf("can not get data")
 }
 
 func (d *DHCPManager) ForEach(fn func(net.IP)) error {

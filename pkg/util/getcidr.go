@@ -90,7 +90,7 @@ func getServiceCIDRByCreateSvc(serviceInterface corev1.ServiceInterface) (*net.I
 			}
 			return cidr, nil
 		}
-		return nil, fmt.Errorf("can not found any keyword of service cidr info, err: %s", err.Error())
+		return nil, errors.Errorf("can not found any keyword of service cidr info, err: %s", err.Error())
 	}
 	return nil, err
 }
@@ -322,7 +322,7 @@ func getPodCIDRFromPod(clientset *kubernetes.Clientset, namespace string, svc *n
 	}
 
 	if len(result) == 0 {
-		return nil, fmt.Errorf("can not found pod cidr from pod list")
+		return nil, errors.Errorf("can not found pod cidr from pod list")
 	}
 
 	return result, nil

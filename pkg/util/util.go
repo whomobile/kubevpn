@@ -111,7 +111,7 @@ func RolloutStatus(ctx1 context.Context, factory cmdutil.Factory, namespace, wor
 		return err
 	}
 	if len(infos) != 1 {
-		return fmt.Errorf("rollout status is only supported on individual resources and resource collections - %d resources were found", len(infos))
+		return errors.Errorf("rollout status is only supported on individual resources and resource collections - %d resources were found", len(infos))
 	}
 	info := infos[0]
 	mapping := info.ResourceMapping()
@@ -156,10 +156,10 @@ func RolloutStatus(ctx1 context.Context, factory cmdutil.Factory, namespace, wor
 
 			case watch.Deleted:
 				// We need to abort to avoid cases of recreation and not to silently watch the wrong (new) object
-				return true, fmt.Errorf("object has been deleted")
+				return true, errors.Errorf("object has been deleted")
 
 			default:
-				return true, fmt.Errorf("internal error: unexpected event %#v", e)
+				return true, errors.Errorf("internal error: unexpected event %#v", e)
 			}
 		})
 		return err
@@ -218,7 +218,7 @@ func WaitPortToBeFree(ctx context.Context, port int) error {
 	for {
 		select {
 		case <-ctx.Done():
-			return fmt.Errorf("wait port %v to be free timeout", port)
+			return errors.Errorf("wait port %v to be free timeout", port)
 		case <-time.Tick(time.Second * 2):
 			if !IsPortListening(port) {
 				log.Infoln(fmt.Sprintf("port %v are free", port))
@@ -293,7 +293,7 @@ func CanI(clientset *kubernetes.Clientset, sa, ns string, resource *rbacv1.Polic
 func DoReq(request *http.Request) (body []byte, err error) {
 	cert, ok := os.LookupEnv(config.TLSCertKey)
 	if !ok {
-		return nil, fmt.Errorf("can not get %s from env", config.TLSCertKey)
+		return nil, errors.Errorf("can not get %s from env", config.TLSCertKey)
 	}
 	caCertPool := x509.NewCertPool()
 	caCertPool.AppendCertsFromPEM([]byte(cert))
@@ -309,17 +309,17 @@ func DoReq(request *http.Request) (body []byte, err error) {
 	var resp *http.Response
 	resp, err = client.Do(request)
 	if err != nil {
-		return nil, fmt.Errorf("err: %v", err)
+		return nil, errors.Errorf("err: %v", err)
 	}
 	defer resp.Body.Close()
 	body, err = io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("can not read body, err: %v", err)
+		return nil, errors.Errorf("can not read body, err: %v", err)
 	}
 	if resp.StatusCode == http.StatusOK {
 		return body, nil
 	}
-	return body, fmt.Errorf("http status is %d", resp.StatusCode)
+	return body, errors.Errorf("http status is %d", resp.StatusCode)
 }
 
 func GetTlsDomain(namespace string) string {
@@ -355,7 +355,7 @@ func CleanExtensionLib() {
 		},
 		func() error {
 			err = driver.UninstallWireGuardTunDriver()
-			return fmt.Errorf("%v", err)
+			return errors.Errorf("%v", err)
 		},
 	)
 	_, err = os.Lstat(filename)

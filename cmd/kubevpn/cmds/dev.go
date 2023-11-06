@@ -94,7 +94,7 @@ Startup your kubernetes workloads in local Docker container with same volume、e
 			util.InitLogger(false)
 			// not support temporally
 			if devOptions.Engine == config.EngineGvisor {
-				return fmt.Errorf(`not support type engine: %s, support ("%s"|"%s")`, config.EngineGvisor, config.EngineMix, config.EngineRaw)
+				return errors.Errorf(`not support type engine: %s, support ("%s"|"%s")`, config.EngineGvisor, config.EngineMix, config.EngineRaw)
 			}
 
 			err = daemon.StartupDaemon(cmd.Context())

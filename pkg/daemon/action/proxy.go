@@ -1,7 +1,6 @@
 package action
 
 import (
-	"fmt"
 	"io"
 
 	log "github.com/sirupsen/logrus"
@@ -72,7 +71,7 @@ func (svr *Server) Proxy(req *rpc.ConnectRequest, resp rpc.Daemon_ProxyServer) e
 
 	daemonClient := svr.GetClient(false)
 	if daemonClient == nil {
-		return fmt.Errorf("daemon is not avaliable")
+		return errors.Errorf("daemon is not avaliable")
 	}
 	if svr.connect != nil {
 		var isSameCluster bool

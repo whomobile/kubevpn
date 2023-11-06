@@ -3,12 +3,11 @@ package webhook
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net"
 
 	"github.com/mattbaird/jsonpatch"
 	log "github.com/sirupsen/logrus"
-	"k8s.io/api/admission/v1"
+	v1 "k8s.io/api/admission/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -16,6 +15,7 @@ import (
 	"k8s.io/kubectl/pkg/cmd/util/podcmd"
 
 	"github.com/wencaiwulue/kubevpn/pkg/config"
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 	"github.com/wencaiwulue/kubevpn/pkg/handler"
 )
 
@@ -25,7 +25,7 @@ func (h *admissionReviewHandler) admitPods(ar v1.AdmissionReview) *v1.AdmissionR
 	log.Infof("admitting pods called, req: %v", string(r))
 	podResource := metav1.GroupVersionResource{Group: "", Version: "v1", Resource: "pods"}
 	if ar.Request.Resource != podResource {
-		err := fmt.Errorf("expect resource to be %s but real %s", podResource, ar.Request.Resource)
+		err := errors.Errorf("expect resource to be %s but real %s", podResource, ar.Request.Resource)
 		log.Error(err)
 		return toV1AdmissionResponse(err)
 	}
@@ -164,7 +164,7 @@ func (h *admissionReviewHandler) admitPods(ar v1.AdmissionReview) *v1.AdmissionR
 			Allowed: true,
 		}
 	default:
-		err := fmt.Errorf("expect operation is %s or %s, not %s", v1.Create, v1.Delete, ar.Request.Operation)
+		err := errors.Errorf("expect operation is %s or %s, not %s", v1.Create, v1.Delete, ar.Request.Operation)
 		log.Error(err)
 		return toV1AdmissionResponse(err)
 	}

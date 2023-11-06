@@ -3,7 +3,6 @@ package controlplane
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"math"
 	"math/rand"
 	"os"
@@ -99,7 +98,7 @@ func ParseYaml(file string) ([]*Virtual, error) {
 
 	yamlFile, err := os.ReadFile(file)
 	if err != nil {
-		return nil, fmt.Errorf("Error reading YAML file: %s\n", err)
+		return nil, errors.Errorf("Error reading YAML file: %s\n", err)
 	}
 
 	err = yaml.Unmarshal(yamlFile, &virtualList)

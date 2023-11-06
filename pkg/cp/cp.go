@@ -110,7 +110,7 @@ func (o *CopyOptions) Complete(f cmdutil.Factory, cmd *cobra.Command, args []str
 // Validate makes sure provided values for CopyOptions are valid
 func (o *CopyOptions) Validate() error {
 	if len(o.args) != 2 {
-		return fmt.Errorf("source and destination are required")
+		return errors.Errorf("source and destination are required")
 	}
 	return nil
 }
@@ -129,7 +129,7 @@ func (o *CopyOptions) Run() error {
 	}
 
 	if len(srcSpec.PodName) != 0 && len(destSpec.PodName) != 0 {
-		return fmt.Errorf("one of src or dest must be a local file specification")
+		return errors.Errorf("one of src or dest must be a local file specification")
 	}
 	if len(srcSpec.File.String()) == 0 || len(destSpec.File.String()) == 0 {
 		return errors.New("filepath can not be empty")
@@ -141,7 +141,7 @@ func (o *CopyOptions) Run() error {
 	if len(destSpec.PodName) != 0 {
 		return o.copyToPod(srcSpec, destSpec, &exec.ExecOptions{})
 	}
-	return fmt.Errorf("one of src or dest must be a remote file specification")
+	return errors.Errorf("one of src or dest must be a remote file specification")
 }
 
 // checkDestinationIsDir receives a destination fileSpec and
@@ -169,7 +169,7 @@ func (o *CopyOptions) checkDestinationIsDir(dest fileSpec) error {
 
 func (o *CopyOptions) copyToPod(src, dest fileSpec, options *exec.ExecOptions) error {
 	if _, err := os.Stat(src.File.String()); err != nil {
-		return fmt.Errorf("%s doesn't exist in local filesystem", src.File)
+		return errors.Errorf("%s doesn't exist in local filesystem", src.File)
 	}
 	reader, writer := io.Pipe()
 
@@ -398,7 +398,7 @@ func (o *CopyOptions) untarAll(prefix string, dest localPath, reader io.Reader) 
 		// For the case where prefix is empty we need to ensure that the path
 		// is not absolute, which also indicates the tar file was tempered with.
 		if !strings.HasPrefix(header.Name, prefix) {
-			return fmt.Errorf("tar contents corrupted")
+			return errors.Errorf("tar contents corrupted")
 		}
 
 		// header.Name is a name of the REMOTE file, so we need to create

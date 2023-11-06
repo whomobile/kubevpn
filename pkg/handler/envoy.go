@@ -146,7 +146,7 @@ func UnPatchContainer(factory cmdutil.Factory, mapInterface v12.ConfigMapInterfa
 		var ps []P
 		err = json.Unmarshal([]byte(patchStr), &ps)
 		if err != nil {
-			return fmt.Errorf("unmarshal json patch: %s failed, err: %v", patchStr, err)
+			return errors.Errorf("unmarshal json patch: %s failed, err: %v", patchStr, err)
 		}
 		fromPatchToProbe(templateSpec, depth, ps)
 	}

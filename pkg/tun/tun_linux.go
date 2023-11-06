@@ -18,7 +18,7 @@ import (
 
 func createTun(cfg Config) (conn net.Conn, itf *net.Interface, err error) {
 	if cfg.Addr == "" && cfg.Addr6 == "" {
-		err = fmt.Errorf("ipv4 address and ipv6 address can not be empty at same time")
+		err = errors.Errorf("ipv4 address and ipv6 address can not be empty at same time")
 		return
 	}
 
@@ -42,12 +42,12 @@ func createTun(cfg Config) (conn net.Conn, itf *net.Interface, err error) {
 	}
 	var ifc *net.Interface
 	if ifc, err = net.InterfaceByName(name); err != nil {
-		err = fmt.Errorf("could not find interface name: %s", err)
+		err = errors.Errorf("could not find interface name: %s", err)
 		return
 	}
 
 	if err = netlink.NetworkSetMTU(ifc, mtu); err != nil {
-		err = fmt.Errorf("can not setup mtu %d to device %s : %v", mtu, name, err)
+		err = errors.Errorf("can not setup mtu %d to device %s : %v", mtu, name, err)
 		return
 	}
 
@@ -57,7 +57,7 @@ func createTun(cfg Config) (conn net.Conn, itf *net.Interface, err error) {
 			return
 		}
 		if err = netlink.NetworkLinkAddIp(ifc, ipv4, ipv4CIDR); err != nil {
-			err = fmt.Errorf("can not set ipv4 address %s to device %s : %v", ipv4.String(), name, err)
+			err = errors.Errorf("can not set ipv4 address %s to device %s : %v", ipv4.String(), name, err)
 			return
 		}
 	}
@@ -68,13 +68,13 @@ func createTun(cfg Config) (conn net.Conn, itf *net.Interface, err error) {
 			return
 		}
 		if err = netlink.NetworkLinkAddIp(ifc, ipv6, ipv6CIDR); err != nil {
-			err = fmt.Errorf("can not setup ipv6 address %s to device %s : %v", ipv6.String(), name, err)
+			err = errors.Errorf("can not setup ipv6 address %s to device %s : %v", ipv6.String(), name, err)
 			return
 		}
 	}
 
 	if err = netlink.NetworkLinkUp(ifc); err != nil {
-		err = fmt.Errorf("can not up device %s : %v", name, err)
+		err = errors.Errorf("can not up device %s : %v", name, err)
 		return
 	}
 
@@ -103,7 +103,7 @@ func addTunRoutes(ifName string, routes ...types.Route) error {
 		log.Debugf("[tun] %s", cmd)
 		err := netlink.AddRoute(route.Dst.String(), "", "", ifName)
 		if err != nil && !errors.Is(err, syscall.EEXIST) {
-			return fmt.Errorf("%s: %v", cmd, err)
+			return errors.Errorf("%s: %v", cmd, err)
 		}
 	}
 	return nil

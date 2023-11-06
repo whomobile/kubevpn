@@ -2,7 +2,6 @@ package util
 
 import (
 	"context"
-	"fmt"
 	"net"
 
 	log "github.com/sirupsen/logrus"
@@ -60,7 +59,7 @@ func GetCIDRElegant(clientset *kubernetes.Clientset, restclient *rest.RESTClient
 	result = Deduplicate(result)
 
 	if len(result) == 0 {
-		err = fmt.Errorf("can not get any cidr, please make sure you have prilivage")
+		err = errors.Errorf("can not get any cidr, please make sure you have prilivage")
 		return
 	}
 	return
@@ -154,7 +153,7 @@ func GetLocalTunIP(tunName string) (net.IP, net.IP, error) {
 		}
 	}
 	if srcIPv4 == nil || srcIPv6 == nil {
-		return srcIPv4, srcIPv6, fmt.Errorf("not found all ip")
+		return srcIPv4, srcIPv6, errors.Errorf("not found all ip")
 	}
 	return srcIPv4, srcIPv6, nil
 }

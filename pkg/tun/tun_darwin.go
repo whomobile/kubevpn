@@ -46,7 +46,7 @@ func createTun(cfg Config) (conn net.Conn, itf *net.Interface, err error) {
 	log.Debugf("[tun] %s", setIPv4Cmd)
 	args := strings.Split(setIPv4Cmd, " ")
 	if err = exec.Command(args[0], args[1:]...).Run(); err != nil {
-		err = fmt.Errorf("%s: %v", setIPv4Cmd, err)
+		err = errors.Errorf("%s: %v", setIPv4Cmd, err)
 		return
 	}
 
@@ -61,7 +61,7 @@ func createTun(cfg Config) (conn net.Conn, itf *net.Interface, err error) {
 		log.Debugf("[tun] %s", setIPv6Cmd)
 		args = strings.Split(setIPv6Cmd, " ")
 		if err = exec.Command(args[0], args[1:]...).Run(); err != nil {
-			err = fmt.Errorf("%s: %v", setIPv6Cmd, err)
+			err = errors.Errorf("%s: %v", setIPv6Cmd, err)
 			return
 		}
 	}
@@ -99,7 +99,7 @@ func addTunRoutes(ifName string, routes ...types.Route) error {
 		args := strings.Split(cmd, " ")
 		err := exec.Command(args[0], args[1:]...).Run()
 		if err != nil {
-			return fmt.Errorf("run cmd %s: %v", cmd, err)
+			return errors.Errorf("run cmd %s: %v", cmd, err)
 		}
 	}
 	return nil

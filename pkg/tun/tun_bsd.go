@@ -17,7 +17,7 @@ import (
 
 func createTun(cfg Config) (conn net.Conn, itf *net.Interface, err error) {
 	if cfg.Addr == "" && cfg.Addr6 == "" {
-		err = fmt.Errorf("ipv4 address and ipv6 address can not be empty at same time")
+		err = errors.Errorf("ipv4 address and ipv6 address can not be empty at same time")
 		return
 	}
 
@@ -52,7 +52,7 @@ func createTun(cfg Config) (conn net.Conn, itf *net.Interface, err error) {
 		log.Debugf("[tun] %s", cmd)
 		args := strings.Split(cmd, " ")
 		if err = exec.Command(args[0], args[1:]...).Run(); err != nil {
-			err = fmt.Errorf("%s: %v", cmd, err)
+			err = errors.Errorf("%s: %v", cmd, err)
 			return
 		}
 	}
@@ -66,7 +66,7 @@ func createTun(cfg Config) (conn net.Conn, itf *net.Interface, err error) {
 		log.Debugf("[tun] %s", cmd)
 		args := strings.Split(cmd, " ")
 		if err = exec.Command(args[0], args[1:]...).Run(); err != nil {
-			err = fmt.Errorf("%s: %v", cmd, err)
+			err = errors.Errorf("%s: %v", cmd, err)
 			return
 		}
 	}
@@ -102,7 +102,7 @@ func addTunRoutes(ifName string, routes ...types.Route) error {
 		log.Debugf("[tun] %s", cmd)
 		args := strings.Split(cmd, " ")
 		if er := exec.Command(args[0], args[1:]...).Run(); er != nil {
-			return fmt.Errorf("%s: %v", cmd, er)
+			return errors.Errorf("%s: %v", cmd, er)
 		}
 	}
 	return nil

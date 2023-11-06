@@ -253,7 +253,7 @@ func (d *CloneOptions) DoClone(ctx context.Context) error {
 					index = 0
 				}
 				if index < 0 {
-					return fmt.Errorf("can not found container %s in pod template", d.TargetContainer)
+					return errors.Errorf("can not found container %s in pod template", d.TargetContainer)
 				}
 				// update container[index] image
 				containers[index].Image = d.TargetImage
@@ -367,7 +367,7 @@ func (d *CloneOptions) DoClone(ctx context.Context) error {
 			return createErr
 		})
 		if retryErr != nil {
-			return fmt.Errorf("create clone for resource %s failed: %v", workload, retryErr)
+			return errors.Errorf("create clone for resource %s failed: %v", workload, retryErr)
 		}
 		log.Infof("create clone resource %s/%s in target cluster", u.GetObjectKind().GroupVersionKind().GroupKind().String(), u.GetName())
 		log.Infof("wait for clone resource %s/%s to be ready", u.GetObjectKind().GroupVersionKind().GroupKind().String(), u.GetName())

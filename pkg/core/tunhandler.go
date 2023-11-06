@@ -322,7 +322,7 @@ func genICMPPacket(src net.IP, dst net.IP) ([]byte, error) {
 	}
 	err := gopacket.SerializeLayers(buf, opts, &ipLayer, &icmpLayer)
 	if err != nil {
-		return nil, fmt.Errorf("failed to serialize icmp packet, err: %v", err)
+		return nil, errors.Errorf("failed to serialize icmp packet, err: %v", err)
 	}
 	return buf.Bytes(), nil
 }
@@ -344,7 +344,7 @@ func genICMPPacketIPv6(src net.IP, dst net.IP) ([]byte, error) {
 	}
 	err := gopacket.SerializeLayers(buf, opts, &ipLayer, &icmpLayer)
 	if err != nil {
-		return nil, fmt.Errorf("failed to serialize icmp6 packet, err: %v", err)
+		return nil, errors.Errorf("failed to serialize icmp6 packet, err: %v", err)
 	}
 	return buf.Bytes(), nil
 }
@@ -581,7 +581,7 @@ func (p *Peer) routeTUN() {
 			}
 		} else {
 			config.LPool.Put(e.data[:])
-			log.Debug(fmt.Errorf("[tun] no route for %s -> %s", e.src, e.dst))
+			log.Debug(errors.Errorf("[tun] no route for %s -> %s", e.src, e.dst))
 		}
 	}
 }

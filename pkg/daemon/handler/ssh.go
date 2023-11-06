@@ -181,13 +181,13 @@ func enterTerminal(conf *util.SshConfig, conn *websocket.Conn) error {
 	fd := int(os.Stdin.Fd())
 	state, err := terminal.MakeRaw(fd)
 	if err != nil {
-		return fmt.Errorf("terminal make raw: %s", err)
+		return errors.Errorf("terminal make raw: %s", err)
 	}
 	defer terminal.Restore(fd, state)
 
 	w, h, err := terminal.GetSize(fd)
 	if err != nil {
-		return fmt.Errorf("terminal get size: %s", err)
+		return errors.Errorf("terminal get size: %s", err)
 	}
 	modes := ssh.TerminalModes{
 		ssh.ECHO:          1,

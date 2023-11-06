@@ -18,12 +18,12 @@ func RentIPIfNeeded(route *core.Route) error {
 	if v, ok := os.LookupEnv(config.EnvInboundPodTunIPv4); ok && v == "" {
 		namespace := os.Getenv(config.EnvPodNamespace)
 		if namespace == "" {
-			return fmt.Errorf("can not get namespace")
+			return errors.Errorf("can not get namespace")
 		}
 		url := fmt.Sprintf("https://%s:80%s", util.GetTlsDomain(namespace), config.APIRentIP)
 		req, err := http.NewRequest("GET", url, nil)
 		if err != nil {
-			return fmt.Errorf("can not new req, err: %v", err)
+			return errors.Errorf("can not new req, err: %v", err)
 		}
 		req.Header.Set(config.HeaderPodName, os.Getenv(config.EnvPodName))
 		req.Header.Set(config.HeaderPodNamespace, namespace)
@@ -36,7 +36,7 @@ func RentIPIfNeeded(route *core.Route) error {
 		log.Infof("rent an ip %s", strings.TrimSpace(string(ip)))
 		ips := strings.Split(string(ip), ",")
 		if len(ips) != 2 {
-			return fmt.Errorf("can not get ip from %s", string(ip))
+			return errors.Errorf("can not get ip from %s", string(ip))
 		}
 		if err = os.Setenv(config.EnvInboundPodTunIPv4, ips[0]); err != nil {
 			log.Errorf("can not set ip, err: %v", err)
@@ -67,7 +67,7 @@ func ReleaseIPIfNeeded() error {
 	url := fmt.Sprintf("https://%s:80%s", util.GetTlsDomain(namespace), config.APIReleaseIP)
 	req, err := http.NewRequest("DELETE", url, nil)
 	if err != nil {
-		return fmt.Errorf("can not new req, err: %v", err)
+		return errors.Errorf("can not new req, err: %v", err)
 	}
 	req.Header.Set(config.HeaderPodName, os.Getenv(config.EnvPodName))
 	req.Header.Set(config.HeaderPodNamespace, namespace)

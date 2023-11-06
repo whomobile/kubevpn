@@ -152,16 +152,16 @@ func Main(f cmdutil.Factory) error {
 func getSSLKeyPairs() ([]tls.Certificate, error) {
 	cert, ok := os.LookupEnv(config.TLSCertKey)
 	if !ok {
-		return nil, fmt.Errorf("can not get %s from env", config.TLSCertKey)
+		return nil, errors.Errorf("can not get %s from env", config.TLSCertKey)
 	}
 	var key string
 	key, ok = os.LookupEnv(config.TLSPrivateKeyKey)
 	if !ok {
-		return nil, fmt.Errorf("can not get %s from env", config.TLSPrivateKeyKey)
+		return nil, errors.Errorf("can not get %s from env", config.TLSPrivateKeyKey)
 	}
 	pair, err := tls.X509KeyPair([]byte(cert), []byte(key))
 	if err != nil {
-		return nil, fmt.Errorf("failed to load certificate and key ,err: %v", err)
+		return nil, errors.Errorf("failed to load certificate and key ,err: %v", err)
 	}
 	return []tls.Certificate{pair}, nil
 }

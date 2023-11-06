@@ -156,7 +156,7 @@ func (c *ConnectOptions) RentInnerIP(ctx context.Context) (context.Context, erro
 
 func (c *ConnectOptions) CreateRemoteInboundPod(ctx context.Context) (err error) {
 	if c.localTunIPv4 == nil || c.localTunIPv6 == nil {
-		return fmt.Errorf("local tun ip is invalid")
+		return errors.Errorf("local tun ip is invalid")
 	}
 
 	for _, workload := range c.Workloads {
@@ -395,7 +395,7 @@ func (c *ConnectOptions) startLocalTunServe(ctx context.Context, forwardAddress 
 	for _, s := range c.ExtraCIDR {
 		_, _, err = net.ParseCIDR(s)
 		if err != nil {
-			return fmt.Errorf("invalid extra-cidr %s, err: %v", s, err)
+			return errors.Errorf("invalid extra-cidr %s, err: %v", s, err)
 		}
 		list.Insert(s)
 	}
@@ -562,7 +562,7 @@ func (c *ConnectOptions) addRouteDynamic(ctx context.Context) (err error) {
 		break
 	}
 	if err != nil {
-		err = fmt.Errorf("can not list service to add it to route table, err: %v", err)
+		err = errors.Errorf("can not list service to add it to route table, err: %v", err)
 		return
 	}
 	for _, item := range serviceList.Items {
@@ -713,7 +713,7 @@ func Parse(r core.Route) ([]core.Server, error) {
 		return nil, err
 	}
 	if len(servers) == 0 {
-		return nil, fmt.Errorf("server is empty, server config: %s", strings.Join(r.ServeNodes, ","))
+		return nil, errors.Errorf("server is empty, server config: %s", strings.Join(r.ServeNodes, ","))
 	}
 	return servers, nil
 }
@@ -862,7 +862,7 @@ func SshJump(ctx context.Context, conf *util.SshConfig, flags *pflag.FlagSet, pr
 
 	if len(ips) == 0 {
 		// handle error: no IP associated with the hostname
-		err = fmt.Errorf("kubeconfig: no IP associated with the hostname %s", serverHost)
+		err = errors.Errorf("kubeconfig: no IP associated with the hostname %s", serverHost)
 		return
 	}
 
@@ -1064,7 +1064,7 @@ func (c *ConnectOptions) PreCheckResource() error {
 				}
 				// only a single service, not support it yet
 				if controller.Len() == 0 {
-					return fmt.Errorf("not support resources: %s", workload)
+					return errors.Errorf("not support resources: %s", workload)
 				}
 			}
 		}
@@ -1176,7 +1176,7 @@ func (c *ConnectOptions) addExtraRoute(ctx context.Context) error {
 		return err
 	}
 	if len(ips) == 0 {
-		err = fmt.Errorf("can't found any dns server")
+		err = errors.Errorf("can't found any dns server")
 		return err
 	}
 
@@ -1330,7 +1330,7 @@ RetryWithDNSClient:
 			}
 		}
 		if !success {
-			return fmt.Errorf("failed to resolve dns for domain %s", domain)
+			return errors.Errorf("failed to resolve dns for domain %s", domain)
 		}
 	}
 	return nil

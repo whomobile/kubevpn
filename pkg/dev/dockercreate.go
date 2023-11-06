@@ -270,7 +270,7 @@ func validatePullOpt(val string) error {
 		// valid option, but nothing to do yet
 		return nil
 	default:
-		return fmt.Errorf(
+		return errors.Errorf(
 			"invalid pull option: '%s': must be one of %q, %q or %q",
 			val,
 			PullImageAlways,

@@ -30,16 +30,16 @@ func GetClient() (*client.Client, *command.DockerCli, error) {
 		client.WithAPIVersionNegotiation(),
 	)
 	if err != nil {
-		return nil, nil, fmt.Errorf("can not create docker client from env, err: %v", err)
+		return nil, nil, errors.Errorf("can not create docker client from env, err: %v", err)
 	}
 	var dockerCli *command.DockerCli
 	dockerCli, err = command.NewDockerCli(command.WithAPIClient(cli))
 	if err != nil {
-		return nil, nil, fmt.Errorf("can not create docker client from env, err: %v", err)
+		return nil, nil, errors.Errorf("can not create docker client from env, err: %v", err)
 	}
 	err = dockerCli.Initialize(flags.NewClientOptions())
 	if err != nil {
-		return nil, nil, fmt.Errorf("can not init docker client, err: %v", err)
+		return nil, nil, errors.Errorf("can not init docker client, err: %v", err)
 	}
 	return cli, dockerCli, nil
 }

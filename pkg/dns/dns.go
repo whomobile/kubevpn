@@ -124,7 +124,7 @@ func (c *Config) updateHosts(str string) error {
 		}
 	}
 	if len(lines) == 0 {
-		return fmt.Errorf("empty hosts file")
+		return errors.Errorf("empty hosts file")
 	}
 
 	{ // todo the reason why needs to add this code is that i found delete 127.0.0.1 localhost entry
@@ -152,7 +152,7 @@ func (c *Config) updateHosts(str string) error {
 	s = strings.TrimRight(s, "\n")
 
 	if strings.TrimSpace(s) == "" {
-		return fmt.Errorf("empty content after update")
+		return errors.Errorf("empty content after update")
 	}
 
 	return os.WriteFile(path, []byte(s), 0644)
@@ -258,7 +258,7 @@ func CleanupHosts() error {
 		}
 	}
 	if len(lines) == 0 {
-		return fmt.Errorf("empty hosts file")
+		return errors.Errorf("empty hosts file")
 	}
 
 	var sb strings.Builder

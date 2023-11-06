@@ -484,7 +484,7 @@ kubevpn serve -L "tcp://:10800" -L "tun://:8422?net=${TunIPv4}" -L "gtcp://:1080
 		}},
 	}, metav1.CreateOptions{})
 	if err != nil && !k8serrors.IsForbidden(err) && !k8serrors.IsAlreadyExists(err) {
-		return fmt.Errorf("failed to create MutatingWebhookConfigurations, err: %v", err)
+		return errors.Errorf("failed to create MutatingWebhookConfigurations, err: %v", err)
 	}
 	_, err = updateRefCount(ctx, clientset.CoreV1().ConfigMaps(namespace), config.ConfigMapPodTrafficManager, 1)
 	if err != nil {

@@ -2,7 +2,6 @@ package action
 
 import (
 	"context"
-	"fmt"
 	"io"
 	defaultlog "log"
 
@@ -105,7 +104,7 @@ func (svr *Server) ConnectFork(req *rpc.ConnectRequest, resp rpc.Daemon_ConnectF
 func (svr *Server) redirectConnectForkToSudoDaemon(req *rpc.ConnectRequest, resp rpc.Daemon_ConnectServer) error {
 	cli := svr.GetClient(true)
 	if cli == nil {
-		return fmt.Errorf("sudo daemon not start")
+		return errors.Errorf("sudo daemon not start")
 	}
 	connect := &handler.ConnectOptions{
 		Namespace:            req.Namespace,
@@ -196,7 +195,7 @@ func (svr *Server) redirectConnectForkToSudoDaemon(req *rpc.ConnectRequest, resp
 			if svr.secondaryConnect[i] == connect {
 				cli := svr.GetClient(false)
 				if cli == nil {
-					return fmt.Errorf("sudo daemon not start")
+					return errors.Errorf("sudo daemon not start")
 				}
 				disconnect, err := cli.Disconnect(context.Background(), &rpc.DisconnectRequest{
 					ID: pointer.Int32(int32(i)),

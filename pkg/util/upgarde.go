@@ -35,20 +35,20 @@ func GetManifest(httpCli *http.Client, os string, arch string) (version string, 
 	}
 	if resp == nil {
 		aggregate := utilerrors.NewAggregate(errs)
-		err = fmt.Errorf("failed to call github api, err: %v", aggregate)
+		err = errors.Errorf("failed to call github api, err: %v", aggregate)
 		return
 	}
 
 	var all []byte
 	all, err = io.ReadAll(resp.Body)
 	if err != nil {
-		err = fmt.Errorf("failed to read all reponse from github api, err: %v", err)
+		err = errors.Errorf("failed to read all reponse from github api, err: %v", err)
 		return
 	}
 	var m RootEntity
 	err = json.Unmarshal(all, &m)
 	if err != nil {
-		err = fmt.Errorf("failed to unmarshal reponse, err: %v", err)
+		err = errors.Errorf("failed to unmarshal reponse, err: %v", err)
 		return
 	}
 	version = m.TagName
@@ -77,7 +77,7 @@ func GetManifest(httpCli *http.Client, os string, arch string) (version string, 
 			for _, asset := range m.Assets {
 				link = append(link, asset.BrowserDownloadUrl)
 			}
-			err = fmt.Errorf("Can not found latest version url of KubeVPN, you can download it manually: \n%s", strings.Join(link, "\n"))
+			err = errors.Errorf("Can not found latest version url of KubeVPN, you can download it manually: \n%s", strings.Join(link, "\n"))
 			return
 		}
 	}
@@ -142,7 +142,7 @@ func UnzipKubeVPNIntoFile(zipFile, filename string) error {
 	}
 
 	if fi == nil {
-		return fmt.Errorf("can not found kubevpn")
+		return errors.Errorf("can not found kubevpn")
 	}
 
 	err = os.MkdirAll(filepath.Dir(filename), os.ModePerm)

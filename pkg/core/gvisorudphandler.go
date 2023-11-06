@@ -2,7 +2,6 @@ package core
 
 import (
 	"context"
-	"fmt"
 	"net"
 	"time"
 
@@ -158,7 +157,7 @@ func handle(ctx context.Context, tcpConn net.Conn, udpConn *net.UDPConn) {
 			}
 			if dgram.DataLength == 0 {
 				log.Debugf("[TUN-UDP] Error: length is zero")
-				errChan <- fmt.Errorf("length of read packet is zero")
+				errChan <- errors.Errorf("length of read packet is zero")
 				return
 			}
 
@@ -190,7 +189,7 @@ func handle(ctx context.Context, tcpConn net.Conn, udpConn *net.UDPConn) {
 			}
 			if n == 0 {
 				log.Debugf("[TUN-UDP] Error: length is zero")
-				errChan <- fmt.Errorf("length of read packet is zero")
+				errChan <- errors.Errorf("length of read packet is zero")
 				return
 			}
 

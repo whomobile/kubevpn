@@ -151,7 +151,7 @@ func (d *Options) Main(ctx context.Context, tempContainerConfig *containerConfig
 	var oom bool
 	oom, _ = checkOutOfMemory(templateSpec, d.Cli)
 	if oom {
-		return fmt.Errorf("your pod resource request is bigger than docker-desktop resource, please adjust your docker-desktop resource")
+		return errors.Errorf("your pod resource request is bigger than docker-desktop resource, please adjust your docker-desktop resource")
 	}
 	mode := container.NetworkMode(d.Copts.netMode.NetworkMode())
 	if len(d.Copts.netMode.Value()) != 0 {
@@ -407,10 +407,10 @@ func DoDev(ctx context.Context, devOption *Options, conf *util.SshConfig, flags 
 			return err
 		}
 		if inspect.State == nil {
-			return fmt.Errorf("can not get container status, please make contianer name is valid")
+			return errors.Errorf("can not get container status, please make contianer name is valid")
 		}
 		if !inspect.State.Running {
-			return fmt.Errorf("container %s status is %s, expect is running, please make sure your outer docker name is correct", mode.ConnectedContainer(), inspect.State.Status)
+			return errors.Errorf("container %s status is %s, expect is running, please make sure your outer docker name is correct", mode.ConnectedContainer(), inspect.State.Status)
 		}
 		log.Infof("container %s is running", mode.ConnectedContainer())
 	} else if mode.IsDefault() && util.RunningInContainer() {
@@ -487,17 +487,17 @@ func (d *Options) doConnect(ctx context.Context, f cmdutil.Factory, conf *util.S
 		return
 	}
 	if len(connect.Workloads) > 1 {
-		return nil, fmt.Errorf("can only dev one workloads at same time, workloads: %v", connect.Workloads)
+		return nil, errors.Errorf("can only dev one workloads at same time, workloads: %v", connect.Workloads)
 	}
 	if len(connect.Workloads) < 1 {
-		return nil, fmt.Errorf("you must provide resource to dev, workloads : %v is invaild", connect.Workloads)
+		return nil, errors.Errorf("you must provide resource to dev, workloads : %v is invaild", connect.Workloads)
 	}
 	d.Workload = connect.Workloads[0]
 
 	// if no-proxy is true, not needs to intercept traffic
 	if d.NoProxy {
 		if len(connect.Headers) != 0 {
-			return nil, fmt.Errorf("not needs to provide headers if is no-proxy mode")
+			return nil, errors.Errorf("not needs to provide headers if is no-proxy mode")
 		}
 		connect.Workloads = []string{}
 	}
@@ -506,7 +506,7 @@ func (d *Options) doConnect(ctx context.Context, f cmdutil.Factory, conf *util.S
 	case ConnectModeHost:
 		daemonCli := daemon.GetClient(false)
 		if daemonCli == nil {
-			return nil, fmt.Errorf("get nil daemon client")
+			return nil, errors.Errorf("get nil daemon client")
 		}
 		var kubeconfig []byte
 		var ns string
@@ -608,7 +608,7 @@ func (d *Options) doConnect(ctx context.Context, f cmdutil.Factory, conf *util.S
 		err = d.Copts.netMode.Set(fmt.Sprintf("container:%s", id))
 		return
 	default:
-		return nil, fmt.Errorf("unsupport connect mode: %s", d.ConnectMode)
+		return nil, errors.Errorf("unsupport connect mode: %s", d.ConnectMode)
 	}
 }
 

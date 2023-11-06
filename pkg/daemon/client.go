@@ -2,7 +2,6 @@ package daemon
 
 import (
 	"context"
-	"fmt"
 	"net"
 	"net/http"
 	"os"
@@ -157,7 +156,7 @@ func runDaemon(ctx context.Context, exe string, isSudo bool) error {
 
 	client := GetClient(isSudo)
 	if client == nil {
-		return fmt.Errorf("can not get daemon server client")
+		return errors.Errorf("can not get daemon server client")
 	}
 	_, err = client.Status(ctx, &rpc.StatusRequest{})
 

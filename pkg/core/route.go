@@ -1,7 +1,6 @@
 package core
 
 import (
-	"fmt"
 	"net"
 	"os"
 	"strings"
@@ -118,7 +117,7 @@ func (r *Route) GenerateServers() ([]Server, error) {
 			}
 		default:
 			log.Errorf("not support protocol %s", node.Protocol)
-			return nil, fmt.Errorf("not support protocol %s", node.Protocol)
+			return nil, errors.Errorf("not support protocol %s", node.Protocol)
 		}
 		servers = append(servers, Server{Listener: ln, Handler: handler})
 	}

@@ -1,7 +1,6 @@
 package action
 
 import (
-	"fmt"
 	"io"
 	"time"
 
@@ -16,7 +15,7 @@ func (svr *Server) Disconnect(req *rpc.DisconnectRequest, resp rpc.Daemon_Discon
 	if !svr.IsSudo {
 		cli := svr.GetClient(true)
 		if cli == nil {
-			return fmt.Errorf("sudo daemon not start")
+			return errors.Errorf("sudo daemon not start")
 		}
 		connResp, err := cli.Disconnect(resp.Context(), req)
 		if err != nil {

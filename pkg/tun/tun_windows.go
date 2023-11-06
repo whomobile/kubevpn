@@ -3,7 +3,6 @@
 package tun
 
 import (
-	"fmt"
 	"net"
 	"net/netip"
 	"reflect"
@@ -21,7 +20,7 @@ import (
 
 func createTun(cfg Config) (conn net.Conn, itf *net.Interface, err error) {
 	if cfg.Addr == "" && cfg.Addr6 == "" {
-		err = fmt.Errorf("ipv4 address and ipv6 address can not be empty at same time")
+		err = errors.Errorf("ipv4 address and ipv6 address can not be empty at same time")
 		return
 	}
 
@@ -31,7 +30,7 @@ func createTun(cfg Config) (conn net.Conn, itf *net.Interface, err error) {
 	}
 	tunDevice, err := wireguardtun.CreateTUN(interfaceName, cfg.MTU)
 	if err != nil {
-		err = fmt.Errorf("failed to create TUN device: %w", err)
+		err = errors.Errorf("failed to create TUN device: %w", err)
 		return
 	}
 

@@ -63,7 +63,7 @@ func CmdProxy(f cmdutil.Factory) *cobra.Command {
 			}
 			// not support temporally
 			if connect.Engine == config.EngineGvisor {
-				return fmt.Errorf(`not support type engine: %s, support ("%s"|"%s")`, config.EngineGvisor, config.EngineMix, config.EngineRaw)
+				return errors.Errorf(`not support type engine: %s, support ("%s"|"%s")`, config.EngineGvisor, config.EngineMix, config.EngineRaw)
 			}
 			return err
 		},

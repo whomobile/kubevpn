@@ -562,7 +562,7 @@ func parse(flags *pflag.FlagSet, copts *ContainerOptions, serverOS string) (*con
 			return nil, errors.Errorf("--health-retries cannot be negative")
 		}
 		if copts.healthStartPeriod < 0 {
-			return nil, fmt.Errorf("--health-start-period cannot be negative")
+			return nil, errors.Errorf("--health-start-period cannot be negative")
 		}
 
 		healthConfig = &container.HealthConfig{

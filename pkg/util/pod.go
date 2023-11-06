@@ -244,7 +244,7 @@ func Shell(clientset *kubernetes.Clientset, restclient *rest.RESTClient, config 
 		return "", err
 	}
 	if pod.Status.Phase == corev1.PodSucceeded || pod.Status.Phase == corev1.PodFailed {
-		err = fmt.Errorf("cannot exec into a container in a completed pod; current phase is %s", pod.Status.Phase)
+		err = errors.Errorf("cannot exec into a container in a completed pod; current phase is %s", pod.Status.Phase)
 		return "", err
 	}
 	if containerName == "" {
@@ -308,7 +308,7 @@ func WaitPodToBeReady(ctx context.Context, podInterface v12.PodInterface, select
 		select {
 		case e, ok := <-watchStream.ResultChan():
 			if !ok {
-				return fmt.Errorf("can not wait pod to be ready because of watch chan has closed")
+				return errors.Errorf("can not wait pod to be ready because of watch chan has closed")
 			}
 			if podT, ok := e.Object.(*corev1.Pod); ok {
 				if podT.DeletionTimestamp != nil {

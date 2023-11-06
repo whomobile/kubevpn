@@ -13,8 +13,7 @@ RUN if [ "$NO_GO_PROXY" != "true" ]; then go env -w GO111MODULE=on && go env -w 
 RUN make kubevpn
 RUN go install github.com/go-delve/delve/cmd/dlv@latest
 
-ARG UBUNTUBASE=ubuntu:latest
-FROM ${UBUNTUBASE}
+FROM ubuntu:latest
 ARG BASE=github.com/wencaiwulue/kubevpn
 ARG NO_UBUNTU_MIRROR
 ARG DOCKER_TIMEZONE=Asia/Shanghai

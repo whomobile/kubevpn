@@ -57,7 +57,7 @@ jobs:
         run: |
           export VERSION=test
           export REGISTRY_TARGET=ghcr.io
-          export SET_UBUNTUBASE=ghcr.io/${{ github.repository }}/ubuntu:latest
+          export SET_UBUNTU_BASE=ghcr.io/${{ github.repository }}/ubuntu:latest
           export REGISTRY_USERNAME=${{ github.actor }}
           export SET_NO_GO_PROXY=true
           export SET_NO_UBUNTU_MIRROR=true

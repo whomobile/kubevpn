@@ -23,9 +23,7 @@ NO_GO_PROXY = $(or $(SET_NO_GO_PROXY),false)
 NO_UBUNTU_MIRROR = $(or $(SET_NO_UBUNTU_MIRROR),false)
 DOCKER_TIMEZONE = $(or $(SET_DOCKER_TIMEZONE),Asia/Shanghai)
 NO_DOCKER_TIMEZONE = $(or $(SET_NO_DOCKER_TIMEZONE),false)
-ifneq ($(strip ${SET_UBUNTUBASE}),)
-UBUNTUBASE =${SET_UBUNTUBASE}
-endif
+
 ifneq ($(strip ${SET_CACHE_FROM}),)
 CACHE_FROM =--cache-from type=local,src=${SET_CACHE_FROM}
 endif
@@ -106,7 +104,6 @@ container:
 	  --build-arg NO_GO_PROXY=${NO_GO_PROXY} \
 	  --build-arg NO_UBUNTU_MIRROR=${NO_UBUNTU_MIRROR} \
 	  --build-arg NO_DOCKER_TIMEZONE=${NO_DOCKER_TIMEZONE} \
-	  --build-arg UBUNTUBASE=${UBUNTUBASE} \
 	  --build-arg REGISTRY_TARGET=${REGISTRY_TARGET} \
 	  --build-arg REGISTRY_USERNAME=${REGISTRY_USERNAME} \
       $(if ${CACHE_FROM},${CACHE_FROM}) \
@@ -120,10 +117,9 @@ container-local: kubevpn-linux-amd64
 	docker buildx build \
 	  --build-arg BASE=${BASE} \
 	  --build-arg NO_GO_PROXY=${NO_GO_PROXY} \
-	  --build-arg UBUNTUBASE=${UBUNTUBASE} \
       $(if ${CACHE_FROM},${CACHE_FROM}) \
       $(if ${CACHE_TO},${CACHE_TO},) \
-	  --platform linux/amd64,linux/arm64 \
+	  --platform linux/amd64 \
 	  -t ${IMAGE_DEFAULT} -f $(BUILD_DIR)/local.Dockerfile --push .
 
 .PHONY: container-test
@@ -133,7 +129,7 @@ container-test: kubevpn-linux-amd64
 	  --build-arg REPOSITORY=${REPOSITORY} \
       $(if ${CACHE_FROM},${CACHE_FROM}) \
       $(if ${CACHE_TO},${CACHE_TO},) \
-	  --platform linux/amd64,linux/arm64 \
+	  --platform linux/amd64 \
 	  -t ${IMAGE_TEST} -f $(BUILD_DIR)/test.Dockerfile --push .
 
 .PHONY: version

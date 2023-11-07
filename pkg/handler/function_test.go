@@ -39,7 +39,9 @@ var (
 )
 
 func TestFunctions(t *testing.T) {
+	t.Log("Test kubevpnConnect:")
 	kubevpnConnect(t)
+	t.Log("Test kubevpnConnect: done")
 	t.Run(runtime.FuncForPC(reflect.ValueOf(pingPodIP).Pointer()).Name(), pingPodIP)
 	t.Log("Test pingPodIP has been run")
 	t.Run(runtime.FuncForPC(reflect.ValueOf(dialUDP).Pointer()).Name(), dialUDP)

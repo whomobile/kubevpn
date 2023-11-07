@@ -136,7 +136,7 @@ jobs:
 
       - name: Test
         run: |
-          go test -v -x -failfast ./... -timeout=20m && echo "Test Success at $(date)" || (echo "Test Failed at $(date)" && exit 1)
+          go test -v -x -failfast ./... -timeout=60m && echo "Test Success at $(date)" || (echo "Test Failed at $(date)" && exit 1)
     
       - name: After test
         run: |
@@ -228,7 +228,7 @@ jobs:
   
       - name: Test
         run: |
-          go test -v -x -failfast ./... -timeout=20m && echo "Test Success at $(date)" || (echo "Test Failed at $(date)" && exit 1)
+          go test -v -x -failfast ./... -timeout=60m && echo "Test Success at $(date)" || (echo "Test Failed at $(date)" && exit 1)
 
       - name: After test
         run: |

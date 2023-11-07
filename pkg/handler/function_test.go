@@ -41,11 +41,17 @@ var (
 func TestFunctions(t *testing.T) {
 	kubevpnConnect(t)
 	t.Run(runtime.FuncForPC(reflect.ValueOf(pingPodIP).Pointer()).Name(), pingPodIP)
+	t.Log("Test pingPodIP has been run")
 	t.Run(runtime.FuncForPC(reflect.ValueOf(dialUDP).Pointer()).Name(), dialUDP)
+	t.Log("Test dialUDP has been run")
 	t.Run(runtime.FuncForPC(reflect.ValueOf(healthCheckPod).Pointer()).Name(), healthCheckPod)
+	t.Log("Test healthCheckPod has been run")
 	t.Run(runtime.FuncForPC(reflect.ValueOf(healthCheckService).Pointer()).Name(), healthCheckService)
+	t.Log("Test healthCheckService has been run")
 	t.Run(runtime.FuncForPC(reflect.ValueOf(shortDomain).Pointer()).Name(), shortDomain)
+	t.Log("Test shortDomain has been run")
 	t.Run(runtime.FuncForPC(reflect.ValueOf(fullDomain).Pointer()).Name(), fullDomain)
+	t.Log("Test fullDomain has been run")
 }
 
 func pingPodIP(t *testing.T) {

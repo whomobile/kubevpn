@@ -2,7 +2,7 @@ name: Test-dev-mkim
 
 on:
   push:
-    branches: [ dev-mkim ]
+    branches: [ dev-mkim, fix-build-env ]
   pull_request:
     branches: [ master ]
 
@@ -120,8 +120,27 @@ jobs:
           route -n
           sudo ln /usr/bin/resolvectl /usr/bin/systemd-resolve
 
+      - name: Setup Test
+        run: |
+          ls -l ~/.ssh || echo "test failed but continue"
+          # ConfigAlias: "ry-dev-agd", ConfigHost: "ry-dev-agd"
+          mkdir -p ~/.ssh
+          MINIKUBE_IP=$(minikube ip)
+          cat <<EOF > ~/.ssh/config
+          Host ry-dev-agd
+            HostName $MINIKUBE_IP
+            User docker
+            Port 22
+            IdentityFile ~/.minikube/machines/minikube/id_rsa
+          EOF
+
       - name: Test
-        run: go test -v -failfast ./... -timeout=60m
+        run: |
+          go test -v -failfast ./... -timeout=60m && echo "Test Success at $(date)" || (echo "Test Failed at $(date)" && exit 1)
+    
+      - name: After test
+        run: |
+          echo "After test at $(date)"
 
   macos:
     runs-on: macos-latest
@@ -193,9 +212,28 @@ jobs:
           ifconfig
           netstat -anr
 
+      - name: Setup Test
+        run: |
+          ls -l ~/.ssh || echo "test failed but continue"
+          # ConfigAlias: "ry-dev-agd", ConfigHost: "ry-dev-agd"
+          mkdir -p ~/.ssh
+          MINIKUBE_IP=$(minikube ip)
+          cat <<EOF > ~/.ssh/config
+          Host ry-dev-agd
+            HostName $MINIKUBE_IP
+            User docker
+            Port 22
+            IdentityFile ~/.minikube/machines/minikube/id_rsa
+          EOF
+  
       - name: Test
-        run: go test -v -failfast ./... -timeout=60m
+        run: |
+          go test -v -failfast ./... -timeout=60m && echo "Test Success at $(date)" || (echo "Test Failed at $(date)" && exit 1)
 
+      - name: After test
+        run: |
+          echo "After test at $(date)"
+    
   windows:
     runs-on: windows-latest
     needs: [ "image" ]
@@ -208,12 +246,13 @@ jobs:
           go-version: '1.20'
 
       - name: Set up Docker
-        uses: crazy-max/ghaction-setup-docker@v1.4.0
+        uses: crazy-max/ghaction-setup-docker@v2
       - run: |
-         dir C:\hostedtoolcache\windows\docker-stable\24.0.5\x64 
-         C:\hostedtoolcache\windows\docker-stable\24.0.5\x64\docker-proxy.exe --help
-         C:\hostedtoolcache\windows\docker-stable\24.0.5\x64\dockerd.exe --help
-         C:\hostedtoolcache\windows\docker-stable\24.0.5\x64\docker.exe --help
+         C:
+         dir C:\hostedtoolcache\windows\docker-stable\24.0.7\x64
+         C:\hostedtoolcache\windows\docker-stable\24.0.7\x64\docker-proxy.exe --help
+         C:\hostedtoolcache\windows\docker-stable\24.0.7\x64\dockerd.exe --help
+         C:\hostedtoolcache\windows\docker-stable\24.0.7\x64\docker.exe --help
          docker info --format '{{.OSType}}'
       - run: |
          choco install minikube
@@ -223,3 +262,12 @@ jobs:
       - name: Build
         run: |
           make kubevpn-windows-amd64
+
+      - name: Test Execution
+        run: |
+          kubectl get pod -A -o wide
+          kubectl get all -o wide
+          kubectl get nodes -o yaml
+          ipconfig
+          netstat -an
+          .\bin\kubevpn version

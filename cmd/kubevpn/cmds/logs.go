@@ -1,7 +1,6 @@
 package cmds
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -15,6 +14,7 @@ import (
 
 	"github.com/wencaiwulue/kubevpn/pkg/daemon"
 	"github.com/wencaiwulue/kubevpn/pkg/daemon/rpc"
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 )
 
 func CmdLogs(f cmdutil.Factory) *cobra.Command {
@@ -36,7 +36,7 @@ func CmdLogs(f cmdutil.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client, err := daemon.GetClient(true).Logs(cmd.Context(), req)
 			if err != nil {
-				err = errors.New("daemon.GetClient(true).Logs(cmd.Context(), req): " + err.Error())
+				err = errors.Wrap(err, "daemon.GetClient(true).Logs(cmd.Context(), req): ")
 				return err
 			}
 			var resp *rpc.LogResponse

@@ -4,7 +4,6 @@ package dns
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -18,6 +17,8 @@ import (
 	"github.com/coredns/caddy"
 	_ "github.com/coredns/coredns/core/dnsserver"
 	_ "github.com/coredns/coredns/core/plugin"
+
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 )
 
 // systemd-resolve --status, systemd-resolve --flush-caches
@@ -103,7 +104,7 @@ func SetupLocalDNS(clientConfig *miekgdns.ClientConfig, existNameservers []strin
 	// Start your engines
 	instance, err := caddy.Start(corefile)
 	if err != nil {
-		err = errors.New("caddy.Start(corefile): " + err.Error())
+		err = errors.Wrap(err, "caddy.Start(corefile): ")
 		return err
 	}
 

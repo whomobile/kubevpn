@@ -5,6 +5,8 @@ package wintun
 
 import (
 	"embed"
+
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 )
 
 //go:embed bin/arm/wintun.dll
@@ -13,7 +15,7 @@ var wintunFs embed.FS
 func InstallWintunDriver() error {
 	bytes, err := wintunFs.ReadFile("bin/arm/wintun.dll")
 	if err != nil {
-		err = errors.New("wintunFs.ReadFile("bin/arm/wintun.dll"): " + err.Error())
+		err = errors.Wrap(err, "wintunFs.ReadFile("bin/arm/wintun.dll"): ")
 		return err
 	}
 	return copyDriver(bytes)

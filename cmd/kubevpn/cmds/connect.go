@@ -1,7 +1,6 @@
 package cmds
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -17,6 +16,7 @@ import (
 	"github.com/wencaiwulue/kubevpn/pkg/config"
 	"github.com/wencaiwulue/kubevpn/pkg/daemon"
 	"github.com/wencaiwulue/kubevpn/pkg/daemon/rpc"
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 	"github.com/wencaiwulue/kubevpn/pkg/handler"
 	"github.com/wencaiwulue/kubevpn/pkg/util"
 )
@@ -50,7 +50,7 @@ func CmdConnect(f cmdutil.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			bytes, ns, err := util.ConvertToKubeconfigBytes(f)
 			if err != nil {
-				err = errors.New("util.ConvertToKubeconfigBytes(f): " + err.Error())
+				err = errors.Wrap(err, "util.ConvertToKubeconfigBytes(f): ")
 				return err
 			}
 			req := &rpc.ConnectRequest{
@@ -73,7 +73,7 @@ func CmdConnect(f cmdutil.Factory) *cobra.Command {
 			if lite {
 				resp, err := cli.ConnectFork(cmd.Context(), req)
 				if err != nil {
-					err = errors.New("cli.ConnectFork(cmd.Context(), req): " + err.Error())
+					err = errors.Wrap(err, "cli.ConnectFork(cmd.Context(), req): ")
 					return err
 				}
 				for {
@@ -90,7 +90,7 @@ func CmdConnect(f cmdutil.Factory) *cobra.Command {
 			} else {
 				resp, err := cli.Connect(cmd.Context(), req)
 				if err != nil {
-					err = errors.New("cli.Connect(cmd.Context(), req): " + err.Error())
+					err = errors.Wrap(err, "cli.Connect(cmd.Context(), req): ")
 					return err
 				}
 				for {

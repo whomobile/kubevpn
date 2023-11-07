@@ -1,7 +1,6 @@
 package action
 
 import (
-	"errors"
 	"fmt"
 	"io"
 
@@ -12,6 +11,7 @@ import (
 
 	"github.com/wencaiwulue/kubevpn/pkg/config"
 	"github.com/wencaiwulue/kubevpn/pkg/daemon/rpc"
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 	"github.com/wencaiwulue/kubevpn/pkg/handler"
 	"github.com/wencaiwulue/kubevpn/pkg/util"
 )
@@ -41,7 +41,7 @@ func (svr *Server) Clone(req *rpc.CloneRequest, resp rpc.Daemon_CloneServer) err
 	cli := svr.GetClient(false)
 	connResp, err := cli.Connect(resp.Context(), connReq)
 	if err != nil {
-		err = errors.New("cli.Connect(resp.Context(), connReq): " + err.Error())
+		err = errors.Wrap(err, "cli.Connect(resp.Context(), connReq): ")
 		return err
 	}
 	var msg *rpc.ConnectResponse
@@ -77,7 +77,7 @@ func (svr *Server) Clone(req *rpc.CloneRequest, resp rpc.Daemon_CloneServer) err
 	}
 	file, err := util.ConvertToTempKubeconfigFile([]byte(req.KubeconfigBytes))
 	if err != nil {
-		err = errors.New("util.ConvertToTempKubeconfigFile([]byte(req.KubeconfigBytes)): " + err.Error())
+		err = errors.Wrap(err, "util.ConvertToTempKubeconfigFile([]byte(req.KubeconfigBytes)): ")
 		return err
 	}
 	flags := pflag.NewFlagSet("", pflag.ContinueOnError)
@@ -88,20 +88,20 @@ func (svr *Server) Clone(req *rpc.CloneRequest, resp rpc.Daemon_CloneServer) err
 	var path string
 	path, err = handler.SshJump(resp.Context(), sshConf, flags, false)
 	if err != nil {
-		err = errors.New("handler.SshJump(resp.Context(), sshConf, flags, false): " + err.Error())
+		err = errors.Wrap(err, "handler.SshJump(resp.Context(), sshConf, flags, false): ")
 		return err
 	}
 	f := InitFactoryByPath(path, req.Namespace)
 	err = options.InitClient(f)
 	if err != nil {
-		log.Errorf("init client failed: %v", err)
+		errors.LogErrorf("init client failed: %v", err)
 		return err
 	}
 	config.Image = req.Image
 	log.Infof("clone workloads...")
 	err = options.DoClone(resp.Context())
 	if err != nil {
-		log.Errorf("clone workloads failed: %v", err)
+		errors.LogErrorf("clone workloads failed: %v", err)
 		_ = options.Cleanup()
 		return err
 	}

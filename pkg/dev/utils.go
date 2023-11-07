@@ -3,7 +3,6 @@ package dev
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net"
 	"net/netip"
@@ -23,6 +22,8 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/tools/clientcmd/api"
 	clientcmdlatest "k8s.io/client-go/tools/clientcmd/api/latest"
+
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 )
 
 func waitExitOrRemoved(ctx context.Context, dockerCli command.Cli, containerID string, waitRemove bool) <-chan int {
@@ -179,19 +180,19 @@ func ConvertHost(kubeconfigPath string) (newPath string, err error) {
 	var kubeconfigBytes []byte
 	kubeconfigBytes, err = os.ReadFile(kubeconfigPath)
 	if err != nil {
-		err = errors.New("os.ReadFile(kubeconfigPath): " + err.Error())
+		err = errors.Wrap(err, "os.ReadFile(kubeconfigPath): ")
 		return
 	}
 	var conf clientcmd.ClientConfig
 	conf, err = clientcmd.NewClientConfigFromBytes(kubeconfigBytes)
 	if err != nil {
-		err = errors.New("clientcmd.NewClientConfigFromBytes(kubeconfigBytes): " + err.Error())
+		err = errors.Wrap(err, "clientcmd.NewClientConfigFromBytes(kubeconfigBytes): ")
 		return
 	}
 	var rawConfig api.Config
 	rawConfig, err = conf.RawConfig()
 	if err != nil {
-		err = errors.New("conf.RawConfig(): " + err.Error())
+		err = errors.Wrap(err, "conf.RawConfig(): ")
 		return
 	}
 	if err = api.FlattenConfig(&rawConfig); err != nil {
@@ -214,13 +215,13 @@ func ConvertHost(kubeconfigPath string) (newPath string, err error) {
 	var u *url.URL
 	u, err = url.Parse(cluster.Server)
 	if err != nil {
-		err = errors.New("url.Parse(cluster.Server): " + err.Error())
+		err = errors.Wrap(err, "url.Parse(cluster.Server): ")
 		return
 	}
 	var remote netip.AddrPort
 	remote, err = netip.ParseAddrPort(u.Host)
 	if err != nil {
-		err = errors.New("netip.ParseAddrPort(u.Host): " + err.Error())
+		err = errors.Wrap(err, "netip.ParseAddrPort(u.Host): ")
 		return
 	}
 	host := fmt.Sprintf("%s://%s", u.Scheme, net.JoinHostPort("kubernetes", strconv.Itoa(int(remote.Port()))))
@@ -230,19 +231,19 @@ func ConvertHost(kubeconfigPath string) (newPath string, err error) {
 	var convertedObj runtime.Object
 	convertedObj, err = clientcmdlatest.Scheme.ConvertToVersion(&rawConfig, clientcmdlatest.ExternalVersion)
 	if err != nil {
-		err = errors.New("clientcmdlatest.Scheme.ConvertToVersion(&rawConfig, clientcmdlatest.ExternalVersion): " + err.Error())
+		err = errors.Wrap(err, "clientcmdlatest.Scheme.ConvertToVersion(&rawConfig, clientcmdlatest.ExternalVersion): ")
 		return
 	}
 	var marshal []byte
 	marshal, err = json.Marshal(convertedObj)
 	if err != nil {
-		err = errors.New("json marshal failed: " + err.Error())
+		err = errors.Wrap(err, "json marshal failed: ")
 		return
 	}
 	var temp *os.File
 	temp, err = os.CreateTemp("", "*.kubeconfig")
 	if err != nil {
-		err = errors.New("create temp file failed: " + err.Error())
+		err = errors.Wrap(err, "create temp file failed: ")
 		return
 	}
 	if err = temp.Close(); err != nil {
@@ -250,7 +251,7 @@ func ConvertHost(kubeconfigPath string) (newPath string, err error) {
 	}
 	err = os.WriteFile(temp.Name(), marshal, 0644)
 	if err != nil {
-		err = errors.New("create temp file failed: " + err.Error())
+		err = errors.Wrap(err, "create temp file failed: ")
 		return
 	}
 	newPath = temp.Name()

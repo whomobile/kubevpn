@@ -2,7 +2,6 @@ package cmds
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -19,6 +18,7 @@ import (
 	"github.com/wencaiwulue/kubevpn/pkg/config"
 	"github.com/wencaiwulue/kubevpn/pkg/daemon"
 	"github.com/wencaiwulue/kubevpn/pkg/daemon/rpc"
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 	"github.com/wencaiwulue/kubevpn/pkg/handler"
 	"github.com/wencaiwulue/kubevpn/pkg/util"
 )
@@ -63,7 +63,7 @@ func CmdProxy(f cmdutil.Factory) *cobra.Command {
 			}
 			// not support temporally
 			if connect.Engine == config.EngineGvisor {
-				return fmt.Errorf(`not support type engine: %s, support ("%s"|"%s")`, config.EngineGvisor, config.EngineMix, config.EngineRaw)
+				return errors.Errorf(`not support type engine: %s, support ("%s"|"%s")`, config.EngineGvisor, config.EngineMix, config.EngineRaw)
 			}
 			return err
 		},
@@ -80,7 +80,7 @@ func CmdProxy(f cmdutil.Factory) *cobra.Command {
 
 			bytes, ns, err := util.ConvertToKubeconfigBytes(f)
 			if err != nil {
-				err = errors.New("util.ConvertToKubeconfigBytes(f): " + err.Error())
+				err = errors.Wrap(err, "util.ConvertToKubeconfigBytes(f): ")
 				return err
 			}
 			// todo 将 doConnect 方法封装？内部使用 client 发送到daemon？

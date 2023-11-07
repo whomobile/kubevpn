@@ -2,18 +2,17 @@ package util
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"net"
 
 	log "github.com/sirupsen/logrus"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/utils/pointer"
 
 	"github.com/wencaiwulue/kubevpn/pkg/config"
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 )
 
 // GetCIDRElegant
@@ -60,7 +59,7 @@ func GetCIDRElegant(clientset *kubernetes.Clientset, restclient *rest.RESTClient
 	result = Deduplicate(result)
 
 	if len(result) == 0 {
-		err = fmt.Errorf("can not get any cidr, please make sure you have prilivage")
+		err = errors.Errorf("can not get any cidr, please make sure you have prilivage")
 		return
 	}
 	return
@@ -133,12 +132,12 @@ func GetCIDRFromResourceUgly(clientset *kubernetes.Clientset, namespace string) 
 func GetLocalTunIP(tunName string) (net.IP, net.IP, error) {
 	tunIface, err := net.InterfaceByName(tunName)
 	if err != nil {
-		err = errors.New("net.InterfaceByName(tunName): " + err.Error())
+		err = errors.Wrap(err, "net.InterfaceByName(tunName): ")
 		return nil, nil, err
 	}
 	addrs, err := tunIface.Addrs()
 	if err != nil {
-		err = errors.New("tunIface.Addrs(): " + err.Error())
+		err = errors.Wrap(err, "tunIface.Addrs(): ")
 		return nil, nil, err
 	}
 	var srcIPv4, srcIPv6 net.IP
@@ -154,7 +153,7 @@ func GetLocalTunIP(tunName string) (net.IP, net.IP, error) {
 		}
 	}
 	if srcIPv4 == nil || srcIPv6 == nil {
-		return srcIPv4, srcIPv6, fmt.Errorf("not found all ip")
+		return srcIPv4, srcIPv6, errors.Errorf("not found all ip")
 	}
 	return srcIPv4, srcIPv6, nil
 }

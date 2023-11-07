@@ -3,7 +3,6 @@ package dns
 import (
 	"bytes"
 	"context"
-	"errors"
 	"fmt"
 	"net"
 	"os"
@@ -15,7 +14,7 @@ import (
 	miekgdns "github.com/miekg/dns"
 	v12 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	utilnet "k8s.io/apimachinery/pkg/util/net"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/apimachinery/pkg/watch"
@@ -23,6 +22,7 @@ import (
 	"k8s.io/client-go/util/flowcontrol"
 
 	"github.com/wencaiwulue/kubevpn/pkg/config"
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 )
 
 type Config struct {
@@ -82,7 +82,7 @@ func (c *Config) AddServiceNameToHosts(ctx context.Context, serviceInterface v13
 							}
 							list, err := serviceInterface.List(ctx, v1.ListOptions{})
 							if err != nil {
-								err = errors.New("serviceInterface.List(ctx, v1.ListOptions{}): " + err.Error())
+								err = errors.Wrap(err, "serviceInterface.List(ctx, v1.ListOptions{}): ")
 								return
 							}
 							entry := c.generateHostsEntry(list.Items, hosts)
@@ -108,7 +108,7 @@ func (c *Config) updateHosts(str string) error {
 	path := GetHostFile()
 	file, err := os.ReadFile(path)
 	if err != nil {
-		err = errors.New("os.ReadFile(path): " + err.Error())
+		err = errors.Wrap(err, "os.ReadFile(path): ")
 		return err
 	}
 	lines := strings.Split(string(file), "\n")
@@ -124,7 +124,7 @@ func (c *Config) updateHosts(str string) error {
 		}
 	}
 	if len(lines) == 0 {
-		return fmt.Errorf("empty hosts file")
+		return errors.Errorf("empty hosts file")
 	}
 
 	{ // todo the reason why needs to add this code is that i found delete 127.0.0.1 localhost entry
@@ -152,7 +152,7 @@ func (c *Config) updateHosts(str string) error {
 	s = strings.TrimRight(s, "\n")
 
 	if strings.TrimSpace(s) == "" {
-		return fmt.Errorf("empty content after update")
+		return errors.Errorf("empty content after update")
 	}
 
 	return os.WriteFile(path, []byte(s), 0644)
@@ -217,7 +217,7 @@ func (c *Config) generateHostsEntry(list []v12.Service, hosts []Entry) string {
 	// if hosts file already contains item, not needs to add it to hosts file
 	file, err := os.ReadFile(GetHostFile())
 	if err != nil {
-		err = errors.New("os.ReadFile(GetHostFile()): " + err.Error())
+		err = errors.Wrap(err, "os.ReadFile(GetHostFile()): ")
 		return ""
 	}
 	lines := strings.Split(string(file), "\n")
@@ -246,7 +246,7 @@ func CleanupHosts() error {
 	path := GetHostFile()
 	file, err := os.ReadFile(path)
 	if err != nil {
-		err = errors.New("os.ReadFile(path): " + err.Error())
+		err = errors.Wrap(err, "os.ReadFile(path): ")
 		return err
 	}
 	lines := strings.Split(string(file), "\n")
@@ -258,7 +258,7 @@ func CleanupHosts() error {
 		}
 	}
 	if len(lines) == 0 {
-		return fmt.Errorf("empty hosts file")
+		return errors.Errorf("empty hosts file")
 	}
 
 	var sb strings.Builder

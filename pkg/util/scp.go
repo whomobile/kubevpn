@@ -6,33 +6,34 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/pkg/errors"
 	"github.com/schollz/progressbar/v3"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/ssh"
+
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 )
 
 // SCP copy file to remote and exec command
 func SCP(conf *SshConfig, filename, to string, commands ...string) error {
 	remote, err := DialSshRemote(conf)
 	if err != nil {
-		log.Errorf("Dial into remote server error: %s", err)
+		errors.LogErrorf("Dial into remote server error: %s", err)
 		return err
 	}
 
 	sess, err := remote.NewSession()
 	if err != nil {
-		err = errors.New("remote.NewSession(): " + err.Error())
+		err = errors.Wrap(err, "remote.NewSession(): ")
 		return err
 	}
 	err = main(sess, filename, to)
 	if err != nil {
-		log.Errorf("Copy file to remote error: %s", err)
+		errors.LogErrorf("Copy file to remote error: %s", err)
 		return err
 	}
 	sess, err = remote.NewSession()
 	if err != nil {
-		err = errors.New("remote.NewSession(): " + err.Error())
+		err = errors.Wrap(err, "remote.NewSession(): ")
 		return err
 	}
 	for _, command := range commands {
@@ -51,12 +52,12 @@ func SCP(conf *SshConfig, filename, to string, commands ...string) error {
 func main(sess *ssh.Session, filename string, to string) error {
 	open, err := os.Open(filename)
 	if err != nil {
-		err = errors.New("os.Open(filename): " + err.Error())
+		err = errors.Wrap(err, "os.Open(filename): ")
 		return err
 	}
 	stat, err := open.Stat()
 	if err != nil {
-		err = errors.New("open.Stat(): " + err.Error())
+		err = errors.Wrap(err, "open.Stat(): ")
 		return err
 	}
 	defer open.Close()
@@ -68,7 +69,7 @@ func main(sess *ssh.Session, filename string, to string) error {
 		fmt.Fprintln(w, "C0644", stat.Size(), filepath.Base(filename))
 		err := sCopy(w, open, stat.Size())
 		if err != nil {
-			log.Errorf("failed to transfer file to remote: %v", err)
+			errors.LogErrorf("failed to transfer file to remote: %v", err)
 			return
 		}
 		fmt.Fprint(w, "\x00") // transfer end with \x00
@@ -100,11 +101,11 @@ func sCopy(dst io.Writer, src io.Reader, size int64) error {
 	buf := make([]byte, 10<<(10*2)) // 10M
 	written, err := io.CopyBuffer(io.MultiWriter(dst, bar), src, buf)
 	if err != nil {
-		log.Errorf("failed to transfer file to remote: %v", err)
+		errors.LogErrorf("failed to transfer file to remote: %v", err)
 		return err
 	}
 	if written != size {
-		log.Errorf("failed to transfer file to remote: written size %d but actuall is %d", written, size)
+		errors.LogErrorf("failed to transfer file to remote: written size %d but actuall is %d", written, size)
 		return err
 	}
 	return nil

@@ -22,3 +22,6 @@
 bin
 
 *.DS_Store
+
+logs/
+empty/

@@ -12,6 +12,8 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"golang.org/x/sys/windows"
+
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 )
 
 // ref https://stackoverflow.com/questions/31558066/how-to-ask-for-administer-privileges-on-windows-with-go
@@ -40,7 +42,7 @@ func RunWithElevatedInnerExec() error {
 	var pi windows.ProcessInformation
 	path, err := exec.LookPath("Powershell")
 	if err != nil {
-		err = errors.New("exec.LookPath("Powershell"): " + err.Error())
+		err = errors.Wrap(err, "exec.LookPath(\"Powershell\"): ")
 		return err
 	}
 	executable, _ := os.Executable()
@@ -49,12 +51,12 @@ func RunWithElevatedInnerExec() error {
 	c, _ := syscall.UTF16PtrFromString(fmt.Sprintf(`%s Start "%s" -Verb Runas`, path, join))
 	err = windows.CreateProcess(nil, c, nil, nil, true, windows.INHERIT_PARENT_AFFINITY, nil, nil, &si, &pi)
 	if err != nil {
-		err = errors.New("windows.CreateProcess(nil, c, nil, nil, true, windows.INHERIT_PARENT_AFFINITY, nil, nil, &si, &pi): " + err.Error())
+		err = errors.Wrap(err, "windows.CreateProcess(nil, c, nil, nil, true, windows.INHERIT_PARENT_AFFINITY, nil, nil, &si, &pi): ")
 		return err
 	}
 	p, err := os.FindProcess(int(pi.ProcessId))
 	if err != nil {
-		err = errors.New("os.FindProcess(int(pi.ProcessId)): " + err.Error())
+		err = errors.Wrap(err, "os.FindProcess(int(pi.ProcessId)): ")
 		return err
 	}
 	_, err = p.Wait()

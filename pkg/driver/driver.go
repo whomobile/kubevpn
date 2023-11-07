@@ -1,7 +1,6 @@
 package driver
 
 import (
-	"errors"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -11,6 +10,7 @@ import (
 
 	"github.com/wencaiwulue/kubevpn/pkg/driver/openvpn"
 	"github.com/wencaiwulue/kubevpn/pkg/driver/wintun"
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 )
 
 func InstallTunTapDriver() {
@@ -36,7 +36,7 @@ func InstallWireGuardTunDriver() {
 func UninstallWireGuardTunDriver() error {
 	executable, err := os.Executable()
 	if err != nil {
-		err = errors.New("os.Executable(): " + err.Error())
+		err = errors.Wrap(err, "os.Executable(): ")
 		return err
 	}
 	filename := filepath.Join(filepath.Dir(executable), "wintun.dll")

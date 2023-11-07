@@ -19,7 +19,6 @@ import (
 	miekgdns "github.com/miekg/dns"
 	"github.com/moby/term"
 	v12 "github.com/opencontainers/image-spec/specs-go/v1"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	v1 "k8s.io/api/core/v1"
@@ -29,6 +28,7 @@ import (
 
 	"github.com/wencaiwulue/kubevpn/pkg/config"
 	"github.com/wencaiwulue/kubevpn/pkg/cp"
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 	util2 "github.com/wencaiwulue/kubevpn/pkg/util"
 )
 
@@ -171,29 +171,29 @@ func ConvertKubeResourceToContainer(namespace string, temp v1.PodTemplateSpec, e
 func GetDNS(ctx context.Context, f util.Factory, ns, pod string) (*miekgdns.ClientConfig, error) {
 	clientSet, err := f.KubernetesClientSet()
 	if err != nil {
-		err = errors.New("f.KubernetesClientSet(): " + err.Error())
+		err = errors.Wrap(err, "f.KubernetesClientSet(): ")
 		return nil, err
 	}
 	_, err = clientSet.CoreV1().Pods(ns).Get(ctx, pod, v13.GetOptions{})
 	if err != nil {
-		err = errors.New("clientSet.CoreV1().Pods(ns).Get(ctx, pod, v13.GetOptions{}): " + err.Error())
+		err = errors.Wrap(err, "clientSet.CoreV1().Pods(ns).Get(ctx, pod, v13.GetOptions{}): ")
 		return nil, err
 	}
 	config, err := f.ToRESTConfig()
 	if err != nil {
-		err = errors.New("f.ToRESTConfig(): " + err.Error())
+		err = errors.Wrap(err, "f.ToRESTConfig(): ")
 		return nil, err
 	}
 
 	client, err := f.RESTClient()
 	if err != nil {
-		err = errors.New("f.RESTClient(): " + err.Error())
+		err = errors.Wrap(err, "f.RESTClient(): ")
 		return nil, err
 	}
 
 	clientConfig, err := util2.GetDNSServiceIPFromPod(clientSet, client, config, pod, ns)
 	if err != nil {
-		err = errors.New("util2.GetDNSServiceIPFromPod(clientSet, client, config, pod, ns): " + err.Error())
+		err = errors.Wrap(err, "util2.GetDNSServiceIPFromPod(clientSet, client, config, pod, ns): ")
 		return nil, err
 	}
 	return clientConfig, nil
@@ -203,13 +203,13 @@ func GetDNS(ctx context.Context, f util.Factory, ns, pod string) (*miekgdns.Clie
 func GetVolume(ctx context.Context, f util.Factory, ns, pod string, d *Options) (map[string][]mount.Mount, error) {
 	clientSet, err := f.KubernetesClientSet()
 	if err != nil {
-		err = errors.New("f.KubernetesClientSet(): " + err.Error())
+		err = errors.Wrap(err, "f.KubernetesClientSet(): ")
 		return nil, err
 	}
 	var get *v1.Pod
 	get, err = clientSet.CoreV1().Pods(ns).Get(ctx, pod, v13.GetOptions{})
 	if err != nil {
-		err = errors.New("clientSet.CoreV1().Pods(ns).Get(ctx, pod, v13.GetOptions{}): " + err.Error())
+		err = errors.Wrap(err, "clientSet.CoreV1().Pods(ns).Get(ctx, pod, v13.GetOptions{}): ")
 		return nil, err
 	}
 	result := map[string][]mount.Mount{}
@@ -226,7 +226,7 @@ func GetVolume(ctx context.Context, f util.Factory, ns, pod string, d *Options) 
 			join := filepath.Join(os.TempDir(), strconv.Itoa(rand.Int()))
 			err = os.MkdirAll(join, 0755)
 			if err != nil {
-				err = errors.New("os.MkdirAll(join, 0755): " + err.Error())
+				err = errors.Wrap(err, "os.MkdirAll(join, 0755): ")
 				return nil, err
 			}
 			if volumeMount.SubPath != "" {
@@ -243,7 +243,7 @@ func GetVolume(ctx context.Context, f util.Factory, ns, pod string, d *Options) 
 			copyOptions.MaxTries = 10
 			err = copyOptions.Complete(f, &cobra.Command{}, []string{remotePath, join})
 			if err != nil {
-				err = errors.New("copyOptions.Complete(f, &cobra.Command{}, []string{remotePath, join}): " + err.Error())
+				err = errors.Wrap(err, "copyOptions.Complete(f, &cobra.Command{}, []string{remotePath, join}): ")
 				return nil, err
 			}
 			err = copyOptions.Run()

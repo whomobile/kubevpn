@@ -2,8 +2,6 @@ package daemon
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"net"
 	"net/http"
 	"os"
@@ -21,6 +19,7 @@ import (
 
 	"github.com/wencaiwulue/kubevpn/pkg/config"
 	"github.com/wencaiwulue/kubevpn/pkg/daemon/rpc"
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 	"github.com/wencaiwulue/kubevpn/pkg/util"
 )
 
@@ -40,7 +39,7 @@ func GetClient(isSudo bool) rpc.DaemonClient {
 	ctx := context.Background()
 	conn, err := grpc.DialContext(ctx, "unix:"+GetSockPath(isSudo), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		err = errors.New("grpc.DialContext(ctx, \"unix:\"+GetSockPath(isSudo), grpc.WithTransportCredentials(insecure.NewCredentials())): " + err.Error())
+		err = errors.Wrap(err, "grpc.DialContext(ctx, \"unix:\"+GetSockPath(isSudo), grpc.WithTransportCredentials(insecure.NewCredentials())): ")
 		return nil
 	}
 	cli := rpc.NewDaemonClient(conn)
@@ -48,7 +47,7 @@ func GetClient(isSudo bool) rpc.DaemonClient {
 	var response *grpc_health_v1.HealthCheckResponse
 	response, err = healthClient.Check(ctx, &grpc_health_v1.HealthCheckRequest{})
 	if err != nil {
-		err = errors.New("healthClient.Check(ctx, &grpc_health_v1.HealthCheckRequest{}): " + err.Error())
+		err = errors.Wrap(err, "healthClient.Check(ctx, &grpc_health_v1.HealthCheckRequest{}): ")
 		return nil
 	}
 	if response.Status != grpc_health_v1.HealthCheckResponse_SERVING {
@@ -56,7 +55,7 @@ func GetClient(isSudo bool) rpc.DaemonClient {
 	}
 	_, err = cli.Status(ctx, &rpc.StatusRequest{})
 	if err != nil {
-		err = errors.New("cli.Status(ctx, &rpc.StatusRequest{}): " + err.Error())
+		err = errors.Wrap(err, "cli.Status(ctx, &rpc.StatusRequest{}): ")
 		return nil
 	}
 	if isSudo {
@@ -131,7 +130,7 @@ func runDaemon(ctx context.Context, exe string, isSudo bool) error {
 		}
 		err = os.Remove(pidPath)
 		if err != nil {
-			err = errors.New("os.Remove(pidPath): " + err.Error())
+			err = errors.Wrap(err, "os.Remove(pidPath): ")
 			return err
 		}
 	}
@@ -157,7 +156,7 @@ func runDaemon(ctx context.Context, exe string, isSudo bool) error {
 
 	client := GetClient(isSudo)
 	if client == nil {
-		return fmt.Errorf("can not get daemon server client")
+		return errors.Errorf("can not get daemon server client")
 	}
 	_, err = client.Status(ctx, &rpc.StatusRequest{})
 
@@ -181,7 +180,7 @@ func GetHttpClient(isSudo bool) *http.Client {
 func GetTCPClient(isSudo bool) net.Conn {
 	conn, err := net.Dial("unix", GetSockPath(isSudo))
 	if err != nil {
-		err = errors.New("net.Dial(\"unix\", GetSockPath(isSudo)): " + err.Error())
+		err = errors.Wrap(err, "net.Dial(\"unix\", GetSockPath(isSudo)): ")
 		return nil
 	}
 	return conn

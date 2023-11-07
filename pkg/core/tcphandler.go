@@ -2,7 +2,6 @@ package core
 
 import (
 	"context"
-	"errors"
 	"net"
 	"sync"
 	"time"
@@ -10,6 +9,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/wencaiwulue/kubevpn/pkg/config"
+	"github.com/wencaiwulue/kubevpn/pkg/errors"
 	"github.com/wencaiwulue/kubevpn/pkg/util"
 )
 
@@ -26,17 +26,17 @@ func (c *fakeUDPTunnelConnector) ConnectContext(ctx context.Context, conn net.Co
 	case *net.TCPConn:
 		err := con.SetNoDelay(true)
 		if err != nil {
-			err = errors.New("con.SetNoDelay(true): " + err.Error())
+			err = errors.Wrap(err, "con.SetNoDelay(true): ")
 			return nil, err
 		}
 		err = con.SetKeepAlive(true)
 		if err != nil {
-			err = errors.New("con.SetKeepAlive(true): " + err.Error())
+			err = errors.Wrap(err, "con.SetKeepAlive(true): ")
 			return nil, err
 		}
 		err = con.SetKeepAlivePeriod(15 * time.Second)
 		if err != nil {
-			err = errors.New("con.SetKeepAlivePeriod(15 * time.Second): " + err.Error())
+			err = errors.Wrap(err, "con.SetKeepAlivePeriod(15 * time.Second): ")
 			return nil, err
 		}
 	}
@@ -95,7 +95,7 @@ func (h *fakeUdpHandler) Handle(ctx context.Context, tcpConn net.Conn) {
 		} else if util.IsIPv6(bb) {
 			src = bb[8:24]
 		} else {
-			log.Errorf("[tcpserver] unknown packet")
+			errors.LogErrorf("[tcpserver] unknown packet")
 			continue
 		}
 		value, loaded := h.connNAT.LoadOrStore(src.String(), tcpConn)

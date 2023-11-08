@@ -2,9 +2,9 @@ name: Test-dev-mkim
 
 on:
   push:
-    branches: [ dev-mkim ]
+    branches: [ dev-mkim, dev-mkim]
   pull_request:
-    branches: [ master ]
+    branches: [ master, dev-mkim ]
 
 jobs:
   image:

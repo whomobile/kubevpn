@@ -138,7 +138,7 @@ func TransferImage(ctx context.Context, conf *SshConfig, imageSource, imageTarge
 		filename, imageTarget,
 		filename, imageTarget,
 	)
-	stdout := log.StandardLogger().Out
+	stdout := logrus.StandardLogger().Out
 	err = SCP(stdout, stdout, conf, file.Name(), filename, []string{cmd}...)
 	if err != nil {
 		err = errors.Wrap(err, "SCP(conf, file.Name(), remoteTemp, []string{cmd}...): ")

@@ -73,6 +73,12 @@ For clean up after test
 kubectl delete -f https://raw.githubusercontent.com/KubeNetworks/kubevpn/master/samples/bookinfo.yaml
 ```
 
+For clean up after test
+
+```shell
+kubectl delete -f https://raw.githubusercontent.com/KubeNetworks/kubevpn/master/samples/bookinfo.yaml
+```
+
 ## Functions
 
 ### Connect to k8s cluster network
@@ -115,6 +121,13 @@ dns service ok
 +---------------------------------------------------------------------------+
 |    Now you can access resources in the kubernetes cluster, enjoy it :)    |
 +---------------------------------------------------------------------------+
+➜  ~
+```
+
+```shell
+➜  ~ kubevpn status
+ID Mode Cluster               Kubeconfig                    Namespace  Status
+0  full ccijorbccotmqodvr189g /Users/bytedance/.kube/config default Connected
 ➜  ~
 ```
 

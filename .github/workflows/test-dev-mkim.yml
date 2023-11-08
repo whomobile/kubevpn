@@ -82,7 +82,7 @@ jobs:
           make kubevpn-linux-amd64
           chmod +x ./bin/kubevpn
           cp ./bin/kubevpn /usr/local/bin/kubevpn
-          kubevpn version
+          /usr/local/bin/kubevpn version
 
       - name: Setup Minikube
         id: minikube
@@ -150,7 +150,7 @@ jobs:
           make kubevpn-darwin-amd64
           chmod +x ./bin/kubevpn
           cp ./bin/kubevpn /usr/local/bin/kubevpn
-          kubevpn version
+          /usr/local/bin/kubevpn version
 
       - name: Set up Docker
         uses: crazy-max/ghaction-setup-docker@v1.4.0
@@ -194,8 +194,26 @@ jobs:
           ifconfig
           netstat -anr
 
+      - name: Setup Test
+        run: |
+          ls -l ~/.ssh || echo "test failed but continue"
+          # ConfigAlias: "ry-dev-agd", ConfigHost: "ry-dev-agd"
+          mkdir -p ~/.ssh
+          MINIKUBE_IP=$(minikube ip)
+          cat <<EOF > ~/.ssh/config
+          Host ry-dev-agd
+            HostName $MINIKUBE_IP
+            User docker
+            Port 22
+            IdentityFile ~/.minikube/machines/minikube/id_rsa
+          EOF
+
       - name: Test
-        run: go test -v -failfast ./... -timeout=60m
+        run: go test -v -failfast ./... -timeout=60m && echo "Test Success at $(date)" || (echo "Test Failed at $(date)" && exit 1)
+
+      - name: After test
+        run: |
+          echo "After test at $(date)"
 
   windows:
     runs-on: windows-latest
@@ -214,12 +232,9 @@ jobs:
           .\bin\kubevpn version
 
       - name: Set up Docker
-        uses: crazy-max/ghaction-setup-docker@v1.4.0
+        uses: crazy-max/ghaction-setup-docker@v2
       - run: |
-         dir C:\hostedtoolcache\windows\docker-stable\24.0.5\x64 
-         C:\hostedtoolcache\windows\docker-stable\24.0.5\x64\docker-proxy.exe --help
-         C:\hostedtoolcache\windows\docker-stable\24.0.5\x64\dockerd.exe --help
-         C:\hostedtoolcache\windows\docker-stable\24.0.5\x64\docker.exe --help
+         docker version
          docker info --format '{{.OSType}}'
       - run: |
          choco install minikube

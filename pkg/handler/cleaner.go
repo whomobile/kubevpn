@@ -35,6 +35,9 @@ func (c *ConnectOptions) addCleanUpResourceHandler() {
 }
 
 func (c *ConnectOptions) Cleanup() {
+	if c == nil {
+		return
+	}
 	log.Info("prepare to exit, cleaning up")
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()

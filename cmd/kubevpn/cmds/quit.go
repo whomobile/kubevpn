@@ -27,9 +27,6 @@ func CmdQuit(f cmdutil.Factory) *cobra.Command {
         # before quit kubevpn, it will leave proxy resources to origin and disconnect from cluster
         kubevpn quit
 `)),
-		PreRunE: func(cmd *cobra.Command, args []string) (err error) {
-			return daemon.StartupDaemon(cmd.Context())
-		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			_ = quit(cmd.Context(), true)
 			_ = quit(cmd.Context(), false)
@@ -47,7 +44,7 @@ func quit(ctx context.Context, isSudo bool) error {
 	}
 	client, err := cli.Quit(ctx, &rpc.QuitRequest{})
 	if err != nil {
-		err = errors.Wrap(err, "cli.Quit(ctx, &rpc.QuitRequest{}): ")
+		err = errors.Wrap(err, "Failed to quit")
 		return err
 	}
 	var resp *rpc.QuitResponse

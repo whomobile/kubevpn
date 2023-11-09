@@ -48,14 +48,14 @@ func (o *SvrOption) Start(ctx context.Context) error {
 	var lc net.ListenConfig
 	lis, err := lc.Listen(o.ctx, "unix", GetSockPath(o.IsSudo))
 	if err != nil {
-		err = errors.Wrap(err, "lc.Listen(o.ctx, \"unix\", GetSockPath(o.IsSudo)): ")
+		err = errors.Wrap(err, "Failed to listen on socket path.")
 		return err
 	}
 	defer lis.Close()
 
 	err = os.Chmod(GetSockPath(o.IsSudo), 0666)
 	if err != nil {
-		err = errors.Wrap(err, "os.Chmod(GetSockPath(o.IsSudo), 0666): ")
+		err = errors.Wrap(err, "Failed to change permissions of socket path.")
 		return err
 	}
 
@@ -70,15 +70,25 @@ func (o *SvrOption) Start(ctx context.Context) error {
 	reflection.Register(o.svr)
 	// [tun-client] 223.254.0.101 - 127.0.0.1:8422: dial tcp 127.0.0.1:55407: connect: can't assign requested address
 	http.DefaultTransport.(*http.Transport).MaxIdleConnsPerHost = 100
-	rpc.RegisterDaemonServer(o.svr, &action.Server{Cancel: o.Stop, IsSudo: o.IsSudo, GetClient: GetClient, LogFile: file})
 	// startup a http server
 	// With downgrading-capable gRPC server, which can also handle HTTP.
 	downgradingServer := &http.Server{}
+	defer downgradingServer.Close()
 	var h2Server http2.Server
-	_ = http2.ConfigureServer(downgradingServer, &h2Server)
+	err = http2.ConfigureServer(downgradingServer, &h2Server)
+	if err != nil {
+		log.Errorf("failed to configure http2 server: %v", err)
+		return err
+	}
 	handler := CreateDowngradingHandler(o.svr, http.HandlerFunc(http.DefaultServeMux.ServeHTTP))
 	downgradingServer.Handler = h2c.NewHandler(handler, &h2Server)
 	o.uptime = time.Now().Unix()
+	cancel := func() {
+		_ = downgradingServer.Close()
+		o.Stop()
+	}
+	// remember to close http server, otherwise daemon will not quit successfully
+	rpc.RegisterDaemonServer(o.svr, &action.Server{Cancel: cancel, IsSudo: o.IsSudo, GetClient: GetClient, LogFile: file})
 	return downgradingServer.Serve(lis)
 	//return o.svr.Serve(lis)
 }

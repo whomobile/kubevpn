@@ -86,10 +86,10 @@ func GetManifest(httpCli *http.Client, os string, arch string) (version string, 
 
 // https://api.github.com/repos/KubeNetworks/kubevpn/releases
 // https://github.com/KubeNetworks/kubevpn/releases/download/v1.1.13/kubevpn-windows-arm64.exe
-func Download(client *http.Client, url string, filename string) error {
+func Download(client *http.Client, url string, filename string, stdout, stderr io.Writer) error {
 	get, err := client.Get(url)
 	if err != nil {
-		err = errors.Wrap(err, "client.Get(url): ")
+		err = errors.Wrap(err, "Failed to get the client")
 		return err
 	}
 	defer get.Body.Close()
@@ -99,17 +99,17 @@ func Download(client *http.Client, url string, filename string) error {
 	var f *os.File
 	f, err = os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
 	if err != nil {
-		err = errors.Wrap(err, "os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755): ")
+		err = errors.Wrap(err, "Failed to open the file with specified flags")
 		return err
 	}
 	defer f.Close()
 	bar := progressbar.NewOptions(int(get.ContentLength),
-		progressbar.OptionSetWriter(os.Stdout),
+		progressbar.OptionSetWriter(stdout),
 		progressbar.OptionEnableColorCodes(true),
 		progressbar.OptionShowBytes(true),
 		progressbar.OptionSetWidth(50),
 		progressbar.OptionOnCompletion(func() {
-			_, _ = fmt.Fprint(os.Stderr, "\n")
+			_, _ = fmt.Fprint(stderr, "\n")
 		}),
 		progressbar.OptionSetRenderBlankState(true),
 		progressbar.OptionSetDescription("Writing temp file..."),
@@ -128,7 +128,7 @@ func Download(client *http.Client, url string, filename string) error {
 func UnzipKubeVPNIntoFile(zipFile, filename string) error {
 	archive, err := zip.OpenReader(zipFile)
 	if err != nil {
-		err = errors.Wrap(err, "zip.OpenReader(zipFile): ")
+		err = errors.Wrap(err, "Failed to open the zip file")
 		return err
 	}
 	defer archive.Close()
@@ -147,14 +147,14 @@ func UnzipKubeVPNIntoFile(zipFile, filename string) error {
 
 	err = os.MkdirAll(filepath.Dir(filename), os.ModePerm)
 	if err != nil {
-		err = errors.Wrap(err, "os.MkdirAll(filepath.Dir(filename), os.ModePerm): ")
+		err = errors.Wrap(err, "Failed to create directories")
 		return err
 	}
 
 	var dstFile *os.File
 	dstFile, err = os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, fi.Mode())
 	if err != nil {
-		err = errors.Wrap(err, "os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, fi.Mode()): ")
+		err = errors.Wrap(err, "Failed to open the file with specified flags")
 		return err
 	}
 	defer dstFile.Close()
@@ -162,7 +162,7 @@ func UnzipKubeVPNIntoFile(zipFile, filename string) error {
 	var fileInArchive io.ReadCloser
 	fileInArchive, err = fi.Open()
 	if err != nil {
-		err = errors.Wrap(err, "fi.Open(): ")
+		err = errors.Wrap(err, "Failed to open the file")
 		return err
 	}
 	defer fileInArchive.Close()

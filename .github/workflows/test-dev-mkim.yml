@@ -2,9 +2,9 @@ name: Test-dev-mkim
 
 on:
   push:
-    branches: [ dev-mkim, fix-build-env ]
+    branches: [ dev-mkim, dev-mkim]
   pull_request:
-    branches: [ master ]
+    branches: [ master, dev-mkim ]
 
 jobs:
   image:
@@ -56,6 +56,7 @@ jobs:
           export SET_CACHE_TO="type=gha,mode=max"
           docker buildx create --use
           make container
+
   linux:
     runs-on: ubuntu-latest
     needs: [ "image" ]
@@ -67,6 +68,21 @@ jobs:
         with:
           go-version: '1.20'
           check-latest: true
+
+      - name: Build
+        run: |
+          export VERSION=test
+          export REGISTRY_TARGET=ghcr.io
+          export REGISTRY_USERNAME=${{ github.actor }}
+          export SET_NO_GO_PROXY=true
+          export SET_NO_UBUNTU_MIRROR=true
+          export SET_NO_DOCKER_TIMEZONE=true
+          export SET_CACHE_FROM="type=gha"
+          export SET_CACHE_TO="type=gha,mode=max"
+          make kubevpn-linux-amd64
+          chmod +x ./bin/kubevpn
+          cp ./bin/kubevpn /usr/local/bin/kubevpn
+          /usr/local/bin/kubevpn version
 
       - name: Setup Minikube
         id: minikube
@@ -93,21 +109,6 @@ jobs:
           eval $(minikube docker-env)
           kubectl apply -f ./samples/bookinfo.yaml
 
-      - name: Build
-        run: |
-          export VERSION=test
-          export REGISTRY_TARGET=ghcr.io
-          export REGISTRY_USERNAME=${{ github.actor }}
-          export SET_NO_GO_PROXY=true
-          export SET_NO_UBUNTU_MIRROR=true
-          export SET_NO_DOCKER_TIMEZONE=true
-          export SET_CACHE_FROM="type=gha"
-          export SET_CACHE_TO="type=gha,mode=max"
-          make kubevpn-linux-amd64
-          chmod +x ./bin/kubevpn
-          cp ./bin/kubevpn /usr/local/bin/kubevpn
-          kubevpn version
-
       - name: Wait for pods reviews to be ready
         run: |
           kubectl wait pods -l app=reviews --for=condition=Ready --timeout=3600s
@@ -120,27 +121,8 @@ jobs:
           route -n
           sudo ln /usr/bin/resolvectl /usr/bin/systemd-resolve
 
-      - name: Setup Test
-        run: |
-          ls -l ~/.ssh || echo "test failed but continue"
-          # ConfigAlias: "ry-dev-agd", ConfigHost: "ry-dev-agd"
-          mkdir -p ~/.ssh
-          MINIKUBE_IP=$(minikube ip)
-          cat <<EOF > ~/.ssh/config
-          Host ry-dev-agd
-            HostName $MINIKUBE_IP
-            User docker
-            Port 22
-            IdentityFile ~/.minikube/machines/minikube/id_rsa
-          EOF
-
       - name: Test
-        run: |
-          go test -v -failfast ./... -timeout=60m && echo "Test Success at $(date)" || (echo "Test Failed at $(date)" && exit 1)
-    
-      - name: After test
-        run: |
-          echo "After test at $(date)"
+        run: go test -v -failfast ./... -timeout=60m
 
   macos:
     runs-on: macos-latest
@@ -153,6 +135,22 @@ jobs:
         with:
           go-version: '1.20'
           check-latest: true
+
+      - name: Build
+        run: |
+          export VERSION=test
+          export GITHUB_REPOSITORY=${{ github.repository }}
+          export REGISTRY_TARGET=ghcr.io
+          export REGISTRY_USERNAME=${{ github.actor }}
+          export SET_NO_GO_PROXY=true
+          export SET_NO_UBUNTU_MIRROR=true
+          export SET_NO_DOCKER_TIMEZONE=true
+          export SET_CACHE_FROM="type=gha"
+          export SET_CACHE_TO="type=gha,mode=max"
+          make kubevpn-darwin-amd64
+          chmod +x ./bin/kubevpn
+          cp ./bin/kubevpn /usr/local/bin/kubevpn
+          /usr/local/bin/kubevpn version
 
       - name: Set up Docker
         uses: crazy-max/ghaction-setup-docker@v1.4.0
@@ -185,22 +183,6 @@ jobs:
           eval $(minikube docker-env)
           kubectl apply -f ./samples/bookinfo.yaml
 
-      - name: Build
-        run: |
-          export VERSION=test
-          export GITHUB_REPOSITORY=${{ github.repository }}
-          export REGISTRY_TARGET=ghcr.io
-          export REGISTRY_USERNAME=${{ github.actor }}
-          export SET_NO_GO_PROXY=true
-          export SET_NO_UBUNTU_MIRROR=true
-          export SET_NO_DOCKER_TIMEZONE=true
-          export SET_CACHE_FROM="type=gha"
-          export SET_CACHE_TO="type=gha,mode=max"
-          make kubevpn-darwin-amd64
-          chmod +x ./bin/kubevpn
-          cp ./bin/kubevpn /usr/local/bin/kubevpn
-          kubevpn version
-
       - name: Wait for pods reviews to be ready
         run: |
           kubectl wait pods -l app=reviews --for=condition=Ready --timeout=3600s
@@ -225,15 +207,14 @@ jobs:
             Port 22
             IdentityFile ~/.minikube/machines/minikube/id_rsa
           EOF
-  
+
       - name: Test
-        run: |
-          go test -v -failfast ./... -timeout=60m && echo "Test Success at $(date)" || (echo "Test Failed at $(date)" && exit 1)
+        run: go test -v -failfast ./... -timeout=60m && echo "Test Success at $(date)" || (echo "Test Failed at $(date)" && exit 1)
 
       - name: After test
         run: |
           echo "After test at $(date)"
-    
+
   windows:
     runs-on: windows-latest
     needs: [ "image" ]
@@ -245,23 +226,20 @@ jobs:
         with:
           go-version: '1.20'
 
+      - name: Build
+        run: |
+          make kubevpn-windows-amd64
+          .\bin\kubevpn version
+
       - name: Set up Docker
         uses: crazy-max/ghaction-setup-docker@v2
       - run: |
-         C:
-         dir C:\hostedtoolcache\windows\docker-stable\24.0.7\x64
-         C:\hostedtoolcache\windows\docker-stable\24.0.7\x64\docker-proxy.exe --help
-         C:\hostedtoolcache\windows\docker-stable\24.0.7\x64\dockerd.exe --help
-         C:\hostedtoolcache\windows\docker-stable\24.0.7\x64\docker.exe --help
+         docker version
          docker info --format '{{.OSType}}'
       - run: |
          choco install minikube
          minikube start --driver=docker
          choco install make
-
-      - name: Build
-        run: |
-          make kubevpn-windows-amd64
 
       - name: Test Execution
         run: |

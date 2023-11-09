@@ -46,36 +46,36 @@ func GetClient() (*client.Client, *command.DockerCli, error) {
 // TransferImage
 // 1) if not special ssh config, just pull image and tag and push
 // 2) if special ssh config, pull image, tag image, save image and scp image to remote, load image and push
-func TransferImage(ctx context.Context, conf *SshConfig, remoteTemp, to string, out io.Writer) error {
-	cli, c, err := GetClient()
+func TransferImage(ctx context.Context, conf *SshConfig, imageSource, imageTarget string, out io.Writer) error {
+	cli, dockerCmdCli, err := GetClient()
 	if err != nil {
 		errors.LogErrorf("failed to get docker client: %v", err)
 		return err
 	}
 	// todo add flags? or detect k8s node runtime ?
 	platform := &v1.Platform{Architecture: "amd64", OS: "linux"}
-	err = PullImage(ctx, platform, cli, c, remoteTemp, out)
+	err = PullImage(ctx, platform, cli, dockerCmdCli, imageSource, out)
 	if err != nil {
 		errors.LogErrorf("failed to pull image: %v", err)
 		return err
 	}
 
-	err = cli.ImageTag(ctx, remoteTemp, to)
+	err = cli.ImageTag(ctx, imageSource, imageTarget)
 	if err != nil {
-		errors.LogErrorf("failed to tag image %s to %s: %v", remoteTemp, to, err)
+		errors.LogErrorf("failed to tag image %s to %s: %v", imageSource, imageTarget, err)
 		return err
 	}
 
 	// use it if sshConfig is not empty
 	if conf.ConfigAlias == "" && conf.Addr == "" {
 		var distributionRef reference.Named
-		distributionRef, err = reference.ParseNormalizedNamed(to)
+		distributionRef, err = reference.ParseNormalizedNamed(imageTarget)
 		if err != nil {
-			errors.LogErrorf("can not parse image name %s: %v", to, err)
+			errors.LogErrorf("can not parse image name %s: %v", imageTarget, err)
 			return err
 		}
 		var imgRefAndAuth trust.ImageRefAndAuth
-		imgRefAndAuth, err = trust.GetImageReferencesAndAuth(ctx, nil, image.AuthResolver(c), distributionRef.String())
+		imgRefAndAuth, err = trust.GetImageReferencesAndAuth(ctx, nil, image.AuthResolver(dockerCmdCli), distributionRef.String())
 		if err != nil {
 			errors.LogErrorf("can not get image auth: %v", err)
 			return err
@@ -86,14 +86,14 @@ func TransferImage(ctx context.Context, conf *SshConfig, remoteTemp, to string, 
 			errors.LogErrorf("can not encode auth config to base64: %v", err)
 			return err
 		}
-		requestPrivilege := command.RegistryAuthenticationPrivilegedFunc(c, imgRefAndAuth.RepoInfo().Index, "push")
+		requestPrivilege := command.RegistryAuthenticationPrivilegedFunc(dockerCmdCli, imgRefAndAuth.RepoInfo().Index, "push")
 		var readCloser io.ReadCloser
-		readCloser, err = cli.ImagePush(ctx, to, types.ImagePushOptions{
+		readCloser, err = cli.ImagePush(ctx, imageTarget, types.ImagePushOptions{
 			RegistryAuth:  encodedAuth,
 			PrivilegeFunc: requestPrivilege,
 		})
 		if err != nil {
-			errors.LogErrorf("can not push image %s, err: %v", to, err)
+			errors.LogErrorf("can not push image %s, err: %v", imageTarget, err)
 			return err
 		}
 		defer readCloser.Close()
@@ -111,9 +111,9 @@ func TransferImage(ctx context.Context, conf *SshConfig, remoteTemp, to string, 
 
 	// transfer image to remote
 	var responseReader io.ReadCloser
-	responseReader, err = cli.ImageSave(ctx, []string{to})
+	responseReader, err = cli.ImageSave(ctx, []string{imageTarget})
 	if err != nil {
-		errors.LogErrorf("can not save image %s: %v", to, err)
+		errors.LogErrorf("can not save image %s: %v", imageTarget, err)
 		return err
 	}
 	defer responseReader.Close()
@@ -122,7 +122,7 @@ func TransferImage(ctx context.Context, conf *SshConfig, remoteTemp, to string, 
 		err = errors.Wrap(err, "os.CreateTemp(\"\", \"*.tar\"): ")
 		return err
 	}
-	logrus.Infof("saving image %s to temp file %s", to, file.Name())
+	logrus.Infof("saving image %s to temp file %s", imageTarget, file.Name())
 	if _, err = io.Copy(file, responseReader); err != nil {
 		return err
 	}
@@ -131,19 +131,20 @@ func TransferImage(ctx context.Context, conf *SshConfig, remoteTemp, to string, 
 	}
 	defer os.Remove(file.Name())
 
-	logrus.Infof("Transfering image %s", to)
-	remoteTemp = filepath.Join("/tmp", filepath.Base(file.Name()))
+	logrus.Infof("Transfering image %s", imageTarget)
+	filename := filepath.Base(file.Name())
 	cmd := fmt.Sprintf(
-		"(docker load image -i %s && docker push %s) || (nerdctl image load -i %s && nerdctl image push %s)",
-		remoteTemp, to,
-		remoteTemp, to,
+		"(docker load image -i ~/.kubevpn/%s && docker push %s) || (nerdctl image load -i ~/.kubevpn/%s && nerdctl image push %s)",
+		filename, imageTarget,
+		filename, imageTarget,
 	)
-	err = SCP(conf, file.Name(), remoteTemp, []string{cmd}...)
+	stdout := logrus.StandardLogger().Out
+	err = SCP(stdout, stdout, conf, file.Name(), filename, []string{cmd}...)
 	if err != nil {
-		err = errors.Wrap(err, "SCP(conf, file.Name(), remoteTemp, []string{cmd}...): ")
+		err = errors.Wrap(err, "Failed to execute SCP command")
 		return err
 	}
-	logrus.Infof("Loaded image: %s", to)
+	logrus.Infof("Loaded image: %s", imageTarget)
 	return nil
 }
 

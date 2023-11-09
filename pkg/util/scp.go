@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path/filepath"
 
 	"github.com/schollz/progressbar/v3"
 	log "github.com/sirupsen/logrus"
@@ -14,7 +13,7 @@ import (
 )
 
 // SCP copy file to remote and exec command
-func SCP(conf *SshConfig, filename, to string, commands ...string) error {
+func SCP(stdout, stderr io.Writer, conf *SshConfig, filename, to string, commands ...string) error {
 	remote, err := DialSshRemote(conf)
 	if err != nil {
 		errors.LogErrorf("Dial into remote server error: %s", err)
@@ -23,20 +22,19 @@ func SCP(conf *SshConfig, filename, to string, commands ...string) error {
 
 	sess, err := remote.NewSession()
 	if err != nil {
-		err = errors.Wrap(err, "remote.NewSession(): ")
+		err = errors.Wrap(err, "Failed to create a new remote session")
 		return err
 	}
-	err = main(sess, filename, to)
+	err = main(sess, stdout, stderr, filename, to)
 	if err != nil {
 		errors.LogErrorf("Copy file to remote error: %s", err)
 		return err
 	}
-	sess, err = remote.NewSession()
-	if err != nil {
-		err = errors.Wrap(err, "remote.NewSession(): ")
-		return err
-	}
 	for _, command := range commands {
+		sess, err = remote.NewSession()
+		if err != nil {
+			return err
+		}
 		output, err := sess.CombinedOutput(command)
 		if err != nil {
 			log.Error(string(output))
@@ -49,15 +47,15 @@ func SCP(conf *SshConfig, filename, to string, commands ...string) error {
 }
 
 // https://blog.neilpang.com/%E6%94%B6%E8%97%8F-scp-secure-copy%E5%8D%8F%E8%AE%AE/
-func main(sess *ssh.Session, filename string, to string) error {
+func main(sess *ssh.Session, stdout, stderr io.Writer, filename string, to string) error {
 	open, err := os.Open(filename)
 	if err != nil {
-		err = errors.Wrap(err, "os.Open(filename): ")
+		err = errors.Wrap(err, "Failed to open the file")
 		return err
 	}
 	stat, err := open.Stat()
 	if err != nil {
-		err = errors.Wrap(err, "open.Stat(): ")
+		err = errors.Wrap(err, "Failed to get file statistics")
 		return err
 	}
 	defer open.Close()
@@ -65,9 +63,9 @@ func main(sess *ssh.Session, filename string, to string) error {
 	go func() {
 		w, _ := sess.StdinPipe()
 		defer w.Close()
-		fmt.Fprintln(w, "D0755", 0, filepath.Dir(to)) // mkdir
-		fmt.Fprintln(w, "C0644", stat.Size(), filepath.Base(filename))
-		err := sCopy(w, open, stat.Size())
+		fmt.Fprintln(w, "D0755", 0, ".kubevpn") // mkdir
+		fmt.Fprintln(w, "C0644", stat.Size(), to)
+		err := sCopy(w, open, stat.Size(), stdout, stderr)
 		if err != nil {
 			errors.LogErrorf("failed to transfer file to remote: %v", err)
 			return
@@ -77,20 +75,20 @@ func main(sess *ssh.Session, filename string, to string) error {
 	return sess.Run("scp -tr ./")
 }
 
-func sCopy(dst io.Writer, src io.Reader, size int64) error {
+func sCopy(dst io.Writer, src io.Reader, size int64, stdout, stderr io.Writer) error {
 	total := float64(size) / 1024 / 1024
 	log.Printf("Length: 68276642 (%0.2fM)\n", total)
 
 	bar := progressbar.NewOptions(int(size),
-		progressbar.OptionSetWriter(log.StandardLogger().Out),
+		progressbar.OptionSetWriter(stdout),
 		progressbar.OptionEnableColorCodes(true),
 		progressbar.OptionShowBytes(true),
 		progressbar.OptionSetWidth(50),
 		progressbar.OptionOnCompletion(func() {
-			_, _ = fmt.Fprint(os.Stderr, "\n")
+			_, _ = fmt.Fprint(stderr, "\n")
 		}),
 		progressbar.OptionSetRenderBlankState(true),
-		progressbar.OptionSetDescription("Transferring image file..."),
+		progressbar.OptionSetDescription("Transferring file..."),
 		progressbar.OptionSetTheme(progressbar.Theme{
 			Saucer:        "=",
 			SaucerHead:    ">",

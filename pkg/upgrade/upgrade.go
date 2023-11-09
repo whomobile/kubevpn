@@ -79,7 +79,7 @@ func Main(ctx context.Context, client *http.Client, latestVersion string, latest
 		err = errors.Wrap(err, "temp.Close(): ")
 		return err
 	}
-	err = util.Download(client, url, temp.Name())
+	err = util.Download(client, url, temp.Name(), os.Stdout, os.Stderr)
 	if err != nil {
 		err = errors.Wrap(err, "util.Download(client, url, temp.Name()): ")
 		return err
